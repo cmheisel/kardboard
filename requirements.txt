@@ -1,0 +1,12 @@
+Flask==0.6.1
+Flask-WTF==0.5.2
+Jinja2==2.5.5
+Pygments==1.4
+Sphinx==1.0.7
+WTForms==0.6.3
+Werkzeug==0.6.2
+mongoengine==0.4
+pymongo==1.11
+unittest2==0.5.1
+
+https://github.com/sbook/flask-mongoengine/tarball/master
