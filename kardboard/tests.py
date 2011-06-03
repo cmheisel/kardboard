@@ -49,6 +49,18 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=12)
         self.done_card.save()
 
+        self.wip_card = self._make_one()
+        self.wip_card.backlog_date = datetime.datetime(
+            year=2011, month=5, day=2)
+        self.wip_card.start_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.wip_card.save()
+
+        self.elabo_card = self._make_one()
+        self.elabo_card.backlog_date = datetime.datetime(
+            year=2011, month=5, day=2)
+        self.elabo_card.save()
+
     def _get_target_class(self):
         from kardboard.models import Kard
         return Kard
@@ -68,13 +80,39 @@ class KardTests(KardboardTestCase):
         k.save()
         self.assert_(k.id)
 
-    def test_cycle_time(self):
+    def test_done_cycle_time(self):
         self.assertEquals(26, self.done_card.cycle_time)
         self.assertEquals(26, self.done_card._cycle_time)
 
-    def test_lead_time(self):
+    def test_done_lead_time(self):
         self.assertEquals(31, self.done_card.lead_time)
         self.assertEquals(31, self.done_card._lead_time)
+
+    def test_wip_cycle_time(self):
+        today = datetime.datetime(year=2011, month=6, day=12)
+
+        self.assertEquals(None, self.wip_card.cycle_time)
+        self.assertEquals(None, self.wip_card._cycle_time)
+
+        self.assertEquals(None, self.wip_card.lead_time)
+        self.assertEquals(None, self.wip_card._lead_time)
+
+        actual = self.wip_card.current_cycle_time(
+                today=today)
+        self.assertEquals(26, actual)
+
+    def test_elabo_cycle_time(self):
+        today = datetime.datetime(year=2011, month=6, day=12)
+
+        self.assertEquals(None, self.elabo_card.cycle_time)
+        self.assertEquals(None, self.elabo_card._cycle_time)
+
+        self.assertEquals(None, self.elabo_card.lead_time)
+        self.assertEquals(None, self.elabo_card._lead_time)
+
+        actual = self.elabo_card.current_cycle_time(
+                today=today)
+        self.assertEquals(None, actual)
 
 if __name__ == "__main__":
     unittest2.main()
