@@ -12,8 +12,8 @@ class KardboardTestCase(unittest2.TestCase):
         from mongoengine.connection import _get_db
         db = _get_db()
         #Truncate/wipe the test database
-        [ db.drop_collection(name) for name in db.collection_names() \
-            if 'system.' not in name ]
+        [db.drop_collection(name) for name in db.collection_names() \
+            if 'system.' not in name]
 
     def _get_target_class(self):
         raise NotImplementedError
@@ -46,6 +46,9 @@ class KardTests(KardboardTestCase):
         k = self._make_one(**required_fields)
         k.save()
         self.assert_(k.id)
+
+    def test_cycle_time(self):
+        pass
 
 
 if __name__ == "__main__":

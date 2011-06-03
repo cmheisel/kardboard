@@ -1,5 +1,6 @@
 from kardboard import app
 
+
 class Kard(app.db.Document):
     key = app.db.StringField(required=True, unique=True, primary_key=True)
     title = app.db.StringField()
