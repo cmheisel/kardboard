@@ -47,6 +47,27 @@ class UtilTests(unittest2.TestCase):
         self.assertEqual(result, 263)
 
 
+class BoardTests(KardboardTestCase):
+    def _get_target_class(self):
+        from kardboard.models import Board
+        return Board
+
+    def _make_one(self, **kwargs):
+        required_fields = {
+            'name': "Teamocil",
+            'categories':
+                ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
+        }
+        kwargs.update(required_fields)
+        b = self._get_target_class()(**kwargs)
+        return b
+
+    def test_valid_board(self):
+        b = self._make_one()
+        b.save()
+        self.assert_(b.id)
+
+
 class KardTests(KardboardTestCase):
     def setUp(self):
         super(KardTests, self).setUp()

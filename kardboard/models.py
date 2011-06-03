@@ -4,6 +4,11 @@ from kardboard import app
 from kardboard.util import business_days_between
 
 
+class Board(app.db.Document):
+    name = app.db.StringField(required=True, unique=True)
+    categories = app.db.ListField(app.db.StringField())
+
+
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
