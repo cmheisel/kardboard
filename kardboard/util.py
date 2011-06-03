@@ -7,7 +7,7 @@ def business_days_between(date1, date2):
     else:
         oldest_date, youngest_date = date2, date1
 
-    business_days = 0
+    business_days = 1
     date = oldest_date
     while date < youngest_date:
         if date.weekday() != 5 and date.weekday() != 6:

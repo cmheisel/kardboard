@@ -29,27 +29,52 @@ class UtilTests(unittest2.TestCase):
         wednesday = datetime.datetime(year=2011, month=6, day=1)
         next_wednesday = datetime.datetime(year=2011, month=6, day=8)
         result = business_days_between(wednesday, next_wednesday)
-        self.assertEqual(result, 5)
+        self.assertEqual(result, 6)
+
+        aday = datetime.datetime(year=2011, month=6, day=1)
+        manydayslater = datetime.datetime(year=2012, month=6, day=1)
+        result = business_days_between(aday, manydayslater)
+        self.assertEqual(result, 263)
 
 
 class KardTests(KardboardTestCase):
+    def setUp(self):
+        super(KardTests, self).setUp()
+        self.done_card = self._make_one()
+        self.done_card.backlog_date = datetime.datetime(
+            year=2011, month=5, day=2)
+        self.done_card.start_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.done_card.done_date = datetime.datetime(
+            year=2011, month=6, day=12)
+        self.done_card.save()
+
     def _get_target_class(self):
         from kardboard.models import Kard
         return Kard
 
-    def test_valid_card(self):
+    def _make_one(self, **kwargs):
         required_fields = {
             'key': "CMSAD-1",
             'title': "There's always money in the banana stand",
             'backlog_date': datetime.datetime.now()
         }
-        k = self._make_one(**required_fields)
+        kwargs.update(required_fields)
+        k = self._get_target_class()(**kwargs)
+        return k
+
+    def test_valid_card(self):
+        k = self._make_one()
         k.save()
         self.assert_(k.id)
 
     def test_cycle_time(self):
-        pass
+        self.assertEquals(26, self.done_card.cycle_time)
+        self.assertEquals(26, self.done_card._cycle_time)
 
+    def test_lead_time(self):
+        self.assertEquals(31, self.done_card.lead_time)
+        self.assertEquals(31, self.done_card._lead_time)
 
 if __name__ == "__main__":
     unittest2.main()
