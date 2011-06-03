@@ -31,6 +31,35 @@ class KardboardTestCase(unittest2.TestCase):
     def _make_one(self, *args, **kwargs):
         return self._get_target_class()(*args, **kwargs)
 
+    def _get_card_class(self):
+        from kardboard.models import Kard
+        return Kard
+
+    def _get_board_class(self):
+        from kardboard.models import Board
+        return Board
+
+    def make_card(self, **kwargs):
+        key = random.randint(1, 100)
+        required_fields = {
+            'key': "CMSAD-%s" % key,
+            'title': "There's always money in the banana stand",
+            'backlog_date': datetime.datetime.now()
+        }
+        kwargs.update(required_fields)
+        k = self._get_card_class()(**kwargs)
+        return k
+
+    def make_board(self, **kwargs):
+        required_fields = {
+            'name': "Teamocil",
+            'categories':
+                ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
+        }
+        kwargs.update(required_fields)
+        b = self._get_board_class()(**kwargs)
+        return b
+
 
 class UtilTests(unittest2.TestCase):
     def test_business_days(self):
@@ -49,18 +78,10 @@ class UtilTests(unittest2.TestCase):
 
 class BoardTests(KardboardTestCase):
     def _get_target_class(self):
-        from kardboard.models import Board
-        return Board
+        return self._get_board_class()
 
     def _make_one(self, **kwargs):
-        required_fields = {
-            'name': "Teamocil",
-            'categories':
-                ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
-        }
-        kwargs.update(required_fields)
-        b = self._get_target_class()(**kwargs)
-        return b
+        return self.make_board(**kwargs)
 
     def test_valid_board(self):
         b = self._make_one()
@@ -93,19 +114,10 @@ class KardTests(KardboardTestCase):
         self.elabo_card.save()
 
     def _get_target_class(self):
-        from kardboard.models import Kard
-        return Kard
+        return self._get_card_class()
 
     def _make_one(self, **kwargs):
-        key = random.randint(1, 100)
-        required_fields = {
-            'key': "CMSAD-%s" % key,
-            'title': "There's always money in the banana stand",
-            'backlog_date': datetime.datetime.now()
-        }
-        kwargs.update(required_fields)
-        k = self._get_target_class()(**kwargs)
-        return k
+        return self.make_card(**kwargs)
 
     def test_valid_card(self):
         k = self._make_one()
@@ -145,6 +157,11 @@ class KardTests(KardboardTestCase):
         actual = self.elabo_card.current_cycle_time(
                 today=today)
         self.assertEquals(None, actual)
+
+
+class HomepageTests(KardboardTestCase):
+    pass
+
 
 if __name__ == "__main__":
     unittest2.main()
