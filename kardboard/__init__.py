@@ -11,5 +11,7 @@ if os.getenv('KARDBOARD_SETTINGS', None):
     app.config.from_envvar('KARDBOARD_SETTINGS')
 app.db = MongoEngine(app)
 
+import kardboard.views
+
 if __name__ == "__main__":
     app.run()

@@ -1,3 +1,5 @@
+from mongoengine.queryset import queryset_manager
+
 import datetime
 
 from kardboard import app
@@ -14,6 +16,7 @@ class Board(app.db.Document):
         if not self.slug:
             self.slug = slugify(self.name)
         super(Board, self).save(*args, **kwargs)
+
 
 
 class Kard(app.db.Document):
@@ -36,6 +39,16 @@ class Kard(app.db.Document):
     _cycle_time = app.db.IntField(db_field="cycle_time")
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
+
+
+    @queryset_manager
+    def in_progress(klass, queryset):
+        return queryset.filter(done_date=None)
+
+    @queryset_manager
+    def started(klass, queryset):
+        return queryset.filter(done_date=None).filter(start_date__exists=True)
+
 
     def save(self, *args, **kwargs):
         if self.done_date and self.start_date:

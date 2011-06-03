@@ -63,8 +63,9 @@ class KardboardTestCase(unittest2.TestCase):
         return k
 
     def make_board(self, **kwargs):
+        key = self._make_unique_key()
         fields = {
-            'name': "Teamocil",
+            'name': "Teamocil Board %s" % (key, ),
             'categories':
                 ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
         }
@@ -176,16 +177,63 @@ class KardTests(KardboardTestCase):
                 today=today)
         self.assertEquals(None, actual)
 
+    def test_in_progress_manager(self):
+        klass = self._get_target_class()
+        self.assertEqual(3, klass.objects.count())
+        self.assertEqual(2, klass.in_progress.count())
+        self.assertEqual(1, klass.started.count())
 
 class HomepageTests(KardboardTestCase):
     def setUp(self):
-        b = self.create_board()
+        super(HomepageTests, self).setUp()
+
+        b = self.make_board()
+        b1 = self.make_board()
 
         for i in xrange(0, 5):
-            k = self.create_card()
+            #board will have 5 cards in elabo, started, and done
+            k = self.make_card() #backlogged
             k.save()
             b.cards.append(k)
+
+            k = self.make_card(start_date=
+                datetime.datetime(year=2011, month=6, day=12))
+            k.save()
+            b.cards.append(k)
+
+            k = self.make_card(
+                start_date=datetime.datetime(year=2011, month=6, day=12),
+                done_date=datetime.datetime(year=2011, month=6, day=19))
+            k.save()
+            b.cards.append(k)
+
             b.save()
+
+        for i in xrange(0, 3):
+            #board will have 5 cards in elabo, started, and done
+            k = self.make_card() #backlogged
+            k.save()
+            b1.cards.append(k)
+
+            k = self.make_card(start_date=
+                datetime.datetime(year=2011, month=6, day=12))
+            k.save()
+            b1.cards.append(k)
+
+            k = self.make_card(
+                start_date=datetime.datetime(year=2011, month=6, day=12),
+                done_date=datetime.datetime(year=2011, month=6, day=19))
+            k.save()
+            b1.cards.append(k)
+
+            b1.save()
+
+    def _get_target_url(self):
+        return '/'
+
+    def test_meta_board(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
 
 
 if __name__ == "__main__":
