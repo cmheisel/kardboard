@@ -1,19 +1,29 @@
 import datetime
+import random
+
 import unittest2
 
 
 class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         import kardboard
-        kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
-        self.app = kardboard.app.test_client()
+        from flaskext.mongoengine import MongoEngine
 
-    def tearDown(self):
+        kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
+        kardboard.app.db = MongoEngine(kardboard.app)
+
+        self._flush_db()
+
+        self.app = kardboard.app.test_client()
+        super(KardboardTestCase, self).setUp()
+
+    def _flush_db(self):
         from mongoengine.connection import _get_db
         db = _get_db()
         #Truncate/wipe the test database
-        [db.drop_collection(name) for name in db.collection_names() \
+        names = [name for name in db.collection_names() \
             if 'system.' not in name]
+        [db.drop_collection(name) for name in names]
 
     def _get_target_class(self):
         raise NotImplementedError
@@ -49,14 +59,14 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=12)
         self.done_card.save()
 
-        self.wip_card = self._make_one()
+        self.wip_card = self._make_one(key="CMSLUCILLE-2")
         self.wip_card.backlog_date = datetime.datetime(
             year=2011, month=5, day=2)
         self.wip_card.start_date = datetime.datetime(
             year=2011, month=5, day=9)
         self.wip_card.save()
 
-        self.elabo_card = self._make_one()
+        self.elabo_card = self._make_one(key="GOB-1")
         self.elabo_card.backlog_date = datetime.datetime(
             year=2011, month=5, day=2)
         self.elabo_card.save()
@@ -66,8 +76,9 @@ class KardTests(KardboardTestCase):
         return Kard
 
     def _make_one(self, **kwargs):
+        key = random.randint(1, 100)
         required_fields = {
-            'key': "CMSAD-1",
+            'key': "CMSAD-%s" % key,
             'title': "There's always money in the banana stand",
             'backlog_date': datetime.datetime.now()
         }
