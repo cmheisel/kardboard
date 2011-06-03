@@ -15,6 +15,8 @@ class KardboardTestCase(unittest2.TestCase):
         self._flush_db()
 
         self.app = kardboard.app.test_client()
+
+        self.used_keys = []
         super(KardboardTestCase, self).setUp()
 
     def _flush_db(self):
@@ -24,6 +26,9 @@ class KardboardTestCase(unittest2.TestCase):
         names = [name for name in db.collection_names() \
             if 'system.' not in name]
         [db.drop_collection(name) for name in names]
+
+    def _get_target_url(self):
+        raise NotImplementedError
 
     def _get_target_class(self):
         raise NotImplementedError
@@ -39,25 +44,32 @@ class KardboardTestCase(unittest2.TestCase):
         from kardboard.models import Board
         return Board
 
+    def _make_unique_key(self):
+        key = random.randint(1, 10000)
+        if key not in self.used_keys:
+            self.used_keys.append(key)
+            return key
+        return self._make_unique_key()
+
     def make_card(self, **kwargs):
-        key = random.randint(1, 100)
-        required_fields = {
+        key = self._make_unique_key()
+        fields = {
             'key': "CMSAD-%s" % key,
             'title': "There's always money in the banana stand",
             'backlog_date': datetime.datetime.now()
         }
-        kwargs.update(required_fields)
-        k = self._get_card_class()(**kwargs)
+        fields.update(**kwargs)
+        k = self._get_card_class()(**fields)
         return k
 
     def make_board(self, **kwargs):
-        required_fields = {
+        fields = {
             'name': "Teamocil",
             'categories':
                 ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
         }
-        kwargs.update(required_fields)
-        b = self._get_board_class()(**kwargs)
+        fields.update(**kwargs)
+        b = self._get_board_class()(**fields)
         return b
 
 
@@ -87,6 +99,12 @@ class BoardTests(KardboardTestCase):
         b = self._make_one()
         b.save()
         self.assert_(b.id)
+
+    def test_board_slug(self):
+        b = self._make_one(name="Operation Hot Mother")
+        b.save()
+        expected = u"operation-hot-mother"
+        self.assertEqual(expected, b.slug)
 
 
 class KardTests(KardboardTestCase):
@@ -160,7 +178,14 @@ class KardTests(KardboardTestCase):
 
 
 class HomepageTests(KardboardTestCase):
-    pass
+    def setUp(self):
+        b = self.create_board()
+
+        for i in xrange(0, 5):
+            k = self.create_card()
+            k.save()
+            b.cards.append(k)
+            b.save()
 
 
 if __name__ == "__main__":
