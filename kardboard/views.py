@@ -19,6 +19,8 @@ def dashboard(year=None, month=None, day=None):
         day = now.day
 
     cards = Kard.in_progress.all()
+    cards = sorted(cards, key=lambda c: c.current_cycle_time())
+    cards.reverse()
 
     metrics = [
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
