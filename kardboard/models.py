@@ -18,7 +18,6 @@ class Board(app.db.Document):
         super(Board, self).save(*args, **kwargs)
 
 
-
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
@@ -40,7 +39,6 @@ class Kard(app.db.Document):
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
 
-
     @queryset_manager
     def in_progress(klass, queryset):
         return queryset.filter(done_date=None)
@@ -48,7 +46,6 @@ class Kard(app.db.Document):
     @queryset_manager
     def started(klass, queryset):
         return queryset.filter(done_date=None).filter(start_date__exists=True)
-
 
     def save(self, *args, **kwargs):
         if self.done_date and self.start_date:
