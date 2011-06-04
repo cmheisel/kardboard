@@ -10,13 +10,22 @@ from kardboard.models import Kard
 @app.route('/<int:year>/<int:month>/')
 @app.route('/<int:year>/<int:month>/<int:day>/')
 def dashboard(year=None, month=None, day=None):
-    now = datetime.datetime.now()
+    date = datetime.datetime.now()
+    scope = 'current'
+
+    if year:
+        scope = 'year'
+    if month:
+        scope = 'month'
+    if day:
+        scope = 'day'
+
     if not year:
-        year = now.year
+        year = date.year
     if not month:
-        month = now.month
+        month = date.month
     if not day:
-        day = now.day
+        day = date.day
 
     cards = Kard.in_progress.all()
     cards = sorted(cards, key=lambda c: c.current_cycle_time())
@@ -33,8 +42,18 @@ def dashboard(year=None, month=None, day=None):
         {'Work in progress': len(cards)},
     ]
 
+    title = "Dashboard"
+    if scope == 'year':
+        title += " for %s"
+    if scope == 'month':
+        title += " for %s/%s" % (date.month, date.year)
+    if scope == 'day' or scope == 'current':
+        title += " for %s/%s/%s" % (date.month, date.day, date.year)
+
     context = {
-        'title': "Dashboard",
+        'scope': scope,
+        'date': date,
+        'title': title,
         'metrics': metrics,
         'cards': cards,
         'updated_at': datetime.datetime.now(),
