@@ -1,9 +1,9 @@
-from mongoengine.queryset import queryset_manager
+from mongoengine.queryset import queryset_manager, QuerySet
 
 import datetime
 
 from kardboard import app
-from kardboard.util import business_days_between, slugify
+from kardboard.util import business_days_between, slugify, month_range
 
 
 class Board(app.db.Document):
@@ -16,6 +16,24 @@ class Board(app.db.Document):
         if not self.slug:
             self.slug = slugify(self.name)
         super(Board, self).save(*args, **kwargs)
+
+
+class KardQuerySet(QuerySet):
+    def done(self):
+        return self.filter(done_date__exists=True)
+
+    def done_in_month(self, year=None, month=None):
+        date = datetime.datetime.now()
+        if year:
+            date.replace(year=year)
+        if month:
+            date.replace(month=month)
+
+        start_date, end_date = month_range(date)
+
+        results = self.done().filter(done_date__lte=end_date,
+            done_date__gte=start_date)
+        return results
 
 
 class Kard(app.db.Document):
@@ -38,6 +56,10 @@ class Kard(app.db.Document):
     _cycle_time = app.db.IntField(db_field="cycle_time")
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
+
+    meta = {
+        'queryset_class': KardQuerySet,
+    }
 
     @queryset_manager
     def in_progress(klass, queryset):

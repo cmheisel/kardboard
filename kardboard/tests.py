@@ -88,6 +88,19 @@ class UtilTests(unittest2.TestCase):
         result = business_days_between(aday, manydayslater)
         self.assertEqual(result, 262)
 
+    def test_month_range(self):
+        from kardboard.util import month_range
+
+        today = datetime.datetime(year=2011, month=6, day=12)
+        start, end = month_range(today)
+        self.assertEqual(6, start.month)
+        self.assertEqual(1, start.day)
+        self.assertEqual(2011, start.year)
+
+        self.assertEqual(6, end.month)
+        self.assertEqual(30, end.day)
+        self.assertEqual(2011, end.year)
+
 
 class BoardTests(KardboardTestCase):
     def _get_target_class(self):
@@ -119,6 +132,16 @@ class KardTests(KardboardTestCase):
         self.done_card.done_date = datetime.datetime(
             year=2011, month=6, day=12)
         self.done_card.save()
+
+        self.done_card2 = self._make_one()
+        self.done_card2.backlog_date = datetime.datetime(
+            year=2011, month=5, day=2)
+        self.done_card2.start_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.done_card2.done_date = datetime.datetime(
+            year=2011, month=5, day=12)
+        self.done_card2.save()
+
 
         self.wip_card = self._make_one(key="CMSLUCILLE-2")
         self.wip_card.backlog_date = datetime.datetime(
@@ -179,14 +202,23 @@ class KardTests(KardboardTestCase):
 
     def test_in_progress_manager(self):
         klass = self._get_target_class()
-        self.assertEqual(3, klass.objects.count())
         self.assertEqual(2, klass.in_progress.count())
         self.assertEqual(1, klass.started.count())
 
+    def test_completed_in_month(self):
+        klass = self._get_target_class()
+        self.assertEqual(1,
+            klass.objects.done_in_month(year=2011, month=6).count())
 
-class HomepageTests(KardboardTestCase):
+
+class DashboardTestCase(KardboardTestCase):
     def setUp(self):
-        super(HomepageTests, self).setUp()
+        super(DashboardTestCase, self).setUp()
+
+        from kardboard.models import Kard
+        self.Kard = Kard
+        self.year = 2011
+        self.month = 6
 
         self.board = self.make_board()
         self.board1 = self.make_board()
@@ -198,13 +230,13 @@ class HomepageTests(KardboardTestCase):
             self.board.cards.append(k)
 
             k = self.make_card(start_date=datetime.datetime(
-                year=2011, month=6, day=12))
+                year=self.year, month=self.month, day=12))
             k.save()
             self.board.cards.append(k)
 
             k = self.make_card(
-                start_date=datetime.datetime(year=2011, month=6, day=12),
-                done_date=datetime.datetime(year=2011, month=6, day=19))
+                start_date=datetime.datetime(year=self.year, month=self.month, day=12),
+                done_date=datetime.datetime(year=self.year, month=self.month, day=19))
             k.save()
             self.board.cards.append(k)
 
@@ -229,16 +261,16 @@ class HomepageTests(KardboardTestCase):
 
             self.board1.save()
 
+
+class HomepageTests(DashboardTestCase):
     def _get_target_url(self):
         return '/'
 
     def test_wip(self):
-        from kardboard.models import Kard
-
         rv = self.app.get(self._get_target_url())
         self.assertEqual(200, rv.status_code)
 
-        expected_cards = Kard.objects.all()
+        expected_cards = self.Kard.objects.all()
         expected_cards = [c for c in expected_cards if c.done_date == None]
 
         for c in expected_cards:
@@ -247,6 +279,19 @@ class HomepageTests(KardboardTestCase):
         expected = """<p class="value">%s</p>""" % len(expected_cards)
         self.assertIn(expected, rv.data)
 
+
+class MonthPageTests(DashboardTestCase):
+    def _get_target_url(self):
+        return '/2011/06/'
+
+    def test_done_month_metric(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+
+        done_month = self.Kard.objects.done_in_month(year=self.year, month=self.month)
+
+        expected = """<p class="value">%s</p>""" % done_month.count()
+        self.assertIn(expected, rv.data)
 
 if __name__ == "__main__":
     unittest2.main()

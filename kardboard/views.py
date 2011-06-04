@@ -7,12 +7,25 @@ from kardboard.models import Kard
 
 
 @app.route('/')
-def metaboard():
+@app.route('/<int:year>/<int:month>/')
+def dashboard(year=None, month=None, day=None):
+    now = datetime.datetime.now()
+    if not year:
+        year = now.year
+    if not month:
+        month = now.month
+    if not day:
+        day = now.day
+
     cards = Kard.in_progress.all()
 
-    metrics = (
+    metrics = [
+        {'Ave. Cycle Time': None},
+        {'Done this week': None},
+        {'Done this month':
+            Kard.objects.done_in_month(year=year, month=month).count()},
         {'Work in progress': len(cards)},
-    )
+    ]
 
     context = {
         'title': "Dashboard",

@@ -2,6 +2,7 @@ import datetime
 import re
 
 import translitcodec
+from dateutil.relativedelta import relativedelta
 
 from kardboard import app
 
@@ -21,9 +22,14 @@ def business_days_between(date1, date2):
     return business_days
 
 
+def month_range(date):
+    start = date.replace(day=1, hour=0, minute=0, second=0)
+    end = start + relativedelta(months=+1) + relativedelta(days=-1)
+    return start, end
+
+
+
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
-
-
 def slugify(text, delim=u'-'):
     """Generates an ASCII-only slug."""
     result = []
