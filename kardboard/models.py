@@ -3,7 +3,7 @@ import math
 
 from dateutil.relativedelta import relativedelta
 
-from mongoengine.queryset import queryset_manager, QuerySet
+from mongoengine.queryset import QuerySet
 
 from kardboard import app
 from kardboard.util import (
@@ -58,17 +58,24 @@ class KardQuerySet(QuerySet):
         return self.filter(done_date__exists=True)
 
     def done_in_month(self, year=None, month=None):
-        date = datetime.datetime.now()
-        if year:
-            date.replace(year=year)
-        if month:
-            date.replace(month=month)
+        date = munge_date(year=year, month=month)
 
         start_date, end_date = month_range(date)
 
         results = self.done().filter(done_date__lte=end_date,
             done_date__gte=start_date)
         return results
+
+    def in_progress(self, date=None):
+        if not date:
+            date = datetime.datetime.now()
+        return self.filter(done_date=None)
+        #return self.filter(backlog_date__lte=date, done_date__lt=date)
+
+    def started(self, date=None):
+        if not date:
+            date = datetime.datetime.now()
+        return self.filter(done_date=None).filter(start_date__exists=True)
 
 
 class Kard(app.db.Document):
@@ -95,14 +102,6 @@ class Kard(app.db.Document):
     meta = {
         'queryset_class': KardQuerySet,
     }
-
-    @queryset_manager
-    def in_progress(klass, queryset):
-        return queryset.filter(done_date=None)
-
-    @queryset_manager
-    def started(klass, queryset):
-        return queryset.filter(done_date=None).filter(start_date__exists=True)
 
     def save(self, *args, **kwargs):
         if self.done_date and self.start_date:
