@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flaskext.mongoengine import MongoEngine
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 app = Flask(__name__)
 
