@@ -81,12 +81,12 @@ class UtilTests(unittest2.TestCase):
         wednesday = datetime.datetime(year=2011, month=6, day=1)
         next_wednesday = datetime.datetime(year=2011, month=6, day=8)
         result = business_days_between(wednesday, next_wednesday)
-        self.assertEqual(result, 6)
+        self.assertEqual(result, 5)
 
         aday = datetime.datetime(year=2011, month=6, day=1)
         manydayslater = datetime.datetime(year=2012, month=6, day=1)
         result = business_days_between(aday, manydayslater)
-        self.assertEqual(result, 263)
+        self.assertEqual(result, 262)
 
 
 class BoardTests(KardboardTestCase):
@@ -144,12 +144,12 @@ class KardTests(KardboardTestCase):
         self.assert_(k.id)
 
     def test_done_cycle_time(self):
-        self.assertEquals(26, self.done_card.cycle_time)
-        self.assertEquals(26, self.done_card._cycle_time)
+        self.assertEquals(25, self.done_card.cycle_time)
+        self.assertEquals(25, self.done_card._cycle_time)
 
     def test_done_lead_time(self):
-        self.assertEquals(31, self.done_card.lead_time)
-        self.assertEquals(31, self.done_card._lead_time)
+        self.assertEquals(30, self.done_card.lead_time)
+        self.assertEquals(30, self.done_card._lead_time)
 
     def test_wip_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
@@ -162,7 +162,7 @@ class KardTests(KardboardTestCase):
 
         actual = self.wip_card.current_cycle_time(
                 today=today)
-        self.assertEquals(26, actual)
+        self.assertEquals(25, actual)
 
     def test_elabo_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
