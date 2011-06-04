@@ -101,6 +101,19 @@ class UtilTests(unittest2.TestCase):
         self.assertEqual(30, end.day)
         self.assertEqual(2011, end.year)
 
+    def test_week_range(self):
+        from kardboard.util import week_range
+        today = datetime.datetime(year=2011, month=5, day=12)
+        start, end = week_range(today)
+
+        self.assertEqual(5, start.month)
+        self.assertEqual(8, start.day)
+        self.assertEqual(2011, start.year)
+
+        self.assertEqual(5, end.month)
+        self.assertEqual(14, end.day)
+        self.assertEqual(2011, end.year)
+
 
 class BoardTests(KardboardTestCase):
     def _get_target_class(self):
@@ -218,6 +231,14 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=12)
         self.assertEqual(expected, actual)
 
+    def test_done_in_week(self):
+        klass = self._get_target_class()
+        expected = 1
+        actual = klass.objects.done_in_week(
+            year=2011, month=6, day=15)
+
+        self.assertEqual(expected, actual.count())
+
 
 class DashboardTestCase(KardboardTestCase):
     def setUp(self):
@@ -227,6 +248,7 @@ class DashboardTestCase(KardboardTestCase):
         self.Kard = Kard
         self.year = 2011
         self.month = 6
+        self.day = 15
 
         self.board = self.make_board()
         self.board1 = self.make_board()
@@ -292,7 +314,7 @@ class HomepageTests(DashboardTestCase):
 
 class MonthPageTests(DashboardTestCase):
     def _get_target_url(self):
-        return '/2011/06/'
+        return '/%s/%s/' % (self.year, self.month)
 
     def test_done_month_metric(self):
         rv = self.app.get(self._get_target_url())
@@ -312,6 +334,21 @@ class MonthPageTests(DashboardTestCase):
             year=self.year, month=self.month)
 
         expected = """<p class="value">%s</p>""" % cycle_time
+        self.assertIn(expected, rv.data)
+
+
+class DayPageTests(DashboardTestCase):
+    def _get_target_url(self):
+        return '/%s/%s/%s/' % (self.year, self.month, self.day)
+
+    def test_done_in_week_metric(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+
+        cycle_time = self.Kard.objects.done_in_week(
+            year=self.year, month=self.month, day=self.day).count()
+
+        expected = """<h2>Done this week</h2>\n      <p class="value">%s</p>""" % cycle_time
         self.assertIn(expected, rv.data)
 
 if __name__ == "__main__":

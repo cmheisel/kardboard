@@ -28,6 +28,18 @@ def month_range(date):
     return start, end
 
 
+def week_range(date):
+    day_type = date.isoweekday()
+    end_diff = 6 - day_type
+    end_date = date + relativedelta(days=end_diff)
+    start_date = end_date - relativedelta(days=6)
+
+    start_date = make_start_date(date=start_date)
+    end_date = make_end_date(date=end_date)
+
+    return start_date, end_date
+
+
 def make_start_date(year=None, month=None, day=None, date=None):
     start_date = munge_date(year, month, day, date)
     start_date = start_date.replace(hour=23, minute=59, second=59)

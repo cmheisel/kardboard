@@ -12,6 +12,8 @@ from kardboard.util import (
     month_range,
     make_end_date,
     make_start_date,
+    munge_date,
+    week_range,
 )
 
 
@@ -28,6 +30,14 @@ class Board(app.db.Document):
 
 
 class KardQuerySet(QuerySet):
+    def done_in_week(self, year=None, month=None, day=None):
+        date = munge_date(year, month, day)
+        start_date, end_date = week_range(date)
+
+        results = self.done().filter(done_date__lte=end_date,
+            done_date__gte=start_date)
+        return results
+
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
         end_date = make_end_date(year, month, day)
         start_date = end_date - relativedelta(weeks=weeks)
