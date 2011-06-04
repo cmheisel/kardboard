@@ -211,7 +211,7 @@ class HomepageTests(KardboardTestCase):
             self.board.save()
 
         for i in xrange(0, 3):
-            #board will have 5 cards in elabo, started, and done
+            #board will have 3 cards in elabo, started, and done
             k = self.make_card()  # backlogged
             k.save()
             self.board1.cards.append(k)
@@ -232,7 +232,7 @@ class HomepageTests(KardboardTestCase):
     def _get_target_url(self):
         return '/'
 
-    def test_meta_board(self):
+    def test_wip(self):
         from kardboard.models import Kard
 
         rv = self.app.get(self._get_target_url())
@@ -243,6 +243,9 @@ class HomepageTests(KardboardTestCase):
 
         for c in expected_cards:
             self.assertIn(c.key, rv.data)
+
+        expected = """<p class="value">%s</p>""" % len(expected_cards)
+        self.assertIn(expected, rv.data)
 
 
 if __name__ == "__main__":

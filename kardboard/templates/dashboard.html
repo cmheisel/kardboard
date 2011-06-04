@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 
+{% for m in metrics %}
+<div class="metric">
+  {% for name, value in m.items() %}
+      <h2>{{ name }}</h2>
+      <p class="value">{{ value }}</p>
+  {% endfor %}
+</div>
+{% endfor %}
+
 <div id="wip_data">
 <table>
 	<tr>
