@@ -40,7 +40,6 @@ def main(csv_filename):
             print
 
 
-
 if __name__ == "__main__":
     import sys
     main(sys.argv[1])
