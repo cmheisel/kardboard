@@ -139,9 +139,8 @@ class KardTests(KardboardTestCase):
         self.done_card2.start_date = datetime.datetime(
             year=2011, month=5, day=9)
         self.done_card2.done_date = datetime.datetime(
-            year=2011, month=5, day=12)
+            year=2011, month=5, day=15)
         self.done_card2.save()
-
 
         self.wip_card = self._make_one(key="CMSLUCILLE-2")
         self.wip_card.backlog_date = datetime.datetime(
@@ -210,6 +209,15 @@ class KardTests(KardboardTestCase):
         self.assertEqual(1,
             klass.objects.done_in_month(year=2011, month=6).count())
 
+    def test_moving_cycle_time(self):
+        klass = self._get_target_class()
+        expected = klass.objects.done().average('_cycle_time')
+
+        expected = int(round(expected))
+        actual = klass.objects.moving_cycle_time(
+            year=2011, month=6, day=12)
+        self.assertEqual(expected, actual)
+
 
 class DashboardTestCase(KardboardTestCase):
     def setUp(self):
@@ -235,8 +243,10 @@ class DashboardTestCase(KardboardTestCase):
             self.board.cards.append(k)
 
             k = self.make_card(
-                start_date=datetime.datetime(year=self.year, month=self.month, day=12),
-                done_date=datetime.datetime(year=self.year, month=self.month, day=19))
+                start_date=datetime.datetime(year=self.year,
+                    month=self.month, day=12),
+                done_date=datetime.datetime(year=self.year,
+                    month=self.month, day=19))
             k.save()
             self.board.cards.append(k)
 
@@ -288,9 +298,20 @@ class MonthPageTests(DashboardTestCase):
         rv = self.app.get(self._get_target_url())
         self.assertEqual(200, rv.status_code)
 
-        done_month = self.Kard.objects.done_in_month(year=self.year, month=self.month)
+        done_month = self.Kard.objects.done_in_month(
+            year=self.year, month=self.month)
 
         expected = """<p class="value">%s</p>""" % done_month.count()
+        self.assertIn(expected, rv.data)
+
+    def test_cycle_time_metric(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+
+        cycle_time = self.Kard.objects.moving_cycle_time(
+            year=self.year, month=self.month)
+
+        expected = """<p class="value">%s</p>""" % cycle_time
         self.assertIn(expected, rv.data)
 
 if __name__ == "__main__":

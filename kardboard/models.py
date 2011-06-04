@@ -1,9 +1,18 @@
+import datetime
+import math
+
+from dateutil.relativedelta import relativedelta
+
 from mongoengine.queryset import queryset_manager, QuerySet
 
-import datetime
-
 from kardboard import app
-from kardboard.util import business_days_between, slugify, month_range
+from kardboard.util import (
+    business_days_between,
+    slugify,
+    month_range,
+    make_end_date,
+    make_start_date,
+)
 
 
 class Board(app.db.Document):
@@ -19,6 +28,22 @@ class Board(app.db.Document):
 
 
 class KardQuerySet(QuerySet):
+    def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
+        end_date = make_end_date(year, month, day)
+        start_date = end_date - relativedelta(weeks=weeks)
+        start_date = make_start_date(date=start_date)
+
+        qs = self.done().filter(
+            done_date__lte=end_date,
+            done_date__gte=start_date,
+            )
+
+        average = qs.average('_cycle_time')
+        if math.isnan(average):
+            average = 0
+
+        return int(round(average))
+
     def done(self):
         return self.filter(done_date__exists=True)
 

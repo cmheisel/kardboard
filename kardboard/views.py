@@ -8,22 +8,22 @@ from kardboard.models import Kard
 
 @app.route('/')
 @app.route('/<int:year>/<int:month>/')
-def dashboard(year=None, month=None, day=None):
+def dashboard(year=None, month=None):
     now = datetime.datetime.now()
     if not year:
         year = now.year
     if not month:
         month = now.month
-    if not day:
-        day = now.day
 
     cards = Kard.in_progress.all()
 
     metrics = [
-        {'Ave. Cycle Time': None},
+        {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
+            year=year, month=month)},
         {'Done this week': None},
         {'Done this month':
-            Kard.objects.done_in_month(year=year, month=month).count()},
+            Kard.objects.done_in_month(
+                year=year, month=month).count()},
         {'Work in progress': len(cards)},
     ]
 

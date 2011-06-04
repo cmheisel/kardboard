@@ -28,8 +28,38 @@ def month_range(date):
     return start, end
 
 
+def make_start_date(year=None, month=None, day=None, date=None):
+    start_date = munge_date(year, month, day, date)
+    start_date = start_date.replace(hour=23, minute=59, second=59)
+    start_date = start_date.replace(hour=0, minute=0, second=0)
+    return start_date
+
+
+def make_end_date(year=None, month=None, day=None, date=None):
+    end_date = munge_date(year, month, day, date)
+    end_date = end_date.replace(hour=23, minute=59, second=59)
+    return end_date
+
+
+def munge_date(year=None, month=None, day=None, date=None):
+    """
+    Takes a given datetime, or now(), and sets its
+    year, month and day to any of those values passed in
+    optionally.
+    """
+    if not date:
+        date = datetime.datetime.now()
+
+    year = year or date.year
+    month = month or date.month
+    day = day or date.day
+
+    date = date.replace(year=year, month=month, day=day, microsecond=0)
+    return date
 
 _punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+
 def slugify(text, delim=u'-'):
     """Generates an ASCII-only slug."""
     result = []
