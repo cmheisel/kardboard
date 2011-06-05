@@ -114,6 +114,16 @@ class UtilTests(unittest2.TestCase):
         self.assertEqual(14, end.day)
         self.assertEqual(2011, end.year)
 
+        today = datetime.datetime(year=2011, month=6, day=5)
+        start, end = week_range(today)
+        self.assertEqual(6, start.month)
+        self.assertEqual(5, start.day)
+        self.assertEqual(2011, start.year)
+
+        self.assertEqual(6, end.month)
+        self.assertEqual(11, end.day)
+        self.assertEqual(2011, end.year)
+
 
 class BoardTests(KardboardTestCase):
     def _get_target_class(self):
