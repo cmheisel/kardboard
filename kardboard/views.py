@@ -1,6 +1,6 @@
 import datetime
 
-from flask import render_template
+from flask import render_template, make_response
 
 from kardboard import app, __version__
 from kardboard.models import Kard
@@ -73,3 +73,22 @@ def done():
     }
 
     return render_template('done.html', **context)
+
+
+@app.route('/done/report/<int:year_number>/<int:month_number>/')
+def done_report(year_number, month_number):
+    cards = Kard.objects.done_in_month(year_number, month_number)
+    cards = sorted(cards, key=lambda c: c.done_date)
+    cards.reverse()
+
+    context = {
+        'title': "Completed Cards: %s/%s: %s Done" % (month_number,
+            year_number, len(cards)),
+        'cards': cards,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+
+    response = make_response(render_template('done-report.txt', **context))
+    response.headers['Content-Type'] = "text/plain"
+    return response

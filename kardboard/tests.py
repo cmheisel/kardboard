@@ -446,5 +446,21 @@ class DonePageTests(DashboardTestCase):
         for c in done:
             self.assertIn(c.key, rv.data)
 
+
+class DoneReportTests(DashboardTestCase):
+    def _get_target_url(self):
+        return '/done/report/%s/%s/' % (self.year, self.month)
+
+    def test_done_report(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+        self.assertIn("text/plain", rv.headers['Content-Type'])
+
+        done = self.Kard.objects.done_in_month(
+            month=self.month, year=self.year)
+
+        for c in done:
+            self.assertIn(c.key, rv.data)
+
 if __name__ == "__main__":
     unittest2.main()
