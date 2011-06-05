@@ -301,9 +301,6 @@ class KardTimeMachineTests(KardboardTestCase):
         self.assertEqual(expected, actual.count())
 
 
-
-
-
 class DashboardTestCase(KardboardTestCase):
     def setUp(self):
         super(DashboardTestCase, self).setUp()
@@ -372,6 +369,7 @@ class HomepageTests(DashboardTestCase):
         for c in expected_cards:
             self.assertIn(c.key, rv.data)
 
+
 class MonthPageTests(DashboardTestCase):
     def _get_target_url(self):
         return '/%s/%s/' % (self.year, self.month)
@@ -418,10 +416,10 @@ class DayPageTests(DashboardTestCase):
         rv = self.app.get(self._get_target_url())
         self.assertEqual(200, rv.status_code)
 
-        cycle_time = self.Kard.objects.done_in_week(
+        done = self.Kard.objects.done_in_week(
             year=self.year, month=self.month, day=self.day).count()
 
-        expected = """<h2>Done this week</h2>\n      <p class="value">%s</p>""" % cycle_time
+        expected = """<p class="value">%s</p>""" % done
         self.assertIn(expected, rv.data)
 
 if __name__ == "__main__":
