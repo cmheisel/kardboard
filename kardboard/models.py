@@ -66,6 +66,7 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date)
         return results
 
+
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.

@@ -432,5 +432,19 @@ class DayPageTests(DashboardTestCase):
         expected = """<p class="value">%s</p>""" % done
         self.assertIn(expected, rv.data)
 
+
+class DonePageTests(DashboardTestCase):
+    def _get_target_url(self):
+        return '/done/'
+
+    def test_done_page(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+
+        done = self.Kard.objects.done()
+
+        for c in done:
+            self.assertIn(c.key, rv.data)
+
 if __name__ == "__main__":
     unittest2.main()

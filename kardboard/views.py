@@ -57,3 +57,19 @@ def dashboard(year=None, month=None, day=None):
     }
 
     return render_template('dashboard.html', **context)
+
+
+@app.route('/done/')
+def done():
+    cards = Kard.objects.done()
+    cards = sorted(cards, key=lambda c: c.done_date)
+    cards.reverse()
+
+    context = {
+        'title': "Completed Cards",
+        'cards': cards,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+
+    return render_template('done.html', **context)
