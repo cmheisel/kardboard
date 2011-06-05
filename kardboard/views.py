@@ -14,31 +14,27 @@ def dashboard(year=None, month=None, day=None):
     scope = 'current'
 
     if year:
+        date = date.replace(year=year)
         scope = 'year'
     if month:
+        date = date.replace(month=month)
         scope = 'month'
     if day:
+        date = date.replace(day=day)
         scope = 'day'
 
-    if not year:
-        year = date.year
-    if not month:
-        month = date.month
-    if not day:
-        day = date.day
-
-    cards = Kard.in_progress.all()
-    cards = sorted(cards, key=lambda c: c.current_cycle_time())
+    cards = list(Kard.in_progress(date))
+    cards = sorted(cards, key=lambda c: c.current_cycle_time(date))
     cards.reverse()
 
     metrics = [
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
-            year=year, month=month, day=day)},
+            year=date.year, month=date.month, day=date.day)},
         {'Done this week': Kard.objects.done_in_week(
-            year=year, month=month, day=day).count()},
+            year=date.year, month=date.month, day=date.day).count()},
         {'Done this month':
             Kard.objects.done_in_month(
-                year=year, month=month).count()},
+                year=date.year, month=date.month).count()},
         {'Work in progress': len(cards)},
     ]
 

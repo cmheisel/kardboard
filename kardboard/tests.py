@@ -214,8 +214,8 @@ class KardTests(KardboardTestCase):
 
     def test_in_progress_manager(self):
         klass = self._get_target_class()
-        self.assertEqual(2, klass.in_progress.count())
-        self.assertEqual(1, klass.started.count())
+        now = datetime.datetime(2011, 6, 12)
+        self.assertEqual(2, klass.in_progress(now).count())
 
     def test_completed_in_month(self):
         klass = self._get_target_class()
@@ -238,6 +238,70 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=15)
 
         self.assertEqual(expected, actual.count())
+
+
+class KardTimeMachineTests(KardboardTestCase):
+    def setUp(self):
+        super(KardTimeMachineTests, self).setUp()
+        self._set_up_data()
+
+    def _get_target_class(self):
+        return self._get_card_class()
+
+    def _make_one(self, **kwargs):
+        return self.make_card(**kwargs)
+
+    def _set_up_data(self):
+        klass = self._get_target_class()
+
+        # Simulate creating 5 cards and moving
+        # some forward
+        backlog_date = datetime.datetime(
+            year=2011, month=5, day=30)
+        for i in xrange(0, 5):
+            c = self._make_one(backlog_date=backlog_date)
+            c.save()
+
+        cards = klass.objects.all()[:2]
+        for c in cards:
+            c.start_date = backlog_date.replace(day=31)
+            c.save()
+
+        for c in cards:
+            c.done_date = backlog_date.replace(month=6, day=2)
+            c.save()
+
+    def test_time_machine(self):
+        klass = self._get_target_class()
+
+        backlogged_day = datetime.datetime(
+            year=2011, month=5, day=30)
+        started_2_day = datetime.datetime(
+            year=2011, month=5, day=31)
+        finished_2_day = datetime.datetime(
+            year=2011, month=6, day=2)
+
+        today = datetime.datetime(
+            year=2011, month=6, day=12)
+
+        expected = 3
+        actual = klass.in_progress(today)
+        self.assertEqual(expected, actual.count())
+
+        expected = 5
+        actual = klass.in_progress(backlogged_day)
+        self.assertEqual(expected, actual.count())
+
+        expected = 5
+        actual = klass.in_progress(started_2_day)
+        self.assertEqual(expected, actual.count())
+
+        expected = 3
+        actual = klass.in_progress(finished_2_day)
+        self.assertEqual(expected, actual.count())
+
+
+
 
 
 class DashboardTestCase(KardboardTestCase):
@@ -308,13 +372,22 @@ class HomepageTests(DashboardTestCase):
         for c in expected_cards:
             self.assertIn(c.key, rv.data)
 
-        expected = """<p class="value">%s</p>""" % len(expected_cards)
-        self.assertIn(expected, rv.data)
-
-
 class MonthPageTests(DashboardTestCase):
     def _get_target_url(self):
         return '/%s/%s/' % (self.year, self.month)
+
+    def test_wip(self):
+        rv = self.app.get(self._get_target_url())
+        self.assertEqual(200, rv.status_code)
+
+        date = datetime.datetime(self.year, self.month, self.day)
+        expected_cards = self.Kard.in_progress(date)
+
+        for c in expected_cards:
+            self.assertIn(c.key, rv.data)
+
+        expected = """<p class="value">%s</p>""" % expected_cards.count()
+        self.assertIn(expected, rv.data)
 
     def test_done_month_metric(self):
         rv = self.app.get(self._get_target_url())

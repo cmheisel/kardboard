@@ -23,8 +23,10 @@ def business_days_between(date1, date2):
 
 
 def month_range(date):
-    start = date.replace(day=1, hour=0, minute=0, second=0)
+    start = date.replace(day=1)
     end = start + relativedelta(months=+1) + relativedelta(days=-1)
+
+    start, end = make_start_date(date=start), make_end_date(date=end)
     return start, end
 
 

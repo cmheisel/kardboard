@@ -3,7 +3,7 @@ import math
 
 from dateutil.relativedelta import relativedelta
 
-from mongoengine.queryset import QuerySet
+from mongoengine.queryset import QuerySet, Q
 
 from kardboard import app
 from kardboard.util import (
@@ -66,18 +66,6 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date)
         return results
 
-    def in_progress(self, date=None):
-        if not date:
-            date = datetime.datetime.now()
-        return self.filter(done_date=None)
-        #return self.filter(backlog_date__lte=date, done_date__lt=date)
-
-    def started(self, date=None):
-        if not date:
-            date = datetime.datetime.now()
-        return self.filter(done_date=None).filter(start_date__exists=True)
-
-
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
@@ -104,11 +92,44 @@ class Kard(app.db.Document):
     }
 
     def save(self, *args, **kwargs):
+        if self.done_date:
+            self.in_progress = False
+
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
         super(Kard, self).save(*args, **kwargs)
+
+    @classmethod
+    def in_progress(klass, date=None):
+        """
+        In progress is a semi-tricky calculation.
+        If the date is today, it's easy, it's any
+        ticket that doesn't have a done_date.
+        If the date is earlier, then it's:
+            a.) Any ticket without a done_date
+                whose backlog_date is lte
+                than the reference date
+            -AND-
+            b.) Any ticket with a done_date
+                greater than the reference date
+                and a start_date earlier than
+                the reference date
+        """
+        if not date:
+            return klass.objects.filter(done_date=None)
+
+        query_a = Q(done_date=None) & Q(backlog_date__lte=date)
+        query_b = Q(done_date__gt=date) & Q(backlog_date__lte=date)
+
+        results_a = list(klass.objects.filter(query_a))
+        results_b = list(klass.objects.filter(query_b))
+
+        all_ids = [c.id for c in results_a]
+        all_ids = set(all_ids)
+        all_ids.update([c.id for c in results_b])
+        return klass.objects.filter(id__in=all_ids)
 
     @property
     def cycle_time(self):
@@ -138,5 +159,5 @@ class Kard(app.db.Document):
             return None
 
         if not today:
-            today = datetime.datetime.today()
+            today = datetime.datetime.now()
         return business_days_between(self.start_date, today)
