@@ -1,9 +1,17 @@
 import datetime
 
-from flask import render_template, make_response
+from flask import (
+    render_template,
+    make_response,
+    request,
+    redirect,
+    url_for,
+    flash,
+)
 
 from kardboard import app, __version__
 from kardboard.models import Kard
+from kardboard.forms import CardForm, _make_choice_field_ready
 
 
 @app.route('/')
@@ -92,3 +100,37 @@ def done_report(year_number, month_number):
     response = make_response(render_template('done-report.txt', **context))
     response.headers['Content-Type'] = "text/plain"
     return response
+
+
+@app.route('/card/add/', methods=["GET", "POST"])
+def card_add():
+    f = CardForm(request.form)
+    choices = app.config.get('CARD_CATEGORIES')
+    f.category.choices = _make_choice_field_ready(choices)
+
+    if request.method == "POST" and f.validate():
+        card = Kard()
+        f.populate_obj(card)
+        card.save()
+        flash("Card %s successfully added" % card.key)
+        return redirect(url_for("card_edit", key=card.key))
+
+    context = {
+        'title': "Add a card",
+        'form': f,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return render_template('card-add.html', **context)
+
+
+@app.route('/card/edit/<key>', methods=["GET", "POST"])
+def card_edit(key):
+    context = {
+        'title': "Edit a card",
+        'form': None,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return "Stub"
+    return render_template('card-add.html', **context)

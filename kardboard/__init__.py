@@ -10,6 +10,7 @@ app = Flask(__name__)
 app.config.from_object('kardboard.default_settings')
 if os.getenv('KARDBOARD_SETTINGS', None):
     app.config.from_envvar('KARDBOARD_SETTINGS')
+app.secret_key = app.config['SECRET_KEY']
 app.db = MongoEngine(app)
 
 import kardboard.views

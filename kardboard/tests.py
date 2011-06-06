@@ -10,6 +10,7 @@ class KardboardTestCase(unittest2.TestCase):
         from flaskext.mongoengine import MongoEngine
 
         kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
+        kardboard.app.config.from_object('kardboard.default_settings')
         kardboard.app.db = MongoEngine(kardboard.app)
 
         self._flush_db()
@@ -461,6 +462,88 @@ class DoneReportTests(DashboardTestCase):
 
         for c in done:
             self.assertIn(c.key, rv.data)
+
+
+class FormTests(KardboardTestCase):
+    pass
+
+
+class CardFormTest(FormTests):
+    def setUp(self):
+        super(CardFormTest, self).setUp()
+        self.form = self._make_one()
+        self.required_data = {
+            'key': u'CMSIF-199',
+            'title': u'You gotta lock that down',
+            'backlog_date': u"06/11/2011",
+            'category': u'Bug',
+        }
+
+    def _get_target_class(self):
+        from kardboard.forms import CardForm
+        return CardForm
+
+    def test_required_fields(self):
+        self.form.process(**self.required_data)
+        self.form.validate()
+        self.assertEquals(0, len(self.form.errors))
+
+        card = self._get_card_class()()
+        self.form.populate_obj(card)
+        card.save()
+
+    def test_datetime_coercing(self):
+        self.form.process(**self.required_data)
+        data = self.form.backlog_date.data
+        self.assertEqual(6, data.month)
+
+    def test_key_uniqueness(self):
+        klass = self._get_card_class()
+        c = klass(**self.required_data)
+        c.backlog_date = datetime.datetime.now()
+        c.save()
+
+        self.form.process(**self.required_data)
+        self.form.validate()
+        self.assertEquals(1, len(self.form.errors))
+        self.assertIn('key', self.form.errors.keys())
+
+
+class CRUDTests(KardboardTestCase):
+    pass
+
+
+class CardAddTests(CRUDTests):
+    def setUp(self):
+        super(CardAddTests, self).setUp()
+        self.required_data = {
+            'key': u'CMSIF-199',
+            'title': u'You gotta lock that down',
+            'backlog_date': u"06/11/2011",
+            'category': u'Bug',
+        }
+
+    def _get_target_url(self):
+        return '/card/add/'
+
+    def _get_target_class(self):
+        return self._get_card_class()
+
+    def ztest_add_card(self):
+        klass = self._get_target_class()
+
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+        self.assertIn('<form', res.data)
+
+        res = self.app.post(self._get_target_url(),
+            data=self.required_data)
+        self.assertEqual(302, res.status_code)
+        self.assertEqual(1, klass.objects.count())
+
+        k = klass.objects.get(key=self.required_data['key'])
+        self.assert_(k.id)
+
 
 if __name__ == "__main__":
     unittest2.main()
