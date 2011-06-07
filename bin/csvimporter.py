@@ -15,21 +15,22 @@ def parse_date(date_string):
 
 
 def main(csv_filename):
-    reader = csv.reader(open(csv_filename))
+    reader = csv.DictReader(open(csv_filename))
     for row in reader:
+
         try:
-            k = Kard.objects.get(key=row[4])
+            k = Kard.objects.get(key=row['Ticket'])
         except Kard.DoesNotExist:
             k = Kard()
 
         try:
-            k.category = row[0]
-            k.backlog_date = parse_date(row[1])
-            k.start_date = parse_date(row[2])
-            k.done_date = parse_date(row[3])
-            k.key = row[4]
-            k.title = row[5]
-            k.shirt_size = row[7]
+            k.category = row['Category']
+            k.backlog_date = parse_date(row['Backlog Date'])
+            k.start_date = parse_date(row['Start Date'])
+            k.done_date = parse_date(row['Done Date'])
+            k.key = row['Ticket']
+            k.title = row['Card title']
+            k.shirt_size = row['Shirt Size']
             k.save()
         except Exception, e:
             print "Error reported!"
