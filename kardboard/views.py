@@ -102,8 +102,10 @@ def done_report(year_number, month_number):
     response.headers['Content-Type'] = "text/plain"
     return response
 
+
 def _init_new_card_form(*args, **kwargs):
     return _init_card_form(*args, new=True, **kwargs)
+
 
 def _init_card_form(*args, **kwargs):
     new = kwargs.get('new', False)
@@ -160,3 +162,24 @@ def card_edit(key):
     }
 
     return render_template('card-add.html', **context)
+
+
+@app.route('/card/<key>/', methods=["GET", "POST"])
+def card(key):
+    try:
+        card = Kard.objects.get(key=key)
+    except Kard.DoesNotExist:
+        abort(404)
+
+    context = {
+        'title': "%s -- %s" % (card.key, card.title),
+        'card': card,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return render_template('card.html', **context)
+
+
+@app.route('/card/<key>/delete/', methods=["GET", "POST"])
+def card_delete(key):
+    pass

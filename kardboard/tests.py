@@ -12,8 +12,10 @@ class KardboardTestCase(unittest2.TestCase):
         import kardboard
         from flaskext.mongoengine import MongoEngine
 
-        kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
         kardboard.app.config.from_object('kardboard.default_settings')
+        kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
+        kardboard.app.config['DEBUG'] = True
+        kardboard.app.config['TESTING'] = True
         kardboard.app.db = MongoEngine(kardboard.app)
 
         self._flush_db()
@@ -59,7 +61,7 @@ class KardboardTestCase(unittest2.TestCase):
         key = self._make_unique_key()
         fields = {
             'key': "CMSAD-%s" % key,
-            'title': "There's always money in the banana stand",
+            'title': "Theres always money in the banana stand",
             'backlog_date': datetime.datetime.now()
         }
         fields.update(**kwargs)
@@ -382,6 +384,30 @@ class HomepageTests(DashboardTestCase):
 
         for c in expected_cards:
             self.assertIn(c.key, rv.data)
+
+
+class DetailPageTests(DashboardTestCase):
+    def _get_target_url(self):
+        return '/card/%s/' % self.card.key
+
+    def setUp(self):
+        super(DetailPageTests, self).setUp()
+        self.card = self._get_card_class().objects.first()
+        self.response = self.app.get(self._get_target_url())
+        self.assertEqual(200, self.response.status_code)
+
+    def test_data(self):
+        expected_values = [
+            self.card.title,
+            self.card.key,
+            self.card.backlog_date.strftime("%m/%d/%Y"),
+            "Start date:",
+            "Done date:",
+            "/card/%s/edit/" % self.card.key,
+            "/card/%s/delete/" % self.card.key,
+        ]
+        for v in expected_values:
+            self.assertIn(v, self.response.data)
 
 
 class MonthPageTests(DashboardTestCase):

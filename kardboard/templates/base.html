@@ -141,10 +141,28 @@ label.required {
     color: #000;
 }
 
+div.card_detail {
+    color: #333;
+    width: 60%;
+    text-align: left;
+}
+
+.card_detail h2 {
+    text-align: left;
+}
+
+div.card_detail .content {
+    padding: 6px;
+}
+
+.card_detail .content a {
+    color: #92CC47;
+}
+
    </style>
 </head>
 <body>
-<h1>{{ title }}</h1>
+<h1>{% block title %}{{ title }}{% endblock %}</h1>
   <p class="nav"></p>
 
   {% block content %}{% endblock content %}

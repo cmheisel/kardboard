@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ card.key }}{% endblock %}
+
+{% macro none_or_date(field) %}
+    {% if field %}
+        {{ field.strftime("%m/%d/%Y") }}
+    {% else %}
+        None
+    {% endif %}
+{% endmacro %}
+
+{% block content %}
+
+<div class="metric card_detail">
+      <h2 style="font-weight: bold;">
+        {{ card.key }}
+        {% if card.done_date %}
+            Done
+        {% elif card.start_date %}
+            Building
+        {% elif card.backlog_date %}
+            Planning
+        {% endif %}
+      </h2>
+      <div class="content">
+      <h3>{{ card.title }}</h2>
+      <ul>
+        <li>
+            <strong>Cycle time:</strong>
+            {% if card.done_date %}
+                {{ card.cycle_time }}
+            {% else %}
+                {{ card.current_cycle_time() }}
+            {% endif %}
+        </li>
+        <li><strong>Backlog date:</strong> {{ none_or_date(card.backlog_date) }}</li>
+        <li><strong>Start date:</strong> {{ none_or_date(card.start_date) }}</li>
+        <li><strong>Done date:</strong> {{ none_or_date(card.done_date) }}</li>
+      </ul>
+
+      <p><a href="{{ url_for('card_edit', key=card.key) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key) }}">Delete</a> / <a href="{{ url_for('dashboard') }}">Home</a>
+      </div>
+
+</div>
+
+{% endblock %}
