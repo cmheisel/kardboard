@@ -182,4 +182,21 @@ def card(key):
 
 @app.route('/card/<key>/delete/', methods=["GET", "POST"])
 def card_delete(key):
-    pass
+    try:
+        card = Kard.objects.get(key=key)
+    except Kard.DoesNotExist:
+        abort(404)
+
+    if request.method == "POST" and request.form.get('delete'):
+        card.delete()
+        return redirect(url_for("dashboard"))
+    elif request.method == "POST" and request.form.get('cancel'):
+        return redirect(url_for("card", key=card.key))
+
+    context = {
+        'title': "%s -- %s" % (card.key, card.title),
+        'card': card,
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return render_template('card-delete.html', **context)

@@ -596,6 +596,27 @@ class CardCRUDTests(KardboardTestCase):
         self.assertEqual(11, k.backlog_date.day)
         self.assertEqual(1911, k.backlog_date.year)
 
+    def test_delete_card(self):
+        klass = self._get_target_class()
+
+        card = klass(**self.required_data)
+        card.backlog_date = datetime.datetime.now()
+        card.save()
+
+        target_url = "/card/%s/delete/" % (card.key, )
+        res = self.app.get(target_url)
+        self.assertEqual(200, res.status_code)
+        self.assertIn('value="Cancel"', res.data)
+        self.assertIn('value="Delete"', res.data)
+        self.assert_(klass.objects.get(key=card.key))
+
+        res = self.app.post(target_url, data={'cancel': 'Cancel'})
+        self.assertEqual(302, res.status_code)
+        self.assert_(klass.objects.get(key=card.key))
+
+        res = self.app.post(target_url, data={'delete': 'Delete'})
+        self.assertEqual(302, res.status_code)
+
 
 if __name__ == "__main__":
     unittest2.main()
