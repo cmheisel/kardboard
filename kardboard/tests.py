@@ -486,8 +486,8 @@ class CardFormTest(FormTests):
         self.post_data = MultiDict(self.required_data)
 
     def _get_target_class(self):
-        from kardboard.forms import NewCardForm
-        return NewCardForm
+        from kardboard.forms import get_card_form
+        return get_card_form(new=True)
 
     def test_required_fields(self):
         f = self.Form(self.post_data)

@@ -12,7 +12,7 @@ from flask import (
 
 from kardboard import app, __version__
 from kardboard.models import Kard
-from kardboard.forms import NewCardForm, CardForm, _make_choice_field_ready
+from kardboard.forms import get_card_form, _make_choice_field_ready
 
 
 @app.route('/')
@@ -102,8 +102,14 @@ def done_report(year_number, month_number):
     response.headers['Content-Type'] = "text/plain"
     return response
 
+def _init_new_card_form(*args, **kwargs):
+    return _init_card_form(*args, new=True, **kwargs)
 
-def _init_card_form(klass, *args, **kwargs):
+def _init_card_form(*args, **kwargs):
+    new = kwargs.get('new', False)
+    if new:
+        del kwargs['new']
+    klass = get_card_form()
     f = klass(*args, **kwargs)
     choices = app.config.get('CARD_CATEGORIES')
     if choices:
@@ -113,7 +119,7 @@ def _init_card_form(klass, *args, **kwargs):
 
 @app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
-    f = _init_card_form(NewCardForm, request.form)
+    f = _init_new_card_form(request.form)
 
     if request.method == "POST" and f.validate():
         card = Kard()
@@ -138,7 +144,7 @@ def card_edit(key):
     except Kard.DoesNotExist:
         abort(404)
 
-    f = _init_card_form(CardForm, request.form, card)
+    f = _init_card_form(request.form, card)
 
     if request.method == "POST" and f.validate():
         f.populate_obj(card)

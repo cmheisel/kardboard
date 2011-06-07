@@ -48,6 +48,7 @@ class CardForm(Form):
         validators=[validators.optional()])
 
 
-class NewCardForm(CardForm):
-    key = TextField(u'JIRA Key',
-        validators=[validators.required(), Unique(Kard, "key")])
+def get_card_form(new=False):
+    if new:
+        CardForm.validate_key = Unique(Kard, 'key')
+    return CardForm
