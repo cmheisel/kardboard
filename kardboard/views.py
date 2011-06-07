@@ -137,7 +137,7 @@ def card_add():
     return render_template('card-add.html', **context)
 
 
-@app.route('/card/edit/<key>/', methods=["GET", "POST"])
+@app.route('/card/<key>/edit/', methods=["GET", "POST"])
 def card_edit(key):
     try:
         card = Kard.objects.get(key=key)

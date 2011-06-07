@@ -553,7 +553,7 @@ class CardCRUDTests(KardboardTestCase):
         card.backlog_date = datetime.datetime.now()
         card.save()
 
-        target_url = "/card/edit/%s/" % (card.key, )
+        target_url = "/card/%s/edit/" % (card.key, )
         res = self.app.get(target_url)
         self.assertEqual(200, res.status_code)
         self.assertIn(card.key, res.data)
