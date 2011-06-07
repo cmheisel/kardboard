@@ -32,6 +32,7 @@ def main():
 
     fp.close()
 
+    exit_flag = 0
     # Now filter thin
     for line in contents:
         line = line.rstrip()
@@ -40,7 +41,9 @@ def main():
 
         if test_line not in exclusions:
             print line
+            exit_flag = -1
+    return exit_flag
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

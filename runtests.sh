@@ -1,6 +1,6 @@
 clear
-python kardboard/tests.py
+./run-pyflakes.py kardboard
 if [ "$?" -eq "0" ]
 then
-    ./run-pyflakes.py kardboard
+    python kardboard/tests.py
 fi
