@@ -529,7 +529,7 @@ class CardAddTests(CRUDTests):
     def _get_target_class(self):
         return self._get_card_class()
 
-    def ztest_add_card(self):
+    def test_add_card(self):
         klass = self._get_target_class()
 
         res = self.app.get(self._get_target_url())
