@@ -2,9 +2,9 @@
 
 {% macro with_errors(field) %}
     {% if field.errors %}
-        <tr class="form_row_error">
-    {% else %}
         <tr class="form_row form_row_error">
+    {% else %}
+        <tr class="form_row">
     {% endif %}
 
         {% if field.errors %}
