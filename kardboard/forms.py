@@ -1,5 +1,5 @@
 
-import datetime
+#import datetime
 
 from wtforms import Form, TextField, SelectField, validators, ValidationError
 from wtforms.ext.dateutil.fields import DateField
@@ -26,41 +26,28 @@ class Unique(object):
         if check:
             raise ValidationError(self.message)
 
-CATEGORY_CHOICES = ('Uncategorized', 'Uncategorized')
+CATEGORY_CHOICES = (
+    ('Bug', 'Bug'),
+    ('Feature', 'Feature'),
+    ('Improvement', 'Improvement'),
+)
 
-
-class CardDateField(DateField):
-    """
-    Exactly like a DateField, except it coerces into a datetime
-    object since that's what the Model needs.
-    """
-    def process_data(self, value):
-        self.data = None
-        if value:
-            super(CardDateField, self).process_formdata([value, ])
-        if self.data and hasattr(self.data, "year"):
-            year, month, day = self.data.year, self.data.month, self.data.day
-            self.data = datetime.datetime(year, month, day, 23, 59, 59, 0)
-
-
-    def process_formdata(self, valuelist):
-        self.data = None
-        if valuelist:
-            super(CardDateField, self).process_formdata(valuelist)
-        if self.data and hasattr(self.data, "year"):
-            year, month, day = self.data.year, self.data.month, self.data.day
-            self.data = datetime.datetime(year, month, day, 23, 59, 59, 0)
 
 class CardForm(Form):
     key = TextField(u'JIRA Key',
-        validators=[validators.required(), Unique(Kard, "key")])
+        validators=[validators.required()])
     title = TextField(u'Card title',
         validators=[validators.required()])
-    backlog_date = CardDateField(u'Backlog date', display_format="%m/%d/%Y",
+    backlog_date = DateField(u'Backlog date', display_format="%m/%d/%Y",
         validators=[validators.required()])
-    start_date = CardDateField(u'Start date', display_format="%m/%d/%Y",
+    start_date = DateField(u'Start date', display_format="%m/%d/%Y",
         validators=[validators.optional()])
-    done_date = CardDateField(u'Done date', display_format="%m/%d/%Y",
+    done_date = DateField(u'Done date', display_format="%m/%d/%Y",
         validators=[validators.optional()])
     category = SelectField(u'Category', choices=CATEGORY_CHOICES,
         validators=[validators.optional()])
+
+
+class NewCardForm(CardForm):
+    key = TextField(u'JIRA Key',
+        validators=[validators.required(), Unique(Kard, "key")])

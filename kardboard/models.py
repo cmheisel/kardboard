@@ -92,7 +92,19 @@ class Kard(app.db.Document):
         'queryset_class': KardQuerySet,
     }
 
+    def _convert_dates_to_datetimes(self, date):
+        if not date:
+            return None
+        if not hasattr(date, "hour"):
+            return datetime.datetime(date.year, date.month, date.day,
+                23, 59, 59, 0)
+        return date
+
     def save(self, *args, **kwargs):
+        self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)
+        self.start_date = self._convert_dates_to_datetimes(self.start_date)
+        self.done_date = self._convert_dates_to_datetimes(self.done_date)
+
         if self.done_date:
             self.in_progress = False
 

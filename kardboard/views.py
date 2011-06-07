@@ -7,11 +7,12 @@ from flask import (
     redirect,
     url_for,
     flash,
+    abort,
 )
 
 from kardboard import app, __version__
 from kardboard.models import Kard
-from kardboard.forms import CardForm, _make_choice_field_ready
+from kardboard.forms import NewCardForm, CardForm, _make_choice_field_ready
 
 
 @app.route('/')
@@ -102,11 +103,17 @@ def done_report(year_number, month_number):
     return response
 
 
+def _init_card_form(klass, *args, **kwargs):
+    f = klass(*args, **kwargs)
+    choices = app.config.get('CARD_CATEGORIES')
+    if choices:
+        f.category.choices = _make_choice_field_ready(choices)
+    return f
+
+
 @app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
-    f = CardForm(request.form)
-    choices = app.config.get('CARD_CATEGORIES')
-    f.category.choices = _make_choice_field_ready(choices)
+    f = _init_card_form(NewCardForm, request.form)
 
     if request.method == "POST" and f.validate():
         card = Kard()
@@ -124,13 +131,26 @@ def card_add():
     return render_template('card-add.html', **context)
 
 
-@app.route('/card/edit/<key>', methods=["GET", "POST"])
+@app.route('/card/edit/<key>/', methods=["GET", "POST"])
 def card_edit(key):
+    try:
+        card = Kard.objects.get(key=key)
+    except Kard.DoesNotExist:
+        abort(404)
+
+    f = _init_card_form(CardForm, request.form, card)
+
+    if request.method == "POST" and f.validate():
+        f.populate_obj(card)
+        card.save()
+        flash("Card %s successfully edited" % card.key)
+        return redirect(url_for("card_edit", key=card.key))
+
     context = {
         'title': "Edit a card",
-        'form': None,
+        'form': f,
         'updated_at': datetime.datetime.now(),
         'version': __version__,
     }
-    return "Stub"
+
     return render_template('card-add.html', **context)
