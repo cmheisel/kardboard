@@ -9,10 +9,13 @@ from flask import (
     flash,
     abort,
 )
+from dateutil.relativedelta import relativedelta
 
 from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
+from kardboard.util import month_range
+from kardboard.charts import ThroughputChart
 
 
 @app.route('/')
@@ -201,3 +204,41 @@ def card_delete(key):
         'version': __version__,
     }
     return render_template('card-delete.html', **context)
+
+
+@app.route('/chart/throughput/')
+@app.route('/chart/throughput/<int:months>/')
+def chart_throughput(months=6, start=None):
+    start = start or datetime.datetime.today()
+    end_start, end_end = month_range(start)
+    months_ago = end_start - relativedelta(months=months - 1)
+
+    start_start, start_end = month_range(months_ago)
+
+    month_ranges = [(start_start, start_end), ]
+
+    for i in xrange(0, months - 2):
+        next_month = month_ranges[-1][0] + relativedelta(months=1)
+        start, end = month_range(date=next_month)
+        month_ranges.append((start, end))
+    month_ranges.append((end_start, end_end))
+
+    month_counts = []
+    for arange in month_ranges:
+        start, end = arange
+        num = Kard.objects.filter(done_date__gte=start,
+            done_date__lte=end).count()
+        month_counts.append((start.strftime("%B"), num))
+
+    chart = ThroughputChart(900, 300)
+    chart.add_bars(month_counts)
+
+    context = {
+        'title': "How much have we done?",
+        'updated_at': datetime.datetime.now(),
+        'chart': chart,
+        'month_counts': month_counts,
+        'version': __version__,
+    }
+
+    return render_template('chart-throughput.html', **context)

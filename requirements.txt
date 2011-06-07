@@ -8,8 +8,9 @@ Werkzeug==0.6.2
 mongoengine==0.4
 pymongo==1.11
 unittest2==0.5.1
+python-dateutil==1.5.0
+pygooglechart
 
 translitcodec==0.2 #Used by util.slugify
 
 https://github.com/sbook/flask-mongoengine/tarball/master
-python-dateutil==1.5.0

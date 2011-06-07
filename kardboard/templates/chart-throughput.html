@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<img src="{{ chart.get_url() }}" />
+
+<div id="wip_data">
+<table>
+    <tr>
+    	<th>Month</th>
+    	<th>Cards done</th>
+    </tr>
+
+    {% for row in month_counts %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+    	<td>{{ row[0] }}</td>
+    	<td>{{ row[1] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}
