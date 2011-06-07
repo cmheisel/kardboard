@@ -2,15 +2,29 @@ import os
 
 from flask import Flask
 from flaskext.mongoengine import MongoEngine
+import mongoengine
 
-__version__ = "0.2"
+__version__ = "1.0"
 
 app = Flask(__name__)
+
+
+class PortAwareMongoEngine(MongoEngine):
+    def init_app(self, app):
+        db = app.config['MONGODB_DB']
+        username = app.config.get('MONGODB_USERNAME', None)
+        password = app.config.get('MONGODB_PASSWORD', None)
+        port = app.config.get('MONGODB_PORT', 27017)
+
+        # more settings e.g. port etc needed
+
+        self.connection = mongoengine.connect(
+            db=db, username=username, password=password, port=port)
 
 app.config.from_object('kardboard.default_settings')
 if os.getenv('KARDBOARD_SETTINGS', None):
     app.config.from_envvar('KARDBOARD_SETTINGS')
 app.secret_key = app.config['SECRET_KEY']
-app.db = MongoEngine(app)
+app.db = PortAwareMongoEngine(app)
 
 import kardboard.views
