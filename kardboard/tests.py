@@ -572,6 +572,22 @@ class CardCRUDTests(KardboardTestCase):
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
 
+    def test_add_duplicate_card(self):
+        klass = self._get_target_class()
+        card = klass(**self.required_data)
+        card.backlog_date = datetime.datetime.now()
+        card.save()
+
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+        self.assertIn('<form', res.data)
+
+        res = self.app.post(self._get_target_url(),
+            data=self.required_data)
+
+        self.assertEqual(200, res.status_code)
+
+
     def test_edit_card(self):
         klass = self._get_target_class()
 

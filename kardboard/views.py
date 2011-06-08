@@ -111,7 +111,7 @@ def _init_card_form(*args, **kwargs):
     new = kwargs.get('new', False)
     if new:
         del kwargs['new']
-    klass = get_card_form()
+    klass = get_card_form(new=new)
     f = klass(*args, **kwargs)
     choices = app.config.get('CARD_CATEGORIES')
     if choices:
@@ -122,6 +122,7 @@ def _init_card_form(*args, **kwargs):
 @app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
     f = _init_new_card_form(request.form)
+    assert hasattr(f, 'validate_key')
 
     if request.method == "POST" and f.validate():
         card = Kard()

@@ -47,8 +47,10 @@ class CardForm(Form):
     category = SelectField(u'Category', choices=CATEGORY_CHOICES,
         validators=[validators.optional()])
 
-
 def get_card_form(new=False):
     if new:
         CardForm.validate_key = Unique(Kard, 'key')
+    else:
+        if hasattr(CardForm, 'validate_key'):
+            delattr(CardForm, 'validate_key')
     return CardForm
