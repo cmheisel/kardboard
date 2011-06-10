@@ -1,2 +1,7 @@
 *.pyc
 *.egg-info
+build
+var
+sample.cfg
+cards.csv
+.noseids

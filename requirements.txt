@@ -10,6 +10,8 @@ pymongo==1.11
 unittest2==0.5.1
 python-dateutil==1.5.0
 pygooglechart
+suds==0.4
+mock==0.7.2
 
 translitcodec==0.2 #Used by util.slugify
 

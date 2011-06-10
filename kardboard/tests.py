@@ -1,8 +1,12 @@
 import datetime
 import random
 import os
+import copy
 
 import unittest2
+from mock import patch
+
+from kardboard.mocks import MockJIRAHelper
 
 
 class KardboardTestCase(unittest2.TestCase):
@@ -550,6 +554,13 @@ class CardCRUDTests(KardboardTestCase):
             'category': u'Bug',
         }
 
+        self.jirapatch = patch('kardboard.tickethelpers.JIRAHelper',
+            new=MockJIRAHelper)
+        self.jirapatch.start()
+
+    def tearDown(self):
+        self.jirapatch.stop()
+
     def _get_target_url(self):
         return '/card/add/'
 
@@ -571,6 +582,22 @@ class CardCRUDTests(KardboardTestCase):
 
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
+
+    def test_add_card_with_no_title(self):
+        klass = self._get_target_class()
+
+        data = copy.copy(self.required_data)
+        del data['title']
+
+        res = self.app.post(self._get_target_url(),
+            data=data)
+
+        self.assertEqual(302, res.status_code)
+        self.assertEqual(1, klass.objects.count())
+
+        k = klass.objects.get(key=self.required_data['key'])
+        self.assert_(k.id)
+        self.assertEqual(k.title, self.required_data['title'])
 
     def test_add_duplicate_card(self):
         klass = self._get_target_class()
