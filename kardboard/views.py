@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
-from kardboard.util import month_range
+from kardboard.util import month_range, slugify
 from kardboard.charts import ThroughputChart
 from kardboard import tickethelpers
 
@@ -76,6 +76,49 @@ def dashboard(year=None, month=None, day=None):
     }
 
     return render_template('dashboard.html', **context)
+
+
+@app.route('/state/')
+@app.route('/state/<state_slug>/')
+def state(state_slug=None):
+    states = app.config.get('STATES', [])
+    state_mapping = {}
+    for state in states:
+        state_mapping[slugify(state)] = state
+
+    target_state = None
+    if state_slug:
+        target_state = state_mapping.get(state_slug, None)
+        if not state:
+            abort(404)
+
+    if target_state:
+        target_states = [target_state, ]
+    else:
+        target_states = states
+
+    states_data = []
+    for state in target_states:
+        state_data = {}
+        state_data['wip_cards'] = Kard.in_progress().filter(state=state)
+        state_data['backlog_cards'] = Kard.backlogged().filter(state=state)
+        state_data['title'] = state
+        if state_data['wip_cards'].count() > 0 or \
+            state_data['backlog_cards'].count() > 0:
+            states_data.append(state_data)
+
+    title = "All states"
+    if state:
+        title = "Cards in %s" % (state, )
+
+    context = {
+        'title': title,
+        'states_data': states_data,
+        'states_count': len(states_data),
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return render_template('state.html', **context)
 
 
 @app.route('/done/')

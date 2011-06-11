@@ -1,16 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% for m in metrics %}
-<div class="metric">
-  {% for name, value in m.items() %}
-      <h2>{{ name }}</h2>
-      <p class="value">{{ value }}</p>
-  {% endfor %}
-</div>
-{% endfor %}
+{% for data in states_data %}
 
 <div id="wip_data">
+
+{% if states_count != 1 %}
+<h2>{{ data['title'] }}</h2>
+{% endif %}
+
 <table>
     <caption>Building</caption>
 	<tr>
@@ -19,7 +17,7 @@
 		<th>Cycle time</th>
 	</tr>
 
-	{% for card in wip_cards %}
+	{% for card in data['wip_cards'] %}
 	<tr class="{{ loop.cycle('odd', 'even') }}">
 		<td>
             <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
@@ -40,6 +38,7 @@
 </table>
 
 
+
 <!-- BACKLOG -->
 <table>
     <caption>Planning</caption>
@@ -49,7 +48,7 @@
         <th>Cycle time</th>
     </tr>
 
-    {% for card in backlog_cards %}
+    {% for card in data['backlog_cards'] %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>
             <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
@@ -69,5 +68,7 @@
     {% endfor %}
 </table>
 </div>
+
+{% endfor %}
 
 {% endblock content %}

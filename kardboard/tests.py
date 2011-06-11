@@ -7,6 +7,7 @@ import unittest2
 from mock import patch
 
 from kardboard.mocks import MockJIRAHelper
+from kardboard.util import slugify
 
 
 class KardboardTestCase(unittest2.TestCase):
@@ -380,6 +381,19 @@ class DashboardTestCase(KardboardTestCase):
             self.board1.cards.append(k)
 
             self.board1.save()
+
+
+class StateTests(DashboardTestCase):
+    def _get_target_url(self, state=None):
+        base_url = '/state/'
+        if state:
+            state_slug = slugify(state)
+            base_url = base_url + '%s/' % state_slug
+        return base_url
+
+    def test_state_page(self):
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
 
 
 class HomepageTests(DashboardTestCase):

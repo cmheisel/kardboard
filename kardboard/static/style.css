@@ -13,6 +13,23 @@ h1 {
     font-size: 40px;
 }
 
+h2 {
+    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", "Impact", Helvetica, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 30px;
+    text-align: center;
+}
+
+caption {
+    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", "Impact", Helvetica, sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 20px;
+    text-align: left;
+    color: #eee;
+}
+
 div.metric {
     width: 250px;
     border: 1px #92CC47 solid;
