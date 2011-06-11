@@ -32,13 +32,17 @@ def dashboard(year=None, month=None, day=None):
     if month:
         date = date.replace(month=month)
         scope = 'month'
+        start, end = month_range(date)
+        date = end
     if day:
         date = date.replace(day=day)
         scope = 'day'
 
-    cards = list(Kard.in_progress(date))
-    cards = sorted(cards, key=lambda c: c.current_cycle_time(date))
-    cards.reverse()
+    wip_cards = list(Kard.in_progress(date))
+    wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time(date))
+    wip_cards.reverse()
+
+    backlog_cards = Kard.backlogged(date).order_by('key')
 
     metrics = [
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
@@ -48,7 +52,8 @@ def dashboard(year=None, month=None, day=None):
         {'Done this month':
             Kard.objects.done_in_month(
                 year=date.year, month=date.month).count()},
-        {'Work in progress': len(cards)},
+        {'Work in progress': len(wip_cards)},
+        {'Plannng': backlog_cards.count()}
     ]
 
     title = "Dashboard"
@@ -64,7 +69,8 @@ def dashboard(year=None, month=None, day=None):
         'date': date,
         'title': title,
         'metrics': metrics,
-        'cards': cards,
+        'wip_cards': wip_cards,
+        'backlog_cards': backlog_cards,
         'updated_at': datetime.datetime.now(),
         'version': __version__,
     }

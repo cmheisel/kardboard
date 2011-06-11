@@ -232,10 +232,17 @@ class KardTests(KardboardTestCase):
                 today=today)
         self.assertEquals(None, actual)
 
+    def test_backlogged(self):
+        klass = self._get_target_class()
+        now = datetime.datetime(2011, 6, 12)
+        qs = klass.backlogged(now)
+        self.assertEqual(1, qs.count())
+        self.assertEqual(self.elabo_card.key, qs[0].key)
+
     def test_in_progress_manager(self):
         klass = self._get_target_class()
         now = datetime.datetime(2011, 6, 12)
-        self.assertEqual(2, klass.in_progress(now).count())
+        self.assertEqual(1, klass.in_progress(now).count())
 
     def test_completed_in_month(self):
         klass = self._get_target_class()
@@ -304,19 +311,19 @@ class KardTimeMachineTests(KardboardTestCase):
         today = datetime.datetime(
             year=2011, month=6, day=12)
 
-        expected = 3
+        expected = 2
         actual = klass.in_progress(today)
         self.assertEqual(expected, actual.count())
 
-        expected = 5
+        expected = 0
         actual = klass.in_progress(backlogged_day)
         self.assertEqual(expected, actual.count())
 
-        expected = 5
+        expected = 2
         actual = klass.in_progress(started_2_day)
         self.assertEqual(expected, actual.count())
 
-        expected = 3
+        expected = 2
         actual = klass.in_progress(finished_2_day)
         self.assertEqual(expected, actual.count())
 
@@ -377,7 +384,9 @@ class DashboardTestCase(KardboardTestCase):
 
 class HomepageTests(DashboardTestCase):
     def _get_target_url(self):
-        return '/'
+        # We have to specify a day, because otherwise just / would
+        # be whatever day it is when you run the tests
+        return '/%s/%s/%s/' % (self.year, self.month, self.day)
 
     def test_wip(self):
         rv = self.app.get(self._get_target_url())
@@ -419,10 +428,13 @@ class MonthPageTests(DashboardTestCase):
         return '/%s/%s/' % (self.year, self.month)
 
     def test_wip(self):
+        from kardboard.util import month_range
+
         rv = self.app.get(self._get_target_url())
         self.assertEqual(200, rv.status_code)
 
         date = datetime.datetime(self.year, self.month, self.day)
+        start, date = month_range(date)
         expected_cards = self.Kard.in_progress(date)
 
         for c in expected_cards:
@@ -613,7 +625,6 @@ class CardCRUDTests(KardboardTestCase):
             data=self.required_data)
 
         self.assertEqual(200, res.status_code)
-
 
     def test_edit_card(self):
         klass = self._get_target_class()

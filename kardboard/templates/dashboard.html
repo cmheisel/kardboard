@@ -13,12 +13,12 @@
 <div id="wip_data">
 <table>
 	<tr>
-		<th>Ticket</th>
+		<th>Ticket (Building)</th>
 		<th>Title</th>
 		<th>Cycle time</th>
 	</tr>
 
-	{% for card in cards %}
+	{% for card in wip_cards %}
 	<tr class="{{ loop.cycle('odd', 'even') }}">
 		<td>
             <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
@@ -36,6 +36,35 @@
 
 	</tr>
 	{% endfor %}
+</table>
+
+
+<!-- BACKLOG -->
+<table>
+    <tr>
+        <th>Ticket (Planning)</th>
+        <th>Title</th>
+        <th>Cycle time</th>
+    </tr>
+
+    {% for card in backlog_cards %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td>
+            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
+            <a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
+            </a>
+        </td>
+
+        <td>
+            {{ card.title }} <a href="{{ url_for('card', key=card.key) }}">&raquo;</a>
+        </td>
+
+        <td>
+            {{ card.current_cycle_time() }}
+        </td>
+
+    </tr>
+    {% endfor %}
 </table>
 </div>
 

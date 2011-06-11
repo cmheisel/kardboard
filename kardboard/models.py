@@ -131,10 +131,46 @@ class Kard(app.db.Document):
                 the reference date
         """
         if not date:
-            return klass.objects.filter(done_date=None)
+            return klass.objects.filter(done_date=None,
+                start_date__exists=True)
 
-        query_a = Q(done_date=None) & Q(backlog_date__lte=date)
-        query_b = Q(done_date__gt=date) & Q(backlog_date__lte=date)
+        query_a = Q(done_date=None) & Q(start_date__lte=date)
+        query_b = Q(done_date__gt=date) & Q(start_date__lte=date)
+
+        results_a = list(klass.objects.filter(query_a))
+        results_b = list(klass.objects.filter(query_b))
+
+        all_ids = [c.id for c in results_a]
+        all_ids = set(all_ids)
+        all_ids.update([c.id for c in results_b])
+        qs = klass.objects.filter(id__in=all_ids)
+        return qs
+
+    @classmethod
+    def backlogged(klass, date=None):
+        """
+        Backlogged is a semi-tricky calculation.
+        If the date is today, it's easy, it's any
+        ticket that doesn't have a done_date or a
+        start_date.
+        If the date is earlier, then it's:
+            a.) Any ticket without a done_date
+                whose backlog_date is lte
+                than the reference date and who's
+                start_date is lte the reference date
+            -AND-
+            b.) Any ticket with a done_date
+                greater than the reference date
+                and a backlog_date earlier than
+                the reference date
+        """
+        if not date:
+            return klass.objects.filter(start_date=None)
+
+        query_a = Q(done_date=None) & Q(start_date=None) & \
+            Q(backlog_date__lte=date)
+        query_b = Q(done_date__gt=date) & Q(start_date__gt=date) & \
+            Q(backlog_date__lte=date)
 
         results_a = list(klass.objects.filter(query_a))
         results_b = list(klass.objects.filter(query_b))
@@ -174,3 +210,16 @@ class Kard(app.db.Document):
         if not today:
             today = datetime.datetime.now()
         return business_days_between(self.start_date, today)
+
+    def __unicode__(self):
+        backlog, start, done = self.backlog_date, self.start_date, \
+            self.done_date
+
+        if backlog:
+            backlog = backlog.strftime("%m/%d/%Y")
+        if start:
+            start = start.strftime("%m/%d/%Y")
+        if done:
+            done = done.strftime("%m/%d/%Y")
+
+        return u"%s -- %s | %s | %s" % (self.key, backlog, start, done)
