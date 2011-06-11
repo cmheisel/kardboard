@@ -5,3 +5,4 @@ var
 sample.cfg
 cards.csv
 .noseids
+.DS_Store
