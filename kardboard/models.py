@@ -87,6 +87,7 @@ class Kard(app.db.Document):
     _cycle_time = app.db.IntField(db_field="cycle_time")
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
+    state = app.db.StringField(required=True, default="Unknown")
 
     meta = {
         'queryset_class': KardQuerySet,

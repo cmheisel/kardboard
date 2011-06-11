@@ -10,3 +10,9 @@ CARD_CATEGORIES = [
     "Feature",
     "Improvement",
 ]
+
+STATES = [
+    'Todo',
+    'Doing',
+    'Done',
+]

@@ -126,6 +126,10 @@ def _init_card_form(*args, **kwargs):
     choices = app.config.get('CARD_CATEGORIES')
     if choices:
         f.category.choices = _make_choice_field_ready(choices)
+
+    states = app.config.get('STATES')
+    if states:
+        f.state.choices = _make_choice_field_ready(states)
     return f
 
 

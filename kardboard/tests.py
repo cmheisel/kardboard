@@ -524,6 +524,7 @@ class CardFormTest(FormTests):
             'title': u'You gotta lock that down',
             'backlog_date': u"06/11/2011",
             'category': u'Bug',
+            'state': u'Doing',
         }
         self.post_data = MultiDict(self.required_data)
 
@@ -564,6 +565,7 @@ class CardCRUDTests(KardboardTestCase):
             'title': u'You gotta lock that down',
             'backlog_date': u"06/11/1911",
             'category': u'Bug',
+            'state': u'Todo',
         }
 
         self.jirapatch = patch('kardboard.tickethelpers.JIRAHelper',

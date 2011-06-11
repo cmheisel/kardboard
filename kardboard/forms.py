@@ -32,11 +32,21 @@ CATEGORY_CHOICES = (
     ('Improvement', 'Improvement'),
 )
 
+STATE_CHOICES = (
+    ('Todo', 'Todo'),
+    ('Doing', 'Doing'),
+    ('Done', 'Done'),
+)
+
 
 class CardForm(Form):
     key = TextField(u'JIRA Key',
         validators=[validators.required()])
     title = TextField(u'Card title',
+        validators=[validators.required()])
+    category = SelectField(u'Category', choices=CATEGORY_CHOICES,
+        validators=[validators.required()])
+    state = SelectField(u'State', choices=STATE_CHOICES,
         validators=[validators.required()])
     backlog_date = DateField(u'Backlog date', display_format="%m/%d/%Y",
         validators=[validators.required()])
@@ -44,8 +54,7 @@ class CardForm(Form):
         validators=[validators.optional()])
     done_date = DateField(u'Done date', display_format="%m/%d/%Y",
         validators=[validators.optional()])
-    category = SelectField(u'Category', choices=CATEGORY_CHOICES,
-        validators=[validators.optional()])
+
 
 def get_card_form(new=False):
     if new:
