@@ -27,4 +27,7 @@ if os.getenv('KARDBOARD_SETTINGS', None):
 app.secret_key = app.config['SECRET_KEY']
 app.db = PortAwareMongoEngine(app)
 
+from kardboard.util import slugify
+app.jinja_env.filters['slugify'] = slugify
+
 import kardboard.views
