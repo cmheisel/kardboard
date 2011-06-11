@@ -672,6 +672,15 @@ class CardCRUDTests(KardboardTestCase):
         self.assertEqual(302, res.status_code)
 
 
+class ChartIndexTests(KardboardTestCase):
+    def _get_target_url(self):
+        return '/chart/'
+
+    def test_chart_index(self):
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+
+
 class ThroughputChartTests(KardboardTestCase):
     def _get_target_url(self, months=None):
         base_url = '/chart/throughput/'

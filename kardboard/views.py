@@ -221,6 +221,16 @@ def card_delete(key):
     return render_template('card-delete.html', **context)
 
 
+@app.route('/chart/')
+def chart_index():
+    context = {
+        'title': "Charts",
+        'updated_at': datetime.datetime.now(),
+        'version': __version__,
+    }
+    return render_template('charts.html', **context)
+
+
 @app.route('/chart/throughput/')
 @app.route('/chart/throughput/<int:months>/')
 def chart_throughput(months=6, start=None):
