@@ -523,6 +523,27 @@ class DoneReportTests(DashboardTestCase):
             self.assertIn(c.key, rv.data)
 
 
+class QuickJumpTests(DashboardTestCase):
+    def _get_target_url(self, key):
+        return '/quick/?key=%s' % (key, )
+
+    def test_quick_existing(self):
+        key = self.Kard.objects.first().key
+
+        res = self.app.get(self._get_target_url(key))
+        self.assertEqual(302, res.status_code)
+
+        expected = "/card/%s/edit/" % (key, )
+        self.assertIn(expected, res.headers['Location'])
+
+    def test_quick_add(self):
+        key = "CMSCMSCMS-127"
+        res = self.app.get(self._get_target_url(key))
+        self.assertEqual(302, res.status_code)
+        expected = "/card/add/?key=%s" % (key, )
+        self.assertIn(expected, res.headers['Location'])
+
+
 class FormTests(KardboardTestCase):
     pass
 
@@ -610,6 +631,14 @@ class CardCRUDTests(KardboardTestCase):
 
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
+
+    def test_add_card_with_qs_params(self):
+        key = "CMSCMS-127"
+        url = "%s?key=%s" % (self._get_target_url(), key)
+        res = self.app.get(url)
+        self.assertEqual(200, res.status_code)
+        self.assertIn('<form', res.data)
+        self.assertIn('value="%s"' % (key, ), res.data)
 
     def test_add_card_with_no_title(self):
         klass = self._get_target_class()

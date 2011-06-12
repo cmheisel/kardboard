@@ -178,7 +178,7 @@ def _init_card_form(*args, **kwargs):
 
 @app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
-    f = _init_new_card_form(request.form)
+    f = _init_new_card_form(request.values)
 
     if request.method == "POST":
         if app.config.get('JIRA_WSDL'):
@@ -266,6 +266,26 @@ def card_delete(key):
         'version': __version__,
     }
     return render_template('card-delete.html', **context)
+
+
+@app.route('/quick/', methods=["GET"])
+def quick():
+    key = request.args.get('key', None)
+    if not key:
+        url = url_for('dashboard')
+        return redirect(url)
+
+    try:
+        card = Kard.objects.get(key=key)
+    except Kard.DoesNotExist:
+        card = None
+
+    if card:
+        url = url_for('card_edit', key=key)
+    else:
+        url = url_for('card_add', key=key)
+
+    return redirect(url)
 
 
 @app.route('/chart/')

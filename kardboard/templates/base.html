@@ -12,6 +12,13 @@
 <h1>{% block title %}{{ title }}{% endblock %}</h1>
   <p class="nav"><a href="/">Overview</a> / <a href="/state/">By state</a> / <a href="/done/">Completed cards</a> / <a href="/card/add/">Add a card</a> / <a href="/chart/">Charts</a></p>
 
+  <p class="nav">
+  <form action="/quick/" method="GET">
+  <input type="text" name="key" />
+  <input type="submit" value="Go" name="go" />
+  </form>
+  </p>
+
   {% block content %}{% endblock content %}
 
   <p class="updated">Updated at {{ updated_at }}
