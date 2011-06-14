@@ -99,7 +99,7 @@ class Kard(app.db.Document):
         'backlog_date',
         'start_date',
         'done_date',
-        'cateogry',
+        'category',
         'state',
     )
 
