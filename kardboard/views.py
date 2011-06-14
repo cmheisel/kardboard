@@ -280,8 +280,14 @@ def quick():
     except Kard.DoesNotExist:
         card = None
 
+    if not card:
+        try:
+            card = Kard.objects.get(key=key.upper())
+        except Kard.DoesNotExist:
+            pass
+
     if card:
-        url = url_for('card_edit', key=key)
+        url = url_for('card_edit', key=card.key)
     else:
         url = url_for('card_add', key=key)
 

@@ -536,6 +536,16 @@ class QuickJumpTests(DashboardTestCase):
         expected = "/card/%s/edit/" % (key, )
         self.assertIn(expected, res.headers['Location'])
 
+    def test_quick_case_insenitive(self):
+        key = self.Kard.objects.first().key
+        lower_key = key.lower()
+
+        res = self.app.get(self._get_target_url(lower_key))
+        self.assertEqual(302, res.status_code)
+
+        expected = "/card/%s/edit/" % (key.upper(), )
+        self.assertIn(expected, res.headers['Location'])
+
     def test_quick_add(self):
         key = "CMSCMSCMS-127"
         res = self.app.get(self._get_target_url(key))
