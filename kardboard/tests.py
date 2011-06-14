@@ -727,6 +727,25 @@ class CardCRUDTests(KardboardTestCase):
         self.assertEqual(302, res.status_code)
 
 
+class ExportTests(KardboardTestCase):
+    def _get_target_url(self):
+        return '/card/export/'
+
+    def setUp(self):
+        super(ExportTests, self).setUp()
+        for i in xrange(0, 10):
+            c = self.make_card()
+            c.save()
+
+    def test_csv(self):
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+        self.assertIn("text/plain", res.headers['Content-Type'])
+
+        Kard = self._get_card_class()
+        for k in Kard.objects.all():
+            self.assertIn(k.key, res.data)
+
 class ChartIndexTests(KardboardTestCase):
     def _get_target_url(self):
         return '/chart/'

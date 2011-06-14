@@ -1,3 +1,5 @@
+import csv
+import cStringIO
 import datetime
 
 from flask import (
@@ -292,6 +294,34 @@ def quick():
         url = url_for('card_add', key=key)
 
     return redirect(url)
+
+
+@app.route('/card/export/')
+def card_export():
+    output = cStringIO.StringIO()
+    export = csv.DictWriter(output, Kard.EXPORT_FIELDNAMES)
+    header_row = [(v, v) for v in Kard.EXPORT_FIELDNAMES]
+    export.writerow(dict(header_row))
+    for c in Kard.objects.all():
+        row = {}
+        card = c.to_mongo()
+        for name in Kard.EXPORT_FIELDNAMES:
+            try:
+                value = card[name]
+                if hasattr(value, 'second'):
+                    value = value.strftime("%m/%d/%Y")
+                if hasattr(value, 'strip'):
+                    value = value.strip()
+                row[name] = value
+            except KeyError:
+                row[name] = ''
+        export.writerow(row)
+
+    response = make_response(output.getvalue())
+    content_type = response.headers['Content-Type']
+    response.headers['Content-Type'] = \
+        content_type.replace('text/html', 'text/plain')
+    return response
 
 
 @app.route('/chart/')

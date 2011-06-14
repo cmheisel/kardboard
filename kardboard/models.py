@@ -93,6 +93,16 @@ class Kard(app.db.Document):
         'queryset_class': KardQuerySet,
     }
 
+    EXPORT_FIELDNAMES = (
+        'key',
+        'title',
+        'backlog_date',
+        'start_date',
+        'done_date',
+        'cateogry',
+        'state',
+    )
+
     def _convert_dates_to_datetimes(self, date):
         if not date:
             return None
