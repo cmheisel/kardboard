@@ -107,8 +107,8 @@ def state(state_slug=None):
             state_data['backlog_cards'].count() > 0:
             states_data.append(state_data)
 
-    title = "All states"
-    if state:
+    title = "Cards in progress"
+    if target_state:
         title = "Cards in %s" % (state, )
 
     context = {
