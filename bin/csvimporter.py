@@ -14,7 +14,36 @@ def parse_date(date_string):
         return None
 
 
-def main(csv_filename):
+def parse_kardboard_output(csv_filename):
+    reader = csv.DictReader(open(csv_filename))
+    for row in reader:
+
+        try:
+            k = Kard.objects.get(key=row['key'])
+        except Kard.DoesNotExist:
+            k = Kard()
+
+        try:
+            k.category = row['category']
+            k.backlog_date = parse_date(row['backlog_date'])
+            k.start_date = parse_date(row['start_date'])
+            k.done_date = parse_date(row['done_date'])
+            k.key = row['key']
+            k.title = row['title']
+            k.state = row['state']
+            if k.state == "Unknown":
+                k.state = "Done"
+            k.save()
+        except Exception, e:
+            print "Error reported!"
+            print row
+            print str(e)
+            print "============="
+            print
+            print
+
+
+def parse_google_output(csv_filename):
     reader = csv.DictReader(open(csv_filename))
     for row in reader:
 
@@ -40,7 +69,6 @@ def main(csv_filename):
             print
             print
 
-
 if __name__ == "__main__":
     import sys
-    main(sys.argv[1])
+    parse_kardboard_output(sys.argv[1])
