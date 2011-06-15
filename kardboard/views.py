@@ -54,8 +54,7 @@ def dashboard(year=None, month=None, day=None):
         {'Done this month':
             Kard.objects.done_in_month(
                 year=date.year, month=date.month).count()},
-        {'Work in progress': len(wip_cards)},
-        {'Plannng': backlog_cards.count()}
+        {'On the board': len(wip_cards) + backlog_cards.count()},
     ]
 
     title = "Dashboard"
