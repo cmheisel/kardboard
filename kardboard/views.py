@@ -16,7 +16,7 @@ from dateutil.relativedelta import relativedelta
 from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
-from kardboard.util import month_range, slugify
+from kardboard.util import month_range, slugify, make_end_date
 from kardboard.charts import ThroughputChart
 from kardboard import tickethelpers
 
@@ -39,6 +39,8 @@ def dashboard(year=None, month=None, day=None):
     if day:
         date = date.replace(day=day)
         scope = 'day'
+
+    date = make_end_date(date=date)
 
     wip_cards = list(Kard.in_progress(date))
     wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time(date))
@@ -101,10 +103,13 @@ def state(state_slug=None):
     states_data = []
     for state in target_states:
         state_data = {}
-        state_data['wip_cards'] = Kard.in_progress().filter(state=state)
+        wip_cards = Kard.in_progress().filter(state=state)
+        wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time())
+        wip_cards.reverse()
+        state_data['wip_cards'] = wip_cards
         state_data['backlog_cards'] = Kard.backlogged().filter(state=state)
         state_data['title'] = state
-        if state_data['wip_cards'].count() > 0 or \
+        if len(state_data['wip_cards']) > 0 or \
             state_data['backlog_cards'].count() > 0:
             states_data.append(state_data)
 

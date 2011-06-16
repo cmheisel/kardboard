@@ -170,7 +170,7 @@ class Kard(app.db.Document):
                 than the reference date and who's
                 start_date is lte the reference date
             -AND-
-            b.) Any ticket with a done_date
+            b.) Any ticket with a start_date
                 greater than the reference date
                 and a backlog_date earlier than
                 the reference date
@@ -178,9 +178,9 @@ class Kard(app.db.Document):
         if not date:
             return klass.objects.filter(start_date=None)
 
-        query_a = Q(done_date=None) & Q(start_date=None) & \
+        query_a = Q(start_date=None) & \
             Q(backlog_date__lte=date)
-        query_b = Q(done_date__gt=date) & Q(start_date__gt=date) & \
+        query_b = Q(start_date__gt=date) & \
             Q(backlog_date__lte=date)
 
         results_a = list(klass.objects.filter(query_a))

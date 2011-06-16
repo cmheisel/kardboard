@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- Reference date: {{ date }} -->
+
 {% for m in metrics %}
 <div class="metric">
   {% for name, value in m.items() %}

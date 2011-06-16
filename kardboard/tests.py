@@ -341,10 +341,12 @@ class DashboardTestCase(KardboardTestCase):
 
         self.board = self.make_board()
         self.board1 = self.make_board()
+        self.backlogged_date = datetime.datetime(
+            year=self.year, month=self.month, day=12)
 
         for i in xrange(0, 5):
             #board will have 5 cards in elabo, started, and done
-            k = self.make_card()  # elabo
+            k = self.make_card(backlog_date=self.backlogged_date)  # elabo
             k.save()
             self.board.cards.append(k)
 
@@ -365,7 +367,7 @@ class DashboardTestCase(KardboardTestCase):
 
         for i in xrange(0, 3):
             #board will have 3 cards in elabo, started, and done
-            k = self.make_card()  # backlogged
+            k = self.make_card(backlog_date=self.backlogged_date)  # backlogged
             k.save()
             self.board1.cards.append(k)
 
@@ -405,9 +407,10 @@ class HomepageTests(DashboardTestCase):
     def test_wip(self):
         rv = self.app.get(self._get_target_url())
         self.assertEqual(200, rv.status_code)
+        date = datetime.datetime(self.year, self.month, self.day)
 
-        expected_cards = self.Kard.objects.all()
-        expected_cards = [c for c in expected_cards if c.done_date == None]
+        expected_cards = list(self.Kard.backlogged(date)) + \
+            list(self.Kard.in_progress(date))
 
         for c in expected_cards:
             self.assertIn(c.key, rv.data)
