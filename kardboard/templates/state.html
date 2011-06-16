@@ -10,7 +10,7 @@
 {% endif %}
 
 <table>
-    <caption>Building</caption>
+    <caption>Building / {{ data['wip_cards']|length }}</caption>
 	<tr>
 		<th>Ticket</th>
 		<th>Title</th>
@@ -41,7 +41,7 @@
 
 <!-- BACKLOG -->
 <table>
-    <caption>Planning</caption>
+    <caption>Planning / {{ data['backlog_cards']|length }}</caption>
     <tr>
         <th>Ticket</th>
         <th>Title</th>
