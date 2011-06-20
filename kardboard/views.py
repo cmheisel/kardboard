@@ -19,7 +19,11 @@ from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import month_range, slugify, make_end_date, month_ranges
-from kardboard.charts import ThroughputChart, MovingCycleTimeChart, CumulativeFlowChart
+from kardboard.charts import (
+    ThroughputChart,
+    MovingCycleTimeChart,
+    CumulativeFlowChart
+)
 from kardboard import tickethelpers
 
 

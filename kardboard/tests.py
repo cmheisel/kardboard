@@ -25,6 +25,7 @@ class KardboardTestCase(unittest2.TestCase):
 
         self._flush_db()
 
+        self.config = kardboard.app.config
         self.app = kardboard.app.test_client()
 
         self.used_keys = []
@@ -198,6 +199,17 @@ class KardTests(KardboardTestCase):
         k = self._make_one()
         k.save()
         self.assert_(k.id)
+
+    def test_state_if_done(self):
+        states = self.config.get('STATES')
+        k = self._make_one()
+        k.done_date = None
+        k.state = states[-2]
+        k.save()
+
+        k.done_date = datetime.datetime.now()
+        k.save()
+        self.assertEqual(states[-1], k.state)
 
     def test_done_cycle_time(self):
         self.assertEquals(25, self.done_card.cycle_time)
