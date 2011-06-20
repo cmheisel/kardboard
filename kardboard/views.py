@@ -55,7 +55,7 @@ def dashboard(year=None, month=None, day=None):
             year=date.year, month=date.month, day=date.day).count()},
         {'Done this month':
             Kard.objects.done_in_month(
-                year=date.year, month=date.month).count()},
+                year=date.year, month=date.month, day=date.day).count()},
         {'On the board': len(wip_cards) + backlog_cards.count()},
     ]
 

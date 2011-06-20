@@ -34,7 +34,7 @@ class KardQuerySet(QuerySet):
         date = munge_date(year, month, day)
         start_date, end_date = week_range(date)
 
-        results = self.done().filter(done_date__lte=end_date,
+        results = self.done().filter(done_date__lte=date,
             done_date__gte=start_date)
         return results
 
@@ -73,12 +73,12 @@ class KardQuerySet(QuerySet):
     def done(self):
         return self.filter(done_date__exists=True)
 
-    def done_in_month(self, year=None, month=None):
-        date = munge_date(year=year, month=month)
+    def done_in_month(self, year=None, month=None, day=None):
+        date = munge_date(year=year, month=month, day=day)
 
-        start_date, end_date = month_range(date)
+        start_date, faux_end_date = month_range(date)
 
-        results = self.done().filter(done_date__lte=end_date,
+        results = self.done().filter(done_date__lte=date,
             done_date__gte=start_date)
         return results
 
