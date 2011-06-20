@@ -418,12 +418,14 @@ def chart_cycle(months=6, start=None):
 
     return render_template('chart-cycle.html', **context)
 
+
 @app.route('/robots.txt')
 def robots():
     response = make_response(render_template('robots.txt'))
     content_type = response.headers['Content-type']
     content_type.replace('text/html', 'text/plain')
     return response
+
 
 @app.route('/chart/flow/')
 @app.route('/chart/flow/<int:months>/')
@@ -433,7 +435,8 @@ def chart_flow(months=3, end=None):
 
     start_day = months_ranges[0][0]
 
-    FlowRecord = namedtuple('FlowRecord', 'date backlog in_progress done backlog_cum in_progress_cum')
+    FlowRecord = namedtuple('FlowRecord',
+        'date backlog in_progress done backlog_cum in_progress_cum')
     day_context = start_day
     rows = []
     while day_context <= end:
@@ -458,4 +461,4 @@ def chart_flow(months=3, end=None):
         'version': __version__,
     }
 
-    return render_template('chart-cycle.html', **context)
+    return render_template('chart-flow.html', **context)

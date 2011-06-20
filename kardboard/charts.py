@@ -58,7 +58,8 @@ class MovingCycleTimeChart(SimpleLineChart, KardboardChartMixer):
 class CumulativeFlowChart(MovingCycleTimeChart):
     def __init__(self, *args, **kwargs):
         super(MovingCycleTimeChart, self).__init__(*args, **kwargs)
-        self.set_colours(['DC3912', 'FF9900', '109618'])
+        self.colours = ['DC3912', 'FF9900', '109618']
+        self.set_colours(self.colours)
 
     def setup_grid(self, dataset):
         max_y = max(dataset, key=lambda x: x.backlog_cum).backlog_cum
@@ -76,3 +77,10 @@ class CumulativeFlowChart(MovingCycleTimeChart):
                 x_labels.append('')
             counter = counter + 1
         self.set_axis_labels(Axis.BOTTOM, x_labels)
+
+        self.add_data([0] * 2)
+
+        #self.add_fill_range('000000', 0, 1)
+        self.add_fill_range("F4C3B7", 0, 1)
+        self.add_fill_range("FFE0B2", 1, 2)
+        self.add_fill_range("B7DFB9", 2, 3)

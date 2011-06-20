@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<img src="{{ chart.get_url() }}" />
+
+<div id="wip_data">
+<table>
+    <tr>
+        <th>Day</th>
+        <th>Planning</th>
+        <th>Doing</th>
+        <th>Done</th>
+    </tr>
+
+    {% for row in flowdata %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td>{{ row.date.strftime("%m/%d/%Y") }}</td>
+        <td>{{ row.backlog }}</td>
+        <td>{{ row.in_progress }}</td>
+        <td>{{ row.done }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}
