@@ -810,5 +810,16 @@ class CumulativeFlowTests(KardboardTestCase):
         res = self.app.get(target_url)
         self.assertEqual(200, res.status_code)
 
+
+class RobotsTests(KardboardTestCase):
+    def _get_target_url(self):
+        return '/robots.txt'
+
+    def test_robots(self):
+        target_url = self._get_target_url()
+        res = self.app.get(target_url)
+        self.assertEqual(200, res.status_code)
+
+
 if __name__ == "__main__":
     unittest2.main()

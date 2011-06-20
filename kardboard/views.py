@@ -418,6 +418,12 @@ def chart_cycle(months=6, start=None):
 
     return render_template('chart-cycle.html', **context)
 
+@app.route('/robots.txt')
+def robots():
+    response = make_response(render_template('robots.txt'))
+    content_type = response.headers['Content-type']
+    content_type.replace('text/html', 'text/plain')
+    return response
 
 @app.route('/chart/flow/')
 @app.route('/chart/flow/<int:months>/')
