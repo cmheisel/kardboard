@@ -2,6 +2,8 @@ import csv
 import cStringIO
 import datetime
 
+from collections import namedtuple
+
 from dateutil import relativedelta
 from flask import (
     render_template,
@@ -17,7 +19,7 @@ from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import month_range, slugify, make_end_date, month_ranges
-from kardboard.charts import ThroughputChart, MovingCycleTimeChart
+from kardboard.charts import ThroughputChart, MovingCycleTimeChart, CumulativeFlowChart
 from kardboard import tickethelpers
 
 
@@ -407,6 +409,42 @@ def chart_cycle(months=6, start=None):
         'updated_at': datetime.datetime.now(),
         'chart': chart,
         'daily_averages': daily_moving_averages,
+        'version': __version__,
+    }
+
+    return render_template('chart-cycle.html', **context)
+
+
+@app.route('/chart/flow/')
+@app.route('/chart/flow/<int:months>/')
+def chart_flow(months=3, end=None):
+    end = end or datetime.datetime.now()
+    months_ranges = month_ranges(end, months)
+
+    start_day = months_ranges[0][0]
+
+    FlowRecord = namedtuple('FlowRecord', 'date backlog in_progress done backlog_cum in_progress_cum')
+    day_context = start_day
+    rows = []
+    while day_context <= end:
+        backlog = Kard.backlogged(day_context).count()
+        in_progress = Kard.in_progress(day_context).count()
+        done = Kard.objects.filter(done_date__lte=day_context).count()
+        f = FlowRecord(day_context, backlog, in_progress, done,
+            backlog + in_progress + done, in_progress + done)
+        rows.append(f)
+        day_context = day_context + relativedelta.relativedelta(days=1)
+
+    chart = CumulativeFlowChart(900, 300)
+    chart.add_data([f.backlog_cum for f in rows])
+    chart.add_data([f.in_progress_cum for f in rows])
+    chart.add_data([f.done for f in rows])
+    chart.setup_grid(rows)
+    context = {
+        'title': "Cumulative Flow",
+        'updated_at': datetime.datetime.now(),
+        'chart': chart,
+        'flowdata': rows,
         'version': __version__,
     }
 

@@ -53,3 +53,26 @@ class MovingCycleTimeChart(SimpleLineChart, KardboardChartMixer):
 
     def add_line(self, daily_average):
         self.add_data([m[1] for m in daily_average])
+
+
+class CumulativeFlowChart(MovingCycleTimeChart):
+    def __init__(self, *args, **kwargs):
+        super(MovingCycleTimeChart, self).__init__(*args, **kwargs)
+        self.set_colours(['DC3912', 'FF9900', '109618'])
+
+    def setup_grid(self, dataset):
+        max_y = max(dataset, key=lambda x: x.backlog_cum).backlog_cum
+        max_y = self.find_even_number(max_y + 10, 10)
+        self.y_range = (0, max_y)
+        left_axis = range(0, max_y + 1, 20)
+        self.set_axis_labels(Axis.LEFT, left_axis)
+
+        x_labels = []
+        counter = 1
+        for row in dataset:
+            if counter % 7 == 0 or counter == 1:
+                x_labels.append(row.date.strftime("%m/%d"))
+            else:
+                x_labels.append('')
+            counter = counter + 1
+        self.set_axis_labels(Axis.BOTTOM, x_labels)
