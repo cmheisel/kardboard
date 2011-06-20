@@ -26,6 +26,7 @@ from kardboard import tickethelpers
 @app.route('/<int:year>/<int:month>/<int:day>/')
 def dashboard(year=None, month=None, day=None):
     date = datetime.datetime.now()
+    now = datetime.datetime.now()
     scope = 'current'
 
     if year:
@@ -67,14 +68,22 @@ def dashboard(year=None, month=None, day=None):
     if scope == 'day' or scope == 'current':
         title += " for %s/%s/%s" % (date.month, date.day, date.year)
 
+    forward_date = date + relativedelta.relativedelta(days=1)
+    back_date = date - relativedelta.relativedelta(days=1)
+
+    if forward_date > now:
+        forward_date = None
+
     context = {
+        'forward_date': forward_date,
+        'back_date': back_date,
         'scope': scope,
         'date': date,
         'title': title,
         'metrics': metrics,
         'wip_cards': wip_cards,
         'backlog_cards': backlog_cards,
-        'updated_at': datetime.datetime.now(),
+        'updated_at': now,
         'version': __version__,
     }
 
