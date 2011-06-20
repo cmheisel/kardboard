@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<img src="{{ chart.get_url() }}" />
+
+<div id="wip_data">
+<table>
+    <tr>
+    	<th>Day</th>
+    	<th>Moving Average</th>
+    </tr>
+
+    {% for row in daily_averages %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+    	<td>{{ row[0].strftime("%m/%d/%Y") }}</td>
+    	<td>{{ row[1] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}

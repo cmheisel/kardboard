@@ -22,6 +22,23 @@ def business_days_between(date1, date2):
     return business_days
 
 
+def month_ranges(date, num_months):
+    end_start, end_end = month_range(date)
+    months_ago = end_start - relativedelta(months=num_months - 1)
+
+    start_start, start_end = month_range(months_ago)
+
+    month_ranges = [(start_start, start_end), ]
+
+    for i in xrange(0, num_months - 2):
+        next_month = month_ranges[-1][0] + relativedelta(months=1)
+        start, end = month_range(date=next_month)
+        month_ranges.append((start, end))
+    month_ranges.append((end_start, end_end))
+
+    return month_ranges
+
+
 def month_range(date):
     start = date.replace(day=1)
     end = start + relativedelta(months=+1) + relativedelta(days=-1)

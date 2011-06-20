@@ -749,6 +749,7 @@ class ExportTests(KardboardTestCase):
         for k in Kard.objects.all():
             self.assertIn(k.key, res.data)
 
+
 class ChartIndexTests(KardboardTestCase):
     def _get_target_url(self):
         return '/chart/'
@@ -766,6 +767,20 @@ class ThroughputChartTests(KardboardTestCase):
         return base_url
 
     def test_throughput(self):
+        target_url = self._get_target_url()
+        res = self.app.get(target_url)
+        self.assertEqual(200, res.status_code)
+
+
+class CycleTimeHistoryTests(KardboardTestCase):
+
+    def _get_target_url(self, months=None):
+        base_url = '/chart/cycle/'
+        if months:
+            base_url = base_url = "%s/" % months
+        return base_url
+
+    def test_cycle(self):
         target_url = self._get_target_url()
         res = self.app.get(target_url)
         self.assertEqual(200, res.status_code)

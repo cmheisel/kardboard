@@ -2,6 +2,7 @@ import csv
 import cStringIO
 import datetime
 
+from dateutil import relativedelta
 from flask import (
     render_template,
     make_response,
@@ -11,13 +12,12 @@ from flask import (
     flash,
     abort,
 )
-from dateutil.relativedelta import relativedelta
 
 from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
-from kardboard.util import month_range, slugify, make_end_date
-from kardboard.charts import ThroughputChart
+from kardboard.util import month_range, slugify, make_end_date, month_ranges
+from kardboard.charts import ThroughputChart, MovingCycleTimeChart
 from kardboard import tickethelpers
 
 
@@ -342,21 +342,11 @@ def chart_index():
 @app.route('/chart/throughput/<int:months>/')
 def chart_throughput(months=6, start=None):
     start = start or datetime.datetime.today()
-    end_start, end_end = month_range(start)
-    months_ago = end_start - relativedelta(months=months - 1)
 
-    start_start, start_end = month_range(months_ago)
-
-    month_ranges = [(start_start, start_end), ]
-
-    for i in xrange(0, months - 2):
-        next_month = month_ranges[-1][0] + relativedelta(months=1)
-        start, end = month_range(date=next_month)
-        month_ranges.append((start, end))
-    month_ranges.append((end_start, end_end))
+    months_ranges = month_ranges(start, months)
 
     month_counts = []
-    for arange in month_ranges:
+    for arange in months_ranges:
         start, end = arange
         num = Kard.objects.filter(done_date__gte=start,
             done_date__lte=end).count()
@@ -374,3 +364,41 @@ def chart_throughput(months=6, start=None):
     }
 
     return render_template('chart-throughput.html', **context)
+
+
+@app.route('/chart/cycle/')
+@app.route('/chart/cycle/<int:months>/')
+def chart_cycle(months=6, start=None):
+    start = start or datetime.datetime.today()
+    months_ranges = month_ranges(start, months)
+
+    start_day = months_ranges[0][0]
+    end_day = months_ranges[-1][1]
+
+    daily_moving_averages = []
+    daily_moving_lead = []
+    day_context = start_day
+    while day_context <= end_day:
+        mean = Kard.objects.moving_cycle_time(year=day_context.year,
+            month=day_context.month, day=day_context.day)
+        lead = Kard.objects.moving_lead_time(year=day_context.year,
+            month=day_context.month, day=day_context.day)
+        daily_moving_averages.append((day_context, mean))
+        daily_moving_lead.append((day_context, lead))
+        day_context = day_context + relativedelta.relativedelta(days=7)
+
+    chart = MovingCycleTimeChart(900, 300)
+    chart.add_first_line(daily_moving_lead)
+    chart.add_line(daily_moving_averages)
+    chart.set_legend(('Lead time', 'Cycle time'))
+
+    daily_moving_averages.reverse()  # reverse order for display
+    context = {
+        'title': "How quick can we do it?",
+        'updated_at': datetime.datetime.now(),
+        'chart': chart,
+        'daily_averages': daily_moving_averages,
+        'version': __version__,
+    }
+
+    return render_template('chart-cycle.html', **context)
