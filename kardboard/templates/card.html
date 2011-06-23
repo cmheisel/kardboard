@@ -14,14 +14,12 @@
 
 <div class="metric card_detail">
       <h2 style="font-weight: bold;">
-        {{ card.key }}
-        {% if card.done_date %}
-            Done
-        {% elif card.start_date %}
-            Building
-        {% elif card.backlog_date %}
-            Planning
-        {% endif %}
+        {{ card.key }} /
+            {% if card.done_date %}
+                {{ card.cycle_time }}
+            {% else %}
+                {{ card.current_cycle_time() }}
+            {% endif %} days
       </h2>
       <div class="content">
       <h3>{{ card.title }}</h2>
@@ -34,6 +32,8 @@
                 {{ card.current_cycle_time() }}
             {% endif %}
         </li>
+        <li><strong>State:</strong> {{ card.state }}</li>
+        <li><strong>Category:</strong> {{ card.category }}</li>
         <li><strong>Backlog date:</strong> {{ none_or_date(card.backlog_date) }}</li>
         <li><strong>Start date:</strong> {{ none_or_date(card.start_date) }}</li>
         <li><strong>Done date:</strong> {{ none_or_date(card.done_date) }}</li>
