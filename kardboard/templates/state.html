@@ -25,9 +25,9 @@
 			</a>
 		</td>
 
-		<td>
-			{{ card.title }} <a href="{{ url_for('card', key=card.key) }}">&raquo;</a>
-		</td>
+        <td>
+            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
+        </td>
 
 		<td>
 			{{ card.current_cycle_time() }}
@@ -57,7 +57,7 @@
         </td>
 
         <td>
-            {{ card.title }} <a href="{{ url_for('card', key=card.key) }}">&raquo;</a>
+            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
         </td>
 
         <td>
