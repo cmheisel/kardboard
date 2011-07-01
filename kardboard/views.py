@@ -383,12 +383,17 @@ def chart_throughput(months=6, start=None):
 
 @app.route('/chart/cycle/')
 @app.route('/chart/cycle/<int:months>/')
-def chart_cycle(months=6, start=None):
-    start = start or datetime.datetime.today()
-    months_ranges = month_ranges(start, months)
+@app.route('/chart/cycle/from/<int:year>/<int:month>/<int:day>/')
+def chart_cycle(months=6, year=None, month=None, day=None):
+    today = datetime.datetime.today()
+    if day:
+        end_day = datetime.datetime(year=year, month=month, day=day)
+        if end_day > today:
+            end_day = today
+    else:
+        end_day = today
 
-    start_day = months_ranges[0][0]
-    end_day = months_ranges[-1][1]
+    start_day = end_day - relativedelta.relativedelta(months=months)
 
     daily_moving_averages = []
     daily_moving_lead = []

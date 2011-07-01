@@ -5,6 +5,7 @@ import copy
 
 import unittest2
 from mock import patch
+from dateutil.relativedelta import relativedelta
 
 from kardboard.mocks import MockJIRAHelper
 from kardboard.util import slugify
@@ -786,16 +787,24 @@ class ThroughputChartTests(KardboardTestCase):
 
 class CycleTimeHistoryTests(KardboardTestCase):
 
-    def _get_target_url(self, months=None):
+    def _get_target_url(self, months=None, date=None):
         base_url = '/chart/cycle/'
         if months:
-            base_url = base_url = "%s/" % months
+            base_url = base_url + "%s/" % months
+        if date:
+            base_url = base_url + "from/%s/%s/%s/" % \
+                (date.year, date.month, date.day)
         return base_url
 
     def test_cycle(self):
-        target_url = self._get_target_url()
+        date = datetime.datetime(year=2011, month=7, day=1)
+        end_date = date - relativedelta(months=6)
+        target_url = self._get_target_url(date=date)
         res = self.app.get(target_url)
         self.assertEqual(200, res.status_code)
+
+        expected = end_date.strftime("%m/%d/%Y")
+        self.assertIn(expected, res.data)
 
 
 class CumulativeFlowTests(KardboardTestCase):
