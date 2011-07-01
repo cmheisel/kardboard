@@ -260,7 +260,7 @@ class KardTests(KardboardTestCase):
     def test_completed_in_month(self):
         klass = self._get_target_class()
         self.assertEqual(1,
-            klass.objects.done_in_month(year=2011, month=6).count())
+            klass.objects.done_in_month(year=2011, month=6, day=30).count())
 
     def test_moving_cycle_time(self):
         klass = self._get_target_class()
