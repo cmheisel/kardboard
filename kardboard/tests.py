@@ -4,6 +4,7 @@ import os
 import copy
 
 import unittest2
+from mock import patch
 from dateutil.relativedelta import relativedelta
 
 from kardboard.util import slugify
@@ -26,6 +27,7 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.config = kardboard.app.config
         self.app = kardboard.app.test_client()
+        self.flask_app = kardboard.app
 
         self.used_keys = []
         super(KardboardTestCase, self).setUp()
@@ -291,6 +293,45 @@ class KardTests(KardboardTestCase):
         h = k.ticket_system
 
         self.assertEqual(True, isinstance(h, TicketHelper))
+        self.assert_(k.key in h.get_ticket_url())
+
+
+class JIRAHelperTests(KardboardTestCase):
+    def setUp(self):
+        super(JIRAHelperTests, self).setUp()
+        from kardboard.mocks import MockJIRAClient, MockJIRAIssue
+        self.card = self.make_card()
+        self.config['JIRA_WSDL'] = 'http://jira.example.com'
+        self.config['JIRA_CREDENTIALS'] = ('foo', 'bar')
+        self.ticket = MockJIRAIssue()
+        self.sudspatch = patch('suds.client.Client', MockJIRAClient)
+        self.sudspatch.start()
+
+    def tearDown(self):
+        super(JIRAHelperTests, self).tearDown()
+        self.sudspatch.stop()
+        del self.config['JIRA_WSDL']
+
+    def _get_target_class(self):
+        from kardboard.tickethelpers import JIRAHelper
+        return JIRAHelper
+
+    def _make_one(self):
+        klass = self._get_target_class()
+        return klass(self.config, self.card)
+
+    def test_get_title(self):
+        h = self._make_one()
+        expected = self.ticket.summary
+        actual = h.get_title()
+        self.assertEqual(expected, actual)
+
+    def test_get_ticket_url(self):
+        h = self._make_one()
+        expected = "%s/browse/%s" % (self.config['JIRA_WSDL'],
+            self.card.key)
+        actual = h.get_ticket_url()
+        self.assertEqual(actual, expected)
 
 
 class KardTimeMachineTests(KardboardTestCase):

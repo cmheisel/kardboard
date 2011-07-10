@@ -1,11 +1,12 @@
-import logging
+import urlparse
+
 from kardboard.util import ImproperlyConfigured
 
 
 class TicketHelper(object):
-    def __init__(self, app, kard):
-        self.app = app
-        self.kard = kard
+    def __init__(self, config, kard):
+        self.app_config = config
+        self.card = kard
 
     def get_title(self, key=None):
         raise NotImplemented
@@ -19,20 +20,21 @@ class TestTicketHelper(TicketHelper):
         return u"""Dummy Title from Dummy Ticket System"""
 
     def get_ticket_url(self):
-        return u"""http://example.com/ticket/%s""" % self.kard.key
+        return u"""http://example.com/ticket/%s""" % self.card.key
 
 
 class JIRAHelper(TicketHelper):
-    def __init__(self, app, kard):
-        super(JIRAHelper, self).__init__(app, kard)
+    def __init__(self, config, kard):
+        super(JIRAHelper, self).__init__(config, kard)
+        self.issues = {}
 
         try:
-            self.wsdl_url = app.config['JIRA_WSDL']
+            self.wsdl_url = self.app_config['JIRA_WSDL']
         except KeyError:
             raise ImproperlyConfigured("You must provide a JIRA_WSDL setting")
 
         try:
-            self.username, self.password = app.config['JIRA_CREDENTIALS']
+            self.username, self.password = self.app_config['JIRA_CREDENTIALS']
         except KeyError:
             raise ImproperlyConfigured(
                 "You must provide a JIRA_CREDENTIALS setting")
@@ -50,11 +52,26 @@ class JIRAHelper(TicketHelper):
         self.auth = auth
         self.service = client.service
 
-    def get_title(self, key=None):
-        if not key:
-            key = self.kard.key
+    def get_issue(self, key=None):
+        key = key or self.card.key
+        if self.issues.get(key, None):
+            return self.issues.get(key)
         issue = self.service.getIssue(self.auth, key)
+        self.issues[key] = issue
+        return issue
+
+    def get_title(self, key=None):
+        issue = self.get_issue(key)
         return issue.summary
 
     def get_ticket_url(self, key=None):
-        raise NotImplemented
+        key = key or self.card.key
+        parsed_url = urlparse.urlparse(self.wsdl_url)
+        browse_url_parts = [
+            parsed_url.scheme,
+            '://',
+            parsed_url.netloc,
+            '/browse/',
+            key,
+        ]
+        return ''.join(browse_url_parts)
