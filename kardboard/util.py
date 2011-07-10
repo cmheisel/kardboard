@@ -1,10 +1,21 @@
 import datetime
 import re
+import traceback
 
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
 from kardboard import app
+
+class ImproperlyConfigured(Exception):
+    pass
+
+
+def log_exception(exc, msg=""):
+    tb = traceback.format_exc()
+    log_msg = [msg, str(exc), tb]
+    log_msg = '\n'.join(log_msg)
+    app.logger.critical(log_msg)
 
 
 def business_days_between(date1, date2):

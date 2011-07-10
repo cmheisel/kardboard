@@ -4,10 +4,8 @@ import os
 import copy
 
 import unittest2
-from mock import patch
 from dateutil.relativedelta import relativedelta
 
-from kardboard.mocks import MockJIRAHelper
 from kardboard.util import slugify
 
 
@@ -31,6 +29,10 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.used_keys = []
         super(KardboardTestCase, self).setUp()
+
+    def tearDown(self):
+        if hasattr(self.config, 'TICKET_HELPER'):
+            del self.config['TICKET_HELPER']
 
     def _flush_db(self):
         from mongoengine.connection import _get_db
@@ -279,6 +281,16 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=15)
 
         self.assertEqual(expected, actual.count())
+
+    def test_ticket_system(self):
+        from kardboard.tickethelpers import TicketHelper
+        self.config['TICKET_HELPER'] = \
+            'kardboard.tickethelpers.TestTicketHelper'
+
+        k = self._make_one()
+        h = k.ticket_system
+
+        self.assertEqual(True, isinstance(h, TicketHelper))
 
 
 class KardTimeMachineTests(KardboardTestCase):
@@ -628,13 +640,11 @@ class CardCRUDTests(KardboardTestCase):
             'category': u'Bug',
             'state': u'Todo',
         }
-
-        self.jirapatch = patch('kardboard.tickethelpers.JIRAHelper',
-            new=MockJIRAHelper)
-        self.jirapatch.start()
+        self.config['TICKET_HELPER'] = \
+            'kardboard.mocks.MockJIRAHelper'
 
     def tearDown(self):
-        self.jirapatch.stop()
+        super(CardCRUDTests, self).tearDown()
 
     def _get_target_url(self):
         return '/card/add/'
@@ -678,6 +688,8 @@ class CardCRUDTests(KardboardTestCase):
         self.assertEqual(302, res.status_code)
         self.assertEqual(1, klass.objects.count())
 
+        # This should work because we mocked TestHelper
+        # in setUp
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
         self.assertEqual(k.title, self.required_data['title'])

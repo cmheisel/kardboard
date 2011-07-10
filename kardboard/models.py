@@ -1,5 +1,6 @@
 import datetime
 import math
+import importlib
 
 from dateutil.relativedelta import relativedelta
 
@@ -94,6 +95,7 @@ class Kard(app.db.Document):
     start_date = date at which the card was considered in progress
     done_date = date the card was considered done
     """
+    _ticket_system = None
 
     key = app.db.StringField(required=True, unique=True)
     title = app.db.StringField()
@@ -251,3 +253,19 @@ class Kard(app.db.Document):
             done = done.strftime("%m/%d/%Y")
 
         return u"%s -- %s | %s | %s" % (self.key, backlog, start, done)
+
+    @property
+    def ticket_system(self):
+        if self._ticket_system:
+            print "self._ticket_system is %s" % (self._ticket_system)
+            return self._ticket_system
+
+        helper_setting = app.config['TICKET_HELPER']
+        modname = '.'.join(helper_setting.split('.')[:-1])
+        klassnam = helper_setting.split('.')[-1]
+        mod = importlib.import_module(modname)
+        klass = getattr(mod, klassnam)
+
+        helper = klass(app, self)
+        self._ticket_system = helper
+        return helper

@@ -18,13 +18,18 @@ from flask import (
 from kardboard import app, __version__
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
-from kardboard.util import month_range, slugify, make_end_date, month_ranges
+from kardboard.util import (
+    month_range,
+    slugify,
+    make_end_date,
+    month_ranges,
+    log_exception,
+)
 from kardboard.charts import (
     ThroughputChart,
     MovingCycleTimeChart,
     CumulativeFlowChart
 )
-from kardboard import tickethelpers
 
 
 @app.route('/')
@@ -200,18 +205,20 @@ def _init_card_form(*args, **kwargs):
 @app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
     f = _init_new_card_form(request.values)
+    card = Kard()
+    f.populate_obj(card)
 
     if request.method == "POST":
-        if app.config.get('JIRA_WSDL'):
-            if f.key.data and not f.title.data:
-                user, passw = app.config.get('JIRA_CREDENTIALS', (None, None))
-                j = tickethelpers.JIRAHelper(app, user, passw)
-                try:
-                    f.title.data = j.get_title(f.key.data)
-                except:
-                    pass
+        if f.key.data and not f.title.data:
+            try:
+                f.title.data = card.ticket_system.get_title(key=f.key.data)
+            except Exception, e:
+                log_exception(e, "Error getting card title via helper")
+                pass
+
         if f.validate():
-            card = Kard()
+            # Repopulate now that some data may have come from the ticket
+            # helper above
             f.populate_obj(card)
             card.save()
             flash("Card %s successfully added" % card.key)
