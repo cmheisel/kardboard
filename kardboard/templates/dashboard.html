@@ -33,77 +33,12 @@
 {% endfor %}
 
 <div id="wip_data">
-<table>
-    <caption>Building</caption>
-	<tr>
-		<th>Ticket</th>
-		<th>Title</th>
-		<th>Cycle time</th>
-        <th>State</th>
-	</tr>
 
-	{% for card in wip_cards %}
-	<tr class="{{ loop.cycle('odd', 'even') }}">
-		<td>
-            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
-			<a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
-			</a>
-		</td>
+{% import "card_macros.html" as card_macros %}
+{{ card_macros.card_table(wip_cards, caption="Building") }}
 
-		<td>
-			<a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
-		</td>
+{{ card_macros.card_table(backlog_cards, caption="Planning") }}
 
-		<td>
-			{{ card.current_cycle_time() }}
-		</td>
-
-        <td>
-            {% if card.state != 'Unknown' %}
-                <a href="{{ url_for('state', state_slug=card.state|slugify) }}">{{ card.state }}</a>
-            {% endif %}
-        </td>
-
-	</tr>
-	{% endfor %}
-</table>
-
-
-<!-- BACKLOG -->
-<table>
-    <caption>Planning</caption>
-    <tr>
-        <th>Ticket</th>
-        <th>Title</th>
-        <th>Cycle time</th>
-        <th>State</th>
-    </tr>
-
-    {% for card in backlog_cards %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td>
-            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
-            <a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
-            </a>
-        </td>
-
-        <td>
-            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
-        </td>
-
-        <td>
-            {{ card.current_cycle_time() }}
-        </td>
-
-        <td>
-            {% if card.state != 'Unknown' %}
-                <a href="{{ url_for('state', state_slug=card.state|slugify) }}">{{ card.state }}</a>
-            {% endif %}
-        </td>
-
-    </tr>
-    {% endfor %}
-</table>
 </div>
 
 {% endblock content %}

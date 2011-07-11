@@ -9,64 +9,13 @@
 <h2>{{ data['title'] }}</h2>
 {% endif %}
 
-<table>
-    <caption>Building / {{ data['wip_cards']|length }}</caption>
-	<tr>
-		<th>Ticket</th>
-		<th>Title</th>
-		<th>Cycle time</th>
-	</tr>
+{% set section_title = "Building / %s" % (data['wip_cards']|length, ) %}
+{% import "card_macros.html" as card_macros %}
+{{ card_macros.card_table(data['wip_cards'], caption=section_title, show_state=False) }}
 
-	{% for card in data['wip_cards'] %}
-	<tr class="{{ loop.cycle('odd', 'even') }}">
-		<td>
-            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
-			<a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
-			</a>
-		</td>
+{% set section_title = "Building / %s" % (data['backlog_cards']|length, ) %}
+{{ card_macros.card_table(data['backlog_cards'], caption=section_title, show_state=False) }}
 
-        <td>
-            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
-        </td>
-
-		<td>
-			{{ card.current_cycle_time() }}
-		</td>
-
-	</tr>
-	{% endfor %}
-</table>
-
-
-
-<!-- BACKLOG -->
-<table>
-    <caption>Planning / {{ data['backlog_cards']|length }}</caption>
-    <tr>
-        <th>Ticket</th>
-        <th>Title</th>
-        <th>Cycle time</th>
-    </tr>
-
-    {% for card in data['backlog_cards'] %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td>
-            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
-            <a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
-            </a>
-        </td>
-
-        <td>
-            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
-        </td>
-
-        <td>
-            {{ card.current_cycle_time() }}
-        </td>
-
-    </tr>
-    {% endfor %}
-</table>
 </div>
 
 {% endfor %}

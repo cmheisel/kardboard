@@ -2,39 +2,12 @@
 {% block content %}
 
 <div id="wip_data">
-<table>
-<caption>Done</caption>
-    <tr>
-        <th class="key_col">Ticket</th>
-        <th>Title</th>
-        <th>Cycle time</th>
-        <th class="date_col">Done</th>
-    </tr>
 
-    {% for card in cards %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td class="key_col">
-            <img src="http://djaapaadm1.ddtc.cmgdigital.com:5150/browse/{{ card.key }}" width="16" height="16" />
-            <a href="https://jira.cmgdigital.com/browse/{{ card.key }}">{{ card.key }}
-            </a>
-        </td>
-
-        <td>
-            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
-        </td>
-
-        <td>
-            {{ card.current_cycle_time() }}
-        </td>
-
-        <td class="date_col">
-            {{ card.done_date.strftime("%Y-%m-%d") }}
-        </td>
+{% import "card_macros.html" as card_macros %}
+{{ card_macros.card_table(cards, caption="Done", show_done=True) }}
 
 
-    </tr>
-    {% endfor %}
-</table>
+
 </div>
 
 {% endblock content %}
