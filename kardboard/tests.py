@@ -682,7 +682,7 @@ class CardCRUDTests(KardboardTestCase):
             'state': u'Todo',
         }
         self.config['TICKET_HELPER'] = \
-            'kardboard.mocks.MockJIRAHelper'
+            'kardboard.tickethelpers.TestTicketHelper'
 
     def tearDown(self):
         super(CardCRUDTests, self).tearDown()
@@ -733,7 +733,7 @@ class CardCRUDTests(KardboardTestCase):
         # in setUp
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
-        self.assertEqual(k.title, self.required_data['title'])
+        self.assertEqual(k.title, "Dummy Title from Dummy Ticket System")
 
     def test_add_duplicate_card(self):
         klass = self._get_target_class()
