@@ -1,7 +1,7 @@
 import urlparse
+import logging
 
 from kardboard.util import ImproperlyConfigured
-
 
 class TicketHelper(object):
     def __init__(self, config, kard):
@@ -22,10 +22,22 @@ class TestTicketHelper(TicketHelper):
     def get_ticket_url(self):
         return u"""http://example.com/ticket/%s""" % self.card.key
 
+class JIRAConnection(object):
+    __shared_state = {}
+
+    def __init__(self, client):
+        self.__dict__ = self.__shared_state
+        self.client = client
+
+    def connect(self, username, password):
+        self.auth = self.client.service.login(username, password)
+        return self.auth
+
 
 class JIRAHelper(TicketHelper):
     def __init__(self, config, kard):
         super(JIRAHelper, self).__init__(config, kard)
+        self.logger = logging.getLogger('kardboard.tickethelpers.JIRAHelper')
         self.issues = {}
 
         try:
@@ -44,18 +56,27 @@ class JIRAHelper(TicketHelper):
 
         from suds.client import Client
         self.Client = Client
-        self.connect()
 
     def connect(self):
         client = self.Client(self.wsdl_url)
-        auth = client.service.login(self.username, self.password)
+        jc = JIRAConnection(client)  # Avoid double-login
+        if hasattr(jc, 'auth'):
+            auth = jc.auth
+        else:
+            auth = jc.connect(self.username, self.password)
+
         self.auth = auth
         self.service = client.service
 
     def get_issue(self, key=None):
+        if not hasattr(self, 'service'):
+            self.connect()
+
         key = key or self.card.key
         if self.issues.get(key, None):
             return self.issues.get(key)
+
+        self.logger.info("Fetching JIRA issue %s via API" % key)
         issue = self.service.getIssue(self.auth, key)
         self.issues[key] = issue
         return issue
