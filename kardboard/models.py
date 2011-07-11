@@ -257,7 +257,6 @@ class Kard(app.db.Document):
     @property
     def ticket_system(self):
         if self._ticket_system:
-            print "self._ticket_system is %s" % (self._ticket_system)
             return self._ticket_system
 
         helper_setting = app.config['TICKET_HELPER']
@@ -266,6 +265,6 @@ class Kard(app.db.Document):
         mod = importlib.import_module(modname)
         klass = getattr(mod, klassnam)
 
-        helper = klass(app, self)
+        helper = klass(app.config, self)
         self._ticket_system = helper
         return helper
