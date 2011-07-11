@@ -1,1 +1,0 @@
-pywatch "bash runtests.sh" kardboard/*.py
