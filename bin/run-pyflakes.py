@@ -24,7 +24,8 @@ def main():
     contents = p.stdout.readlines()
     # Read in the exclusions file
     exclusions = {}
-    fp = open(os.path.join(cur_dir, "pyflakes.exclude"), "r")
+    exclusion_file = os.path.join(cur_dir, "pyflakes.exclude")
+    fp = open(exclusion_file, "r")
 
     for line in fp.readlines():
         if not line.startswith("#"):

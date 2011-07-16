@@ -1,6 +1,10 @@
+pushd `dirname $0` > /dev/null
+SCRIPTPATH=`pwd`
+popd > /dev/null
+
 clear
-./run-pyflakes.py kardboard
+$SCRIPTPATH/run-pyflakes.py kardboard
 if [ "$?" -eq "0" ]
 then
-    python kardboard/tests.py
+    python $SCRIPTPATH/../kardboard/tests.py
 fi
