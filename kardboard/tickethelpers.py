@@ -1,7 +1,9 @@
 import urlparse
 import logging
+import datetime
 
 from kardboard.util import ImproperlyConfigured
+
 
 class TicketHelper(object):
     def __init__(self, config, kard):
@@ -14,13 +16,28 @@ class TicketHelper(object):
     def get_ticket_url(self, key=None):
         raise NotImplemented
 
+    def update(self):
+        raise NotImplemented
+
 
 class TestTicketHelper(TicketHelper):
     def get_title(self, key=None):
-        return u"""Dummy Title from Dummy Ticket System"""
+        if not self.card.ticket_system_data:
+            self.update()
+        title = self.card.ticket_system_data['summary']
+        return title
 
     def get_ticket_url(self):
         return u"""http://example.com/ticket/%s""" % self.card.key
+
+    def update(self):
+        test_data = {
+            'summary': u"""Dummy Title from Dummy Ticket System""",
+        }
+        now = datetime.datetime.now()
+        self.card._ticket_system_updated_at = now
+        self.card._ticket_system_data = test_data
+
 
 class JIRAConnection(object):
     __shared_state = {}
