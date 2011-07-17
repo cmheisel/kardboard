@@ -2,6 +2,7 @@ import urlparse
 import logging
 import datetime
 
+from kardboard.models import Kard
 from kardboard import cache
 from kardboard.util import ImproperlyConfigured, log_exception
 
@@ -17,22 +18,20 @@ class TicketHelper(object):
     def get_ticket_url(self, key=None):
         raise NotImplemented
 
-    def update(self):
+    def update(self, sync=False):
         now = datetime.datetime.now()
         self.card._ticket_system_updated_at = now
 
 
 class TestTicketHelper(TicketHelper):
     def get_title(self, key=None):
-        if not self.card.ticket_system_data:
-            self.update()
-        title = self.card.ticket_system_data['summary']
+        title = self.card.ticket_system_data.get('summary', '')
         return title
 
     def get_ticket_url(self):
         return u"""http://example.com/ticket/%s""" % self.card.key
 
-    def update(self):
+    def update(self, sync=False):
         super(TestTicketHelper, self).update()
         test_data = {
             'summary': u"""Dummy Title from Dummy Ticket System""",
@@ -98,15 +97,12 @@ class JIRAHelper(TicketHelper):
         if self.issues.get(key, None):
             return self.issues.get(key)
 
-        self.logger.info("Fetching JIRA issue %s via API" % key)
         issue = self.service.getIssue(self.auth, key)
         self.issues[key] = issue
         return issue
 
     def get_title(self, key=None):
-        if not self.card.ticket_system_data:
-            self.update()
-        title = self.card.ticket_system_data['summary']
+        title = self.card.ticket_system_data.get('summary', '')
         return title
 
     def issue_to_dictionary(self, obj):
@@ -152,7 +148,27 @@ class JIRAHelper(TicketHelper):
         except IndexError:
             return type_id
 
-    def update(self):
+    def update(self, sync=True):
+        if self.card._ticket_system_data:
+            # We have some data, lets see if it's old
+            threshold = 60 * 60  #1 hour
+            now = datetime.datetime.now()
+            diff = now - self.card._ticket_system_updated_at
+            if diff.seconds >= threshold:
+                self.logger.info("Card %s info is out of date" % self.card.key)
+                if sync:
+                    self.actually_update()
+                else:
+                    # schedule an actual update here
+                    pass
+            else:
+                self.logger.info(
+                    "Card %s info is less than an hour old" % self.card.key)
+        else:
+            # first fetch
+            self.actually_update()
+
+    def actually_update(self):
         super(JIRAHelper, self).update()
         self.logger.info("Fetching JIRA data for %s" % self.card.key)
         try:
@@ -166,6 +182,9 @@ class JIRAHelper(TicketHelper):
             issue_dict = {}
 
         self.card._ticket_system_data = issue_dict
+        if self.card.id:
+            Kard.objects(id=self.card.id).update_one(
+                set___ticket_system_data=issue_dict)
 
     def get_ticket_url(self, key=None):
         key = key or self.card.key
