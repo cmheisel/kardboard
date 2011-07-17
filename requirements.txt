@@ -16,3 +16,4 @@ mock==0.7.2
 translitcodec==0.2 #Used by util.slugify
 
 https://github.com/sbook/flask-mongoengine/tarball/master
+Flask-Cache==0.3.3
