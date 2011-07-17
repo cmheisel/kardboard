@@ -278,7 +278,8 @@ class Kard(app.db.Document):
         self._ticket_system_accessed_at = now
         if self.id:
             #We can safely record this access attempt
-            Kard.objects.get(id=self.id).only(
-                "_ticket_system_accessed_at").update(
-                _ticket_system_accessed_at=now)
+            Kard.objects(id=self.id).update_one(
+                set___ticket_system_accessed_at=now)
+        if not self._ticket_system_data:
+            self.ticket_system.update()
         return self._ticket_system_data

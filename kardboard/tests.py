@@ -325,6 +325,7 @@ class JIRAHelperTests(KardboardTestCase):
         self.card = self.make_card()
         self.config['JIRA_WSDL'] = 'http://jira.example.com'
         self.config['JIRA_CREDENTIALS'] = ('foo', 'bar')
+        self.config['TICKET_HELPER'] = 'kardboard.tickethelpers.JIRAHelper'
         self.ticket = MockJIRAIssue()
         self.sudspatch = patch('suds.client.Client', MockJIRAClient)
         self.sudspatch.start()

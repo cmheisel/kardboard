@@ -3,7 +3,7 @@ import logging
 import datetime
 
 from kardboard import cache
-from kardboard.util import ImproperlyConfigured
+from kardboard.util import ImproperlyConfigured, log_exception
 
 
 class TicketHelper(object):
@@ -116,9 +116,7 @@ class JIRAHelper(TicketHelper):
         for key in keys:
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
-        idic['status'] = self.object_to_dict(idic['status'])
-        idic['type'] = self.resolve_status(idic['type'])
-        idic['type'] = self.object_to_dict(idic['type'])
+        idic['type'] = self.resolve_type(idic['type'])
         return idic
 
     def object_to_dict(self, obj):
@@ -135,24 +133,38 @@ class JIRAHelper(TicketHelper):
             statuses = [self.object_to_dict(s) for s in statuses]
             cache.set(key, statuses)
         status = [s for s in statuses if s['id'] == status_id]
-        return status
+        try:
+            return status[0]
+        except IndexError:
+            return status_id
 
     def resolve_type(self, type_id):
         key = "%s_issue_types" % self.cache_prefix
         the_types = cache.get(key)
         if not the_types:
             self.logger.info("Cache miss for %s" % key)
-            the_types = self.service.getTypes()
+            the_types = self.service.getIssueTypes()
             the_types = [self.object_to_dict(t) for t in the_types]
             cache.set(key, the_types)
         the_type = [t for t in the_types if t['id'] == type_id]
-        return the_type
+        try:
+            return the_type[0]
+        except IndexError:
+            return type_id
 
     def update(self):
         super(JIRAHelper, self).update()
         self.logger.info("Fetching JIRA data for %s" % self.card.key)
-        issue = self.get_issue(self.card.key)
-        issue_dict = self.issue_to_dictionary(issue)
+        try:
+            issue = self.get_issue(self.card.key)
+        except Exception:
+            issue = None
+            log_exception("Couldn't fetch JIRA issue %s" % self.card.key)
+        if issue:
+            issue_dict = self.issue_to_dictionary(issue)
+        else:
+            issue_dict = {}
+
         self.card._ticket_system_data = issue_dict
 
     def get_ticket_url(self, key=None):
