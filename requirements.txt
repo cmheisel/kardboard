@@ -9,7 +9,7 @@ mongoengine==0.4
 pymongo==1.11
 unittest2==0.5.1
 python-dateutil==1.5.0
-pygooglechart
+pygooglechart==0.3.0
 suds==0.4
 mock==0.7.2
 
@@ -17,3 +17,4 @@ translitcodec==0.2 #Used by util.slugify
 
 https://github.com/sbook/flask-mongoengine/tarball/master
 Flask-Cache==0.3.3
+python-memcached==1.47
