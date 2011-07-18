@@ -291,7 +291,8 @@ class Kard(app.db.Document):
             diff = now - self._ticket_system_updated_at
             if diff.seconds >= threshold:
                 app.logger.info(
-                    "Card %s info is older than an hour" % self.key)
+                    "Card %s info is older than an %s seconds" % (self.key,
+                        threshold))
                 self.ticket_system.update()  # Schedules an update job
 
         return self._ticket_system_data
