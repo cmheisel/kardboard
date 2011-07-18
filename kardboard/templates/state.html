@@ -13,7 +13,7 @@
 {% import "card_macros.html" as card_macros %}
 {{ card_macros.card_table(data['wip_cards'], caption=section_title, show_state=False) }}
 
-{% set section_title = "Building / %s" % (data['backlog_cards']|length, ) %}
+{% set section_title = "Planning / %s" % (data['backlog_cards']|length, ) %}
 {{ card_macros.card_table(data['backlog_cards'], caption=section_title, show_state=False) }}
 
 </div>
