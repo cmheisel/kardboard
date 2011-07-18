@@ -15,8 +15,8 @@ def profile_run():
 
 def run():
     app.logger.setLevel(logging.DEBUG)
-    print app.logger.getEffectiveLevel()
     app.run(debug=True)
+
 if __name__ == "__main__":
     if "profile" in sys.argv:
         profile_run()
