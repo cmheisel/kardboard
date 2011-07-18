@@ -2,6 +2,7 @@ import datetime
 import random
 import os
 import copy
+import logging
 
 import unittest2
 from mock import patch
@@ -21,6 +22,8 @@ class KardboardTestCase(unittest2.TestCase):
         kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
         kardboard.app.config['DEBUG'] = True
         kardboard.app.config['TESTING'] = True
+        kardboard.app.config['CELERY_ALWAYS_EAGER'] = True
+        kardboard.app.logger.setLevel(logging.WARNING)
         kardboard.app.db = MongoEngine(kardboard.app)
 
         self._flush_db()
@@ -342,6 +345,19 @@ class JIRAHelperTests(KardboardTestCase):
     def _make_one(self):
         klass = self._get_target_class()
         return klass(self.config, self.card)
+
+    def test_update(self):
+        k = self.card
+        k.save()
+        self.assert_(k._ticket_system_data == {})
+        self.assert_(k._ticket_system_updated_at is None)
+
+        k.ticket_system.update()
+        k.reload()
+        now = datetime.datetime.now()
+        updated_at = k._ticket_system_updated_at
+        diff = now - updated_at
+        self.assert_(diff.seconds <= 1)
 
     def test_get_title(self):
         h = self._make_one()

@@ -2,8 +2,7 @@ MONGODB_DB = "kardboard"
 
 SECRET_KEY = "yougonnawannachangethis"
 
-#JIRA_WSDL = "foo"
-#JIRA_CREDENTIALS = ('foo', 'baz')
+CACHE_TYPE = 'simple'
 
 CARD_CATEGORIES = [
     "Bug",
@@ -16,3 +15,11 @@ STATES = [
     'Doing',
     'Done',
 ]
+
+BROKER_TRANSPORT = "mongodb"
+CELERY_RESULT_BACKEND = "mongodb"
+CELERY_MONGODB_BACKEND_SETTINGS = {
+    "database": MONGODB_DB,
+    "taskmeta_collection": "kardboard_taskmeta",
+}
+CELERY_IMPORTS = ("kardboard.tasks", )

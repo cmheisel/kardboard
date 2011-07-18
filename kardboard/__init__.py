@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flaskext.mongoengine import MongoEngine
 from flaskext.cache import Cache
+from flaskext.celery import Celery
 import mongoengine
 
 __version__ = "1.3.3"
@@ -31,5 +32,6 @@ app.db = PortAwareMongoEngine(app)
 from kardboard.util import slugify
 app.jinja_env.filters['slugify'] = slugify
 cache = Cache(app)
+celery = Celery(app)
 
 import kardboard.views

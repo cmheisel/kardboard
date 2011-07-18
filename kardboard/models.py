@@ -280,6 +280,18 @@ class Kard(app.db.Document):
             #We can safely record this access attempt
             Kard.objects(id=self.id).update_one(
                 set___ticket_system_accessed_at=now)
+
         if not self._ticket_system_data:
-            self.ticket_system.update()
+            #Empty data set we have to stop and get the data now
+            self.ticket_system.update(sync=True)
+        elif self._ticket_system_data and self._ticket_system_updated_at:
+            #We've updated it at some point, let's see if it's old
+            #enough to warrant an update
+            threshold = 60  # 1 hour
+            diff = now - self._ticket_system_updated_at
+            if diff.seconds >= threshold:
+                app.logger.info(
+                    "Card %s info is older than an hour" % self.key)
+                self.ticket_system.update()  # Schedules an update job
+
         return self._ticket_system_data

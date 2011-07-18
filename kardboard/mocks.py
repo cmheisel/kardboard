@@ -3,8 +3,13 @@ from mock import Mock
 
 class MockJIRAIssue(Mock):
     summary = "There's been a lot of lies in this family"
+    key = "CMSAD-1"
+    reporter = 'cheisel'
+    assignee = 'cheisel'
+    description = ''
     status = '6'
     type = '4'
+
 
 
 class MockJIRAObject(object):

@@ -5,6 +5,7 @@ import datetime
 from kardboard.models import Kard
 from kardboard import cache
 from kardboard.util import ImproperlyConfigured, log_exception
+from kardboard.tasks import update_ticket
 
 
 class TicketHelper(object):
@@ -21,6 +22,9 @@ class TicketHelper(object):
     def update(self, sync=False):
         now = datetime.datetime.now()
         self.card._ticket_system_updated_at = now
+
+    def actually_update(self):
+        raise NotImplemented
 
 
 class TestTicketHelper(TicketHelper):
@@ -148,22 +152,14 @@ class JIRAHelper(TicketHelper):
         except IndexError:
             return type_id
 
-    def update(self, sync=True):
-        if self.card._ticket_system_data:
-            # We have some data, lets see if it's old
-            threshold = 60 * 60  #1 hour
-            now = datetime.datetime.now()
-            diff = now - self.card._ticket_system_updated_at
-            if diff.seconds >= threshold:
-                self.logger.info("Card %s info is out of date" % self.card.key)
-                if sync:
-                    self.actually_update()
-                else:
-                    # schedule an actual update here
-                    pass
+    def update(self, sync=False):
+        if self.card._ticket_system_data and self.card.id:
+            if sync:
+                self.actually_update()
             else:
                 self.logger.info(
-                    "Card %s info is less than an hour old" % self.card.key)
+                    "Scheduling update job for %s" % self.card.key)
+                update_ticket.apply_async((self.card.id,))
         else:
             # first fetch
             self.actually_update()
@@ -181,10 +177,18 @@ class JIRAHelper(TicketHelper):
         else:
             issue_dict = {}
 
+        now = datetime.datetime.now()
         self.card._ticket_system_data = issue_dict
+        self.card._ticket_system_updated_at = now
         if self.card.id:
             Kard.objects(id=self.card.id).update_one(
                 set___ticket_system_data=issue_dict)
+            Kard.objects(id=self.card.id).update_one(
+                set___ticket_system_updated_at=now)
+            self.card.reload()
+            self.logger.info(
+                "%s updated at %s" % (self.card.key,
+                    self.card._ticket_system_updated_at))
 
     def get_ticket_url(self, key=None):
         key = key or self.card.key

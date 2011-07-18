@@ -17,4 +17,7 @@ translitcodec==0.2 #Used by util.slugify
 
 https://github.com/sbook/flask-mongoengine/tarball/master
 Flask-Cache==0.3.3
+
+celery==2.2.7
+Flask-Celery==2.2.5
 python-memcached==1.47
