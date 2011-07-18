@@ -4,6 +4,9 @@
     <tr>
         <th class="key_col">Ticket</th>
         <th>Title</th>
+
+        <th>Assigned</th>
+
         <th>Cycle time</th>
         {% if show_done %}
         <th class="date_col">Done</th>
@@ -35,6 +38,13 @@
 
         <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
+        </td>
+
+
+        <td>
+          {% if card.ticket_system_data %}
+          {{ card.ticket_system_data.get('assignee', '') }}
+          {% endif %}
         </td>
 
         <td>

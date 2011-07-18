@@ -39,6 +39,31 @@
         <li><strong>Done date:</strong> {{ none_or_date(card.done_date) }}</li>
       </ul>
 
+      {% if card.ticket_system_data %}
+      <h4>Ticket information</h4>
+      <ul>
+        <li>Last synced: {{ card._ticket_system_updated_at|timesince }}</li>
+        <li>Assigned: {{ card.ticket_system_data.get('assignee', '') }}</li>
+        <li>
+                {% set icon = card.ticket_system_data.get('status', {}).get('icon') %}
+                {% set status_label = card.ticket_system_data.get('status', {}).get('name', '') %}
+                {% if icon %}
+                <img src="{{ icon }}" alt="{{ status_label }}" title="{{ status_label }}" width="16" height="16" />
+                {% endif %}
+                {{ status_label }}
+        </li>
+        <li>    {% set icon = card.ticket_system_data.get('type', {}).get('icon') %}
+                {% set status_label = card.ticket_system_data.get('type', {}).get('name', '') %}
+                {% if icon %}
+                <img src="{{ icon }}" alt="{{ status_label }}" title="{{ status_label }}" width="16" height="16" />
+                {% endif %}
+                {{ status_label }}
+        </li>
+        </ul>
+
+
+      {% endif %}
+
       <p><a href="{{ url_for('card_edit', key=card.key) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key) }}">Delete</a> / <a href="{{ url_for('dashboard') }}">Home</a>
       </div>
 
