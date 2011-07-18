@@ -287,7 +287,7 @@ class Kard(app.db.Document):
         elif self._ticket_system_data and self._ticket_system_updated_at:
             #We've updated it at some point, let's see if it's old
             #enough to warrant an update
-            threshold = 60  # 1 hour
+            threshold = app.config.get('TICKET_UPDATE_THRESHOLD', 60 * 60)
             diff = now - self._ticket_system_updated_at
             if diff.seconds >= threshold:
                 app.logger.info(
