@@ -48,7 +48,11 @@
         </td>
 
         <td>
-            {{ card.current_cycle_time() }}
+            {% if card.cycle_time %}
+                {{ card.cycle_time }}
+            {% else %}
+                {{ card.current_cycle_time() }}
+            {% endif %}
         </td>
 
 
