@@ -21,3 +21,4 @@ Flask-Cache==0.3.3
 celery==2.2.7
 Flask-Celery==2.2.5
 python-memcached==1.47
+git+git://github.com/sbook/flask-mongoengine.git@c579ff16264cb7005213#egg=Flask_MongoEngine
