@@ -1,5 +1,7 @@
 MONGODB_DB = "kardboard"
 
+MONGODB_PORT = 27017
+
 SECRET_KEY = "yougonnawannachangethis"
 
 CACHE_TYPE = 'simple'
