@@ -112,6 +112,7 @@ class Kard(app.db.Document):
 
     meta = {
         'queryset_class': KardQuerySet,
+        'collection': 'kard',
     }
 
     EXPORT_FIELDNAMES = (
