@@ -58,7 +58,8 @@ class JIRAConnection(object):
 class JIRAHelper(TicketHelper):
     def __init__(self, config, kard):
         super(JIRAHelper, self).__init__(config, kard)
-        self.logger = logging.getLogger('kardboard.tickethelpers.JIRAHelper')
+        from kardboard import app
+        self.logger = app.logger
         self.issues = {}
 
         try:
@@ -136,7 +137,9 @@ class JIRAHelper(TicketHelper):
         try:
             return status[0]
         except IndexError:
-            return status_id
+            self.logger.warn("Couldn't find status_id: %s in %s" %
+                (status_id, statuses))
+            return {}
 
     def resolve_type(self, type_id):
         key = "%s_issue_types" % self.cache_prefix
@@ -150,7 +153,11 @@ class JIRAHelper(TicketHelper):
         try:
             return the_type[0]
         except IndexError:
-            return type_id
+            type_help = ["%s -- %s" % (t['id'], t['name']) \
+                for t in the_types]
+            self.logger.warn("Couldn't find type_id: %s in %s" %
+                (type_id, type_help))
+            return {}
 
     def update(self, sync=False):
         if self.card._ticket_system_data and self.card.id:
