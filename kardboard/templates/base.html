@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% if config.get('GOOGLE_SITE_VERIFICATION', None) %}
+            <meta name="google-site-verification" content="{{ config['GOOGLE_SITE_VERIFICATION'] }}" />
+        {% endif %}
         <meta charset=utf-8 />
         <meta name="robots" content="noindex" />
         <title>
