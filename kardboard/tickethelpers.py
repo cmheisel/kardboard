@@ -1,5 +1,4 @@
 import urlparse
-import logging
 import datetime
 
 from kardboard.models import Kard
