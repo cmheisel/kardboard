@@ -3,7 +3,7 @@ SCRIPTPATH=`pwd`
 popd > /dev/null
 
 clear
-$SCRIPTPATH/run-pyflakes.py kardboard
+$SCRIPTPATH/run-pyflakes.py ../kardboard
 if [ "$?" -eq "0" ]
 then
     python $SCRIPTPATH/../kardboard/tests.py

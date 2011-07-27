@@ -1,3 +1,6 @@
 kardboard/util.py:*: 'translitcodec' imported but unused
 kardboard/__init__.py:*: 'kardboard' imported but unused
 kardboard/tickethelpers/__init__.py:*: 'logging' imported but unused
+bin/githubissues.py:*: 'csv' imported but unused
+docs/source/conf.py:*: 'sys' imported but unused
+docs/source/conf.py:*: 'os' imported but unused

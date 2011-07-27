@@ -37,6 +37,7 @@ def main():
     # Now filter thin
     for line in contents:
         line = line.rstrip()
+        line = line.replace('../kardboard/', '')
         test_line = re.sub(r':[0-9]+:', r':*:', line, 1)
         test_line = re.sub(r'line [0-9]+', r'line *', test_line)
 
