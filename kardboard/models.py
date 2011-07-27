@@ -107,7 +107,6 @@ class Kard(app.db.Document):
     category = app.db.StringField(required=True, default="Uncategorized")
     state = app.db.StringField(required=True, default="Unknown")
     _ticket_system_updated_at = app.db.DateTimeField()
-    _ticket_system_accessed_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
     meta = {
@@ -276,12 +275,6 @@ class Kard(app.db.Document):
     @property
     def ticket_system_data(self):
         now = datetime.datetime.now()
-        self._ticket_system_accessed_at = now
-        if self.id:
-            #We can safely record this access attempt
-            Kard.objects(id=self.id).update_one(
-                set___ticket_system_accessed_at=now)
-
         if not self._ticket_system_data:
             #Empty data set we have to stop and get the data now
             self.ticket_system.update(sync=True)

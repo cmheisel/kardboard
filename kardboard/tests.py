@@ -298,17 +298,6 @@ class KardTests(KardboardTestCase):
         self.assertEqual(True, isinstance(h, TicketHelper))
         self.assert_(k.key in h.get_ticket_url())
 
-    def test_ticket_system_access(self):
-        k = self._make_one()
-        self.assert_(k._ticket_system_data == {})
-        self.assert_(k._ticket_system_accessed_at is None)
-
-        k.ticket_system_data
-        now = datetime.datetime.now()
-        accessed_at = k._ticket_system_accessed_at
-        diff = now - accessed_at
-        self.assert_(diff.seconds <= 1)
-
     def test_ticket_system_update(self):
         k = self._make_one()
         self.assert_(k._ticket_system_data == {})
