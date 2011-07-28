@@ -28,7 +28,12 @@ class TicketHelper(object):
 
 class TestTicketHelper(TicketHelper):
     def get_title(self, key=None):
-        title = self.card.ticket_system_data.get('summary', '')
+        title = ''
+        if self.card._ticket_system_data:
+            title = self.card._ticket_system_data.get('summary', '')
+        else:
+            self.card.ticket_system.update(sync=True)
+            title = self.card.ticket_system_data.get('summary', '')
         return title
 
     def get_ticket_url(self):
@@ -59,6 +64,7 @@ class JIRAHelper(TicketHelper):
         super(JIRAHelper, self).__init__(config, kard)
         from kardboard import app
         self.logger = app.logger
+        self.testing = app.config.get('TESTING')
         self.issues = {}
 
         try:
@@ -106,7 +112,12 @@ class JIRAHelper(TicketHelper):
         return issue
 
     def get_title(self, key=None):
-        title = self.card.ticket_system_data.get('summary', '')
+        title = ''
+        if self.card._ticket_system_data:
+            title = self.card._ticket_system_data.get('summary', '')
+        else:
+            self.card.ticket_system.update(sync=True)
+            title = self.card.ticket_system_data.get('summary', '')
         return title
 
     def issue_to_dictionary(self, obj):
@@ -172,7 +183,8 @@ class JIRAHelper(TicketHelper):
 
     def actually_update(self):
         super(JIRAHelper, self).update()
-        self.logger.info("Fetching JIRA data for %s" % self.card.key)
+        if not self.testing:
+            self.logger.info("Fetching JIRA data for %s" % self.card.key)
         try:
             issue = self.get_issue(self.card.key)
         except Exception:
@@ -196,9 +208,10 @@ class JIRAHelper(TicketHelper):
             Kard.objects(id=self.card.id).update_one(
                 set___ticket_system_updated_at=now)
             self.card.reload()
-            self.logger.info(
-                "%s updated at %s" % (self.card.key,
-                    self.card._ticket_system_updated_at))
+            if not self.testing:
+                self.logger.info(
+                    "%s updated at %s" % (self.card.key,
+                        self.card._ticket_system_updated_at))
 
     def get_ticket_url(self, key=None):
         key = key or self.card.key
