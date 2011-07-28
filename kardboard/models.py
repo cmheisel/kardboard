@@ -277,6 +277,7 @@ class Kard(app.db.Document):
         now = datetime.datetime.now()
         if not self._ticket_system_data:
             #Empty data set we have to stop and get the data now
+            app.logger.warning("Card %s has no ticket_system_data!" % self.key)
             self.ticket_system.update(sync=True)
         elif self._ticket_system_data and self._ticket_system_updated_at:
             #We've updated it at some point, let's see if it's old
