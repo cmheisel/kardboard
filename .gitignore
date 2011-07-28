@@ -7,3 +7,4 @@ cards.csv
 .noseids
 .DS_Store
 kardboard.sh
+bin/githubissues.py
