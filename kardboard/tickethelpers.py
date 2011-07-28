@@ -128,7 +128,7 @@ class JIRAHelper(TicketHelper):
         key = "%s_statuses" % self.cache_prefix
         statuses = cache.get(key)
         if not statuses:
-            self.logger.info("Cache miss for %s" % key)
+            self.logger.warn("Cache miss for %s" % key)
             statuses = self.service.getStatuses()
             statuses = [self.object_to_dict(s) for s in statuses]
             cache.set(key, statuses)
@@ -144,7 +144,7 @@ class JIRAHelper(TicketHelper):
         key = "%s_issue_types" % self.cache_prefix
         the_types = cache.get(key)
         if not the_types:
-            self.logger.info("Cache miss for %s" % key)
+            self.logger.warn("Cache miss for %s" % key)
             the_types = self.service.getIssueTypes()
             the_types = [self.object_to_dict(t) for t in the_types]
             cache.set(key, the_types)
