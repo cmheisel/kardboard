@@ -180,8 +180,12 @@ class JIRAHelper(TicketHelper):
             log_exception("Couldn't fetch JIRA issue %s" % self.card.key)
         if issue:
             issue_dict = self.issue_to_dictionary(issue)
+        elif self.card._ticket_system_data:
+            return None
         else:
+            # We want to ensure there's at least an empty dict
             issue_dict = {}
+            return None
 
         now = datetime.datetime.now()
         self.card._ticket_system_data = issue_dict
