@@ -23,7 +23,6 @@ class KardboardTestCase(unittest2.TestCase):
         kardboard.app.config['DEBUG'] = True
         kardboard.app.config['TESTING'] = True
         kardboard.app.config['CELERY_ALWAYS_EAGER'] = True
-        kardboard.app.logger.setLevel(logging.WARNING)
         kardboard.app.db = MongoEngine(kardboard.app)
 
         self._flush_db()
@@ -33,11 +32,22 @@ class KardboardTestCase(unittest2.TestCase):
         self.flask_app = kardboard.app
 
         self.used_keys = []
+        self._setup_logging()
         super(KardboardTestCase, self).setUp()
 
     def tearDown(self):
         if hasattr(self.config, 'TICKET_HELPER'):
             del self.config['TICKET_HELPER']
+
+        self.flask_app.logger.handlers = self._old_logging_handlers
+
+    def _setup_logging(self):
+        self._old_logging_handlers = self.flask_app.logger.handlers
+        del self.flask_app.logger.handlers[:]
+        new_handler = logging.StreamHandler()
+        new_handler.setLevel(logging.CRITICAL)
+        new_handler.setFormatter(logging.Formatter(self.flask_app.debug_log_format))
+        self.flask_app.logger.addHandler(new_handler)
 
     def _flush_db(self):
         from mongoengine.connection import _get_db

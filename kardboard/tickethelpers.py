@@ -183,8 +183,7 @@ class JIRAHelper(TicketHelper):
 
     def actually_update(self):
         super(JIRAHelper, self).update()
-        if not self.testing:
-            self.logger.info("Fetching JIRA data for %s" % self.card.key)
+        self.logger.info("Fetching JIRA data for %s" % self.card.key)
         try:
             issue = self.get_issue(self.card.key)
         except Exception:
@@ -208,10 +207,9 @@ class JIRAHelper(TicketHelper):
             Kard.objects(id=self.card.id).update_one(
                 set___ticket_system_updated_at=now)
             self.card.reload()
-            if not self.testing:
-                self.logger.info(
-                    "%s updated at %s" % (self.card.key,
-                        self.card._ticket_system_updated_at))
+            self.logger.info(
+                "%s updated at %s" % (self.card.key,
+                    self.card._ticket_system_updated_at))
 
     def get_ticket_url(self, key=None):
         key = key or self.card.key

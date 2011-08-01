@@ -276,8 +276,7 @@ class Kard(app.db.Document):
     def ticket_system_data(self):
         now = datetime.datetime.now()
         if not self._ticket_system_data:
-            if not app.config.get('TESTING'):
-                app.logger.warning("Card %s has no ticket_system_data!" % self.key)
+            app.logger.warning("Card %s has no ticket_system_data!" % self.key)
             self.ticket_system.update()
             return {}
         elif self._ticket_system_data and self._ticket_system_updated_at:
