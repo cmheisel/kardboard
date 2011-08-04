@@ -20,6 +20,9 @@ class MockJIRAService(Mock):
     def getIssue(self, auth, key):
         return MockJIRAIssue()
 
+    def login(self, user, password):
+        return "Not much here"
+
     def getIssueTypes(self):
         return [
             MockJIRAObject({
