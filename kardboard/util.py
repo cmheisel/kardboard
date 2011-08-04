@@ -11,16 +11,20 @@ import mongoengine
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
-from flask import current_app as app
-
 class ImproperlyConfigured(Exception):
     pass
+
+
+def get_current_app():
+    from kardboard import app
+    return app
 
 
 def log_exception(exc, msg=""):
     tb = traceback.format_exc()
     log_msg = [msg, str(exc), tb]
     log_msg = '\n'.join(log_msg)
+    app = get_current_app()
     app.logger.critical(log_msg)
 
 
