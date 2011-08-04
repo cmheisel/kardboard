@@ -22,3 +22,8 @@ Flask-Celery==2.2.5
 python-memcached==1.47
 git+git://github.com/sbook/flask-mongoengine.git@a14907896fdaef5cc25deae5c3546c72532e0e4a#egg=Flask-MongoEngine
 Fabric==1.2.0
+
+
+#Needed for deployment
+gevent==0.13.6
+gunicorn==0.12.2
