@@ -25,3 +25,5 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
     "taskmeta_collection": "kardboard_taskmeta",
 }
 CELERY_IMPORTS = ("kardboard.tasks", )
+
+TICKET_HELPER = "kardboard.tickethelpers.NullHelper"

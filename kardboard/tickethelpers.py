@@ -26,6 +26,21 @@ class TicketHelper(object):
         raise NotImplemented
 
 
+class NullHelper(TicketHelper):
+    def get_title(self, key=None):
+        return ''
+
+    def get_ticket_url(self, key=None):
+        return ''
+
+    def update(self, sync=False):
+        super(NullHelper, self).update(sync)
+        return None
+
+    def actually_update(self):
+        return None
+
+
 class TestTicketHelper(TicketHelper):
     def get_title(self, key=None):
         title = ''
