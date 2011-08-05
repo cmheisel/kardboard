@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+
 MONGODB_DB = "kardboard"
 
 MONGODB_PORT = 27017
@@ -41,4 +44,13 @@ CELERY_IMPORTS = ("kardboard.tasks", )
 
 TICKET_HELPER = "kardboard.tickethelpers.NullHelper"
 
-TICKET_UPDATE_THRESHOLD = 3600
+# How old can tickets get before we refresh
+TICKET_UPDATE_THRESHOLD = 60*5
+
+# How often should we look for old tickets and queue them for updates
+CELERYBEAT_SCHEDULE = {
+    "load-update-queue": {
+        "task": "tasks.queue_updates",
+        "schedule": timedelta(seconds=90),
+    },
+}

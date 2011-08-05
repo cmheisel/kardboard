@@ -97,6 +97,7 @@ class JIRAHelper(TicketHelper):
 
         client = self.Client(self.wsdl_url)
         if not auth:
+            self.logger.warn("Cache miss for %s" % auth_key)
             auth = client.service.login(self.username, self.password)
             cache.set(auth_key, auth, 60 * 60)  # Cache for an hour
 
@@ -175,8 +176,6 @@ class JIRAHelper(TicketHelper):
             if sync:
                 self.actually_update()
             else:
-                self.logger.info(
-                    "Scheduling update job for %s" % self.card.key)
                 update_ticket.apply_async((self.card.id,))
         else:
             # first fetch
