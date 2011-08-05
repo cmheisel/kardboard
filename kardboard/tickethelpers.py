@@ -68,6 +68,7 @@ class JIRAHelper(TicketHelper):
         self.logger = app.logger
         self.testing = app.config.get('TESTING')
         self.issues = {}
+        self._service = None
 
         try:
             self.wsdl_url = self.app_config['JIRA_WSDL']
@@ -83,13 +84,18 @@ class JIRAHelper(TicketHelper):
             raise ImproperlyConfigured(
                 "JIRA_CREDENTIALS should be a two-item tuple (user, pass)")
 
-        from suds.client import Client
-        self.Client = Client
-        self.connect()
-
     @property
     def cache_prefix(self):
         return "jira_%s" % self.wsdl_url
+
+    @property
+    def service(self):
+        if self._service is None:
+            from suds.client import Client
+            self.Client = Client
+            self.connect()
+        return self._service
+
 
     def connect(self):
         auth_key = "offline_auth_%s" % self.cache_prefix
@@ -102,7 +108,7 @@ class JIRAHelper(TicketHelper):
             cache.set(auth_key, auth, 60 * 60)  # Cache for an hour
 
         self.auth = auth
-        self.service = client.service
+        self._service = client.service
 
     def get_issue(self, key=None):
         key = key or self.card.key
