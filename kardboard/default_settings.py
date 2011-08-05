@@ -26,4 +26,19 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
 }
 CELERY_IMPORTS = ("kardboard.tasks", )
 
+
+
+CELERYD_LOG_LEVEL = "INFO"
+BROKER_TRANSPORT = "mongodb"
+CELERY_RESULT_BACKEND = "mongodb"
+CELERY_MONGODB_BACKEND_SETTINGS = {
+    "database": MONGODB_DB,
+    "taskmeta_collection": "kardboard_taskmeta",
+}
+CELERY_IMPORTS = ("kardboard.tasks", )
+
+
+
 TICKET_HELPER = "kardboard.tickethelpers.NullHelper"
+
+TICKET_UPDATE_THRESHOLD = 3600
