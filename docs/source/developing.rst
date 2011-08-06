@@ -7,7 +7,9 @@ Quickstart
 To get a local version of kardboard up and running suitable for developing against, you can follow this quickstart guide.
 
 .. code-block:: bash
+
     # Install python, virtualenv and mongodb using your favorite system package manager here.
+    # aptitude install gcc python2.6 python2.6-dev python-virtualenv libevent-1.4-2 libevent-dev memcached mongodb-10gen
 
     # Get the source, using your own fork most likely
     git clone git@github.com:cmheisel/kardboard.git
@@ -25,6 +27,9 @@ To get a local version of kardboard up and running suitable for developing again
     # Start mongo and drop it into the background
     mkdir var
     mongod --fork --logpath=./var/mongo.log --dbpath=./var/
+
+    # Start the celery process
+    python kardboard/manage.py celeryd -B
 
     # Start the server
     python kardboard/runserver.py
