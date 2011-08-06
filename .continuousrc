@@ -1,2 +1,3 @@
 PIP_REQUIREMENTS="requirements.txt"
 TEST_COMMAND="python kardboard/tests.py"
+COVERAGE_COMMAND='coverage run --omit "env*" --'
