@@ -15,7 +15,7 @@ from flask import (
     abort,
 )
 
-from kardboard import app, __version__
+from kardboard import app, VERSION
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import (
@@ -95,7 +95,7 @@ def dashboard(year=None, month=None, day=None):
         'wip_cards': wip_cards,
         'backlog_cards': backlog_cards,
         'updated_at': now,
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('dashboard.html', **context)
@@ -142,7 +142,7 @@ def state(state_slug=None):
         'states_data': states_data,
         'states_count': len(states_data),
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
     return render_template('state.html', **context)
 
@@ -157,7 +157,7 @@ def done():
         'title': "Completed Cards",
         'cards': cards,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('done.html', **context)
@@ -174,7 +174,7 @@ def done_report(year_number, month_number):
             year_number, len(cards)),
         'cards': cards,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
 
     response = make_response(render_template('done-report.txt', **context))
@@ -228,7 +228,7 @@ def card_add():
         'title': "Add a card",
         'form': f,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
     return render_template('card-add.html', **context)
 
@@ -252,7 +252,7 @@ def card_edit(key):
         'title': "Edit a card",
         'form': f,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('card-add.html', **context)
@@ -269,7 +269,7 @@ def card(key):
         'title': "%s -- %s" % (card.key, card.title),
         'card': card,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
     return render_template('card.html', **context)
 
@@ -291,7 +291,7 @@ def card_delete(key):
         'title': "%s -- %s" % (card.key, card.title),
         'card': card,
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
     return render_template('card-delete.html', **context)
 
@@ -355,7 +355,7 @@ def chart_index():
     context = {
         'title': "Charts",
         'updated_at': datetime.datetime.now(),
-        'version': __version__,
+        'version': VERSION,
     }
     return render_template('charts.html', **context)
 
@@ -382,7 +382,7 @@ def chart_throughput(months=6, start=None):
         'updated_at': datetime.datetime.now(),
         'chart': chart,
         'month_counts': month_counts,
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('chart-throughput.html', **context)
@@ -425,7 +425,7 @@ def chart_cycle(months=6, year=None, month=None, day=None):
         'updated_at': datetime.datetime.now(),
         'chart': chart,
         'daily_averages': daily_moving_averages,
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('chart-cycle.html', **context)
@@ -470,7 +470,7 @@ def chart_flow(months=3, end=None):
         'updated_at': datetime.datetime.now(),
         'chart': chart,
         'flowdata': rows,
-        'version': __version__,
+        'version': VERSION,
     }
 
     return render_template('chart-flow.html', **context)

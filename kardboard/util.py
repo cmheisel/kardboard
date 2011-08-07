@@ -3,6 +3,7 @@ import re
 import traceback
 import logging
 import os
+import subprocess
 
 from flaskext.mongoengine import MongoEngine
 import mongoengine
@@ -13,6 +14,20 @@ from dateutil.relativedelta import relativedelta
 
 class ImproperlyConfigured(Exception):
     pass
+
+def get_git_version():
+    p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
+    returncode = os.wait()
+    has_git = returncode[-1] if returncode else -1
+    if has_git == 0:
+        location = os.path.dirname(os.path.abspath(__file__))
+        p = subprocess.Popen(
+            ['cd %s && git describe' % location],
+            stdout=subprocess.PIPE, shell=True)
+        result = p.communicate()[0]
+        return result
+    else:
+        return 'no-git'
 
 
 def get_current_app():
