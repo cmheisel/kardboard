@@ -8,3 +8,4 @@ cards.csv
 .DS_Store
 kardboard.sh
 bin/githubissues.py
+celerybeat-schedule
