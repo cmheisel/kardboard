@@ -3,6 +3,7 @@
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Ticket</th>
+        <th>&nbsp;</th>
         <th>Title</th>
 
         <th>Assigned</th>
@@ -44,8 +45,14 @@
         </td>
 
         <td>
+            <a href="{{ url_for('card_edit', key=card.key) }}">Edit</a>
+        </td>
+
+        <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
         </td>
+
+
 
 
         <td>
