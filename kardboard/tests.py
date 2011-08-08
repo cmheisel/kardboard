@@ -319,6 +319,38 @@ class KardTests(KardboardTestCase):
         diff = now - updated_at
         self.assert_(diff.seconds <= 1)
 
+    def test_priority(self):
+        klass = self._get_target_class()
+        klass.objects.all().delete()
+
+        now = datetime.datetime.now()
+        older = now - datetime.timedelta(days=1)
+        oldest = now - datetime.timedelta(days=2)
+        oldestest = now - datetime.timedelta(days=3)
+        oldestester = now - datetime.timedelta(days=4)
+        k = self._make_one(key="K-0", priority=1,
+            backlog_date=older, start_date=None)
+        k1 = self._make_one(key="K-1", priority=2,
+            backlog_date=oldest, start_date=None)
+        k2 = self._make_one(key="K-2", priority=3,
+            backlog_date=oldestest, start_date=None)
+        k3 = self._make_one(key="K-3", priority=4,
+            backlog_date=oldestester, start_date=None)
+
+        test_cards = [ k, k1, k2, k3 ]
+        [ c.save() for c in test_cards ]
+
+        expected = [
+            (k.key, k.priority),
+            (k1.key, k1.priority),
+            (k2.key, k2.priority),
+            (k3.key, k3.priority),
+        ]
+
+        actual = [(c.key, c.priority) for c in klass.backlogged() ]
+
+        self.assertEqual(expected, actual)
+
 
 class JIRAHelperTests(KardboardTestCase):
     def setUp(self):

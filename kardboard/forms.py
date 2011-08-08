@@ -1,7 +1,7 @@
 
 #import datetime
 
-from wtforms import Form, TextField, SelectField, validators, ValidationError
+from wtforms import Form, TextField, SelectField, IntegerField, validators, ValidationError
 from wtforms.ext.dateutil.fields import DateField
 
 from kardboard.models import Kard
@@ -54,6 +54,7 @@ class CardForm(Form):
         validators=[validators.optional()])
     done_date = DateField(u'Done date', display_format="%m/%d/%Y",
         validators=[validators.optional()])
+    priority = IntegerField(u'Ordering', validators=[validators.optional()])
 
 
 def get_card_form(new=False):

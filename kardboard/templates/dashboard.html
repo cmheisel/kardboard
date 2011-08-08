@@ -37,7 +37,8 @@
 {% import "card_macros.html" as card_macros %}
 {{ card_macros.card_table(wip_cards, caption="Building") }}
 
-{{ card_macros.card_table(backlog_cards, caption="Planning") }}
+{% set section_title = "Planning / %s" % (backlog_cards|length, ) %}
+{{ card_macros.card_table(backlog_cards, caption=section_title, show_state=False, show_priority=False, show_cycle=False) }}
 
 </div>
 

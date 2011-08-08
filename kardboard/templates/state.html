@@ -9,12 +9,17 @@
 <h2>{{ data['title'] }}</h2>
 {% endif %}
 
-{% set section_title = "Building / %s" % (data['wip_cards']|length, ) %}
 {% import "card_macros.html" as card_macros %}
+
+{% if data['backlog_cards']|length > 0 %}
+
+{% set section_title = "Building / %s" % (data['wip_cards']|length, ) %}
 {{ card_macros.card_table(data['wip_cards'], caption=section_title, show_state=False) }}
 
 {% set section_title = "Planning / %s" % (data['backlog_cards']|length, ) %}
-{{ card_macros.card_table(data['backlog_cards'], caption=section_title, show_state=False) }}
+{{ card_macros.card_table(data['backlog_cards'], caption=section_title, show_state=False, show_priority=True, show_cycle=False) }}
+{% endif %}
+
 
 </div>
 

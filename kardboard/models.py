@@ -106,12 +106,14 @@ class Kard(app.db.Document):
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
     state = app.db.StringField(required=True, default="Unknown")
+    priority = app.db.IntField(required=False)
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
     meta = {
         'queryset_class': KardQuerySet,
         'collection': 'kard',
+        'ordering': ['+priority', '-backlog_date']
     }
 
     EXPORT_FIELDNAMES = (
@@ -247,6 +249,7 @@ class Kard(app.db.Document):
     def __unicode__(self):
         backlog, start, done = self.backlog_date, self.start_date, \
             self.done_date
+        priority = ""
 
         if backlog:
             backlog = backlog.strftime("%m/%d/%Y")
@@ -254,8 +257,10 @@ class Kard(app.db.Document):
             start = start.strftime("%m/%d/%Y")
         if done:
             done = done.strftime("%m/%d/%Y")
+        if hasattr(self, 'priority') and self.priority:
+            priority = "P%s | " % (self.priority, )
 
-        return u"%s -- %s | %s | %s" % (self.key, backlog, start, done)
+        return u"%s -- %s%s | %s | %s" % (self.key, priority, backlog, start, done)
 
     @property
     def ticket_system(self):
