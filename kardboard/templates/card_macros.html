@@ -1,12 +1,16 @@
-{% macro card_table(card_collection, caption="", show_done=False, show_state=True, show_priority=False, show_cycle=True) -%}
+{% macro card_table(card_collection, caption="", show_done=False, show_state=True, show_priority=False, show_cycle=True, show_assigned=True) -%}
 <table>
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Ticket</th>
+        <th>Category</th>
         <th>&nbsp;</th>
         <th>Title</th>
 
+
+        {% if show_assigned %}
         <th>Assigned</th>
+        {% endif %}
 
         {% if show_cycle %}
         <th>Cycle time</th>
@@ -45,6 +49,11 @@
         </td>
 
         <td>
+            {{ card.category }}
+        </td>
+
+
+        <td>
             <a href="{{ url_for('card_edit', key=card.key) }}">Edit</a>
         </td>
 
@@ -55,11 +64,13 @@
 
 
 
+        {% if show_assigned %}
         <td>
           {% if card.ticket_system_data %}
           {{ card.ticket_system_data.get('assignee', '') }}
           {% endif %}
         </td>
+        {% endif %}
 
         {% if show_cycle %}
         <td>
