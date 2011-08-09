@@ -32,6 +32,10 @@ class Board(app.db.Document):
 
 class KardQuerySet(QuerySet):
     def done_in_week(self, year=None, month=None, day=None):
+        """
+        Kards that were completed in the week of the specified day.
+        """
+
         date = munge_date(year, month, day)
         start_date, end_date = week_range(date)
 
@@ -40,6 +44,10 @@ class KardQuerySet(QuerySet):
         return results
 
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
+        """
+        The moving average of cycle time for every day in the last N weeks.
+        """
+
         end_date = make_end_date(year, month, day)
         start_date = end_date - relativedelta(weeks=weeks)
         start_date = make_start_date(date=start_date)
@@ -56,6 +64,10 @@ class KardQuerySet(QuerySet):
         return int(round(average))
 
     def moving_lead_time(self, year=None, month=None, day=None, weeks=4):
+        """
+        The moving average of lead time for every day in the last N weeks.
+        """
+
         end_date = make_end_date(year, month, day)
         start_date = end_date - relativedelta(weeks=weeks)
         start_date = make_start_date(date=start_date)
@@ -72,9 +84,16 @@ class KardQuerySet(QuerySet):
         return int(round(average))
 
     def done(self):
+        """
+        Kards that have been completed.
+        """
         return self.filter(done_date__exists=True)
 
     def done_in_month(self, year=None, month=None, day=None):
+        """
+        Kards that have been completed in the specified month.
+        """
+
         date = munge_date(year=year, month=month, day=day)
 
         start_date, faux_end_date = month_range(date)
@@ -87,26 +106,32 @@ class KardQuerySet(QuerySet):
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
-
-    key = JIRA or other ticket tracker unique ID
-    title = short human friendly name for the card
-
-    backlog_date = date the card entered the backlog
-    start_date = date at which the card was considered in progress
-    done_date = date the card was considered done
     """
     _ticket_system = None
 
     key = app.db.StringField(required=True, unique=True)
+    """A unique string that matches a Kard up to a ticket in a parent system."""
+
     title = app.db.StringField()
     backlog_date = app.db.DateTimeField(required=True)
+    """When the card entered the backlog."""
+
     start_date = app.db.DateTimeField()
+    """When the card was started."""
+
     done_date = app.db.DateTimeField()
+    """When the card was completed."""
+
     _cycle_time = app.db.IntField(db_field="cycle_time")
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
+    """A user-supplied taxonomy for cards. See :ref:`CARD_CATEGORIES`"""
+
     state = app.db.StringField(required=True, default="Unknown")
+    """Which column on the kanban board the card is in."""
     priority = app.db.IntField(required=False)
+    """Used when ordering cards in the backlog."""
+
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
@@ -152,18 +177,21 @@ class Kard(app.db.Document):
     @classmethod
     def in_progress(klass, date=None):
         """
+        Cards that are in progress as of the supplied date (or now).
+
         In progress is a semi-tricky calculation.
         If the date is today, it's easy, it's any
         ticket that doesn't have a done_date.
         If the date is earlier, then it's:
+
             a.) Any ticket without a done_date
-                whose backlog_date is lte
-                than the reference date
-            -AND-
+            whose backlog_date is lte
+            than the reference date **AND**
+
             b.) Any ticket with a done_date
-                greater than the reference date
-                and a start_date earlier than
-                the reference date
+            greater than the reference date
+            and a start_date earlier than
+            the reference date
         """
         if not date:
             return klass.objects.filter(done_date=None,
@@ -184,16 +212,19 @@ class Kard(app.db.Document):
     @classmethod
     def backlogged(klass, date=None):
         """
+        Cards that are backlogged as of the supplied date (or now).
+
         Backlogged is a semi-tricky calculation.
         If the date is today, it's easy, it's any
         ticket that doesn't have a done_date or a
         start_date.
+
         If the date is earlier, then it's:
             a.) Any ticket without a done_date
                 whose backlog_date is lte
                 than the reference date and who's
-                start_date is lte the reference date
-            -AND-
+                start_date is lte the reference date **AND**
+
             b.) Any ticket with a start_date
                 greater than the reference date
                 and a backlog_date earlier than
@@ -264,6 +295,10 @@ class Kard(app.db.Document):
 
     @property
     def ticket_system(self):
+        """
+        Instance of :ref:`TICKET_HELPER`
+        """
+
         if self._ticket_system:
             return self._ticket_system
 
@@ -279,6 +314,11 @@ class Kard(app.db.Document):
 
     @property
     def ticket_system_data(self):
+        """
+        Dictionary of data supplied by :ref:`TICKET_HELPER`.
+
+        The exact composition of the dictionary varies by the helper used.
+        """
         if not self._ticket_system_data:
             return {}
         else:

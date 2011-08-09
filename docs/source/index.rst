@@ -9,11 +9,6 @@ Contents:
     concepts
     installing
     developing
+    api
 
-Indices and tables
-==================
-
-* :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
-

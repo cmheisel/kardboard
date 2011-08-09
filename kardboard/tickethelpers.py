@@ -13,17 +13,31 @@ class TicketHelper(object):
         self.card = kard
 
     def get_title(self, key=None):
-        raise NotImplemented
+        """
+        The title of the ticket
+        """
+        pass
 
     def get_ticket_url(self, key=None):
-        raise NotImplemented
+        """
+        A URL to the ticket in the orignating system.
+        """
+        pass
 
     def update(self, sync=False):
+        """
+        Schedules a job to update the ticket from its originating system.
+
+        If sync is True, then the call is executed immediately as a blocking IO task.
+        """
         now = datetime.datetime.now()
         self.card._ticket_system_updated_at = now
 
     def actually_update(self):
-        raise NotImplemented
+        """
+        Method called by the scheduled task. Updates the ticket from the originating system.
+        """
+        pass
 
 
 class NullHelper(TicketHelper):

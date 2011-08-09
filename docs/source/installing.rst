@@ -82,6 +82,8 @@ Default: (No default)
 
 Directory to store cache. Used only for FileSystemCache.
 
+.. _CARD_CATEGORIES:
+
 CARD_CATEGORIES
 ^^^^^^^^^^^^^^^^^
 Default: ``[ 'Bug', 'Feature', 'Improvement',]``
