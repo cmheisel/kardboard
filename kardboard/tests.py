@@ -219,7 +219,7 @@ class KardTests(KardboardTestCase):
         self.assert_(k.id)
 
     def test_state_if_done(self):
-        states = self.config.get('STATES')
+        states = self.config.get('CARD_STATES')
         k = self._make_one()
         k.done_date = None
         k.state = states[-2]

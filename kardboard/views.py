@@ -104,7 +104,7 @@ def dashboard(year=None, month=None, day=None):
 @app.route('/state/')
 @app.route('/state/<state_slug>/')
 def state(state_slug=None):
-    states = app.config.get('STATES', [])
+    states = app.config.get('CARD_STATES', [])
     state_mapping = {}
     for state in states:
         state_mapping[slugify(state)] = state
@@ -196,7 +196,7 @@ def _init_card_form(*args, **kwargs):
     if choices:
         f.category.choices = _make_choice_field_ready(choices)
 
-    states = app.config.get('STATES')
+    states = app.config.get('CARD_STATES')
     if states:
         f.state.choices = _make_choice_field_ready(states)
     return f

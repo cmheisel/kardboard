@@ -141,7 +141,7 @@ class Kard(app.db.Document):
 
         if self.done_date:
             self.in_progress = False
-            self.state = app.config.get("STATES", [])[-1]
+            self.state = app.config.get("CARD_STATES", [])[-1]
 
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time
