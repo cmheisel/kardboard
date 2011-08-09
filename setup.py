@@ -1,8 +1,12 @@
+import os
 from setuptools import setup, find_packages
+
+this_folder = os.path.dirname(os.path.abspath(__file__))
+version_file = os.path.join(this_folder, 'kardboard', 'VERSION')
 
 setup(
     name="kardboard",
-    version=__import__("kardboard").__version__,
+    version=file(version_file, 'r').read(),
     author="Chris Heisel",
     author_email="chris@heisel.org",
     description=("Dashboard for tracking real-life cards on a real-life Kanban board(s)"),
