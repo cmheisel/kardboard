@@ -200,6 +200,8 @@ Possible settings are:
 * ``'critical'``
 * ``'error'``
 
+.. _LOG_FILE:
+
 LOG_FILE
 ^^^^^^^^^^
 Default: (No default)
@@ -241,6 +243,8 @@ Default: ``'kardboard.tickethelpers.NullHelper'``
 A Python class that will fetch additional information from a ticketing system (JIRA, Redmine, Pivotal Tracker, e.g.) about a card.
 
 The only provider shipped with kardboard is ``'kardboard.tickethelpers.JIRAHelper'``.
+
+.. _TICKET_UPDATE_THRESHOLD:
 
 TICKET_UPDATE_THRESHOLD
 ^^^^^^^^^^^^^^^^^^^^^^^

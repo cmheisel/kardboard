@@ -7,7 +7,7 @@ Card
     A card represents a unit of work, it's the central object around which almost everything else revolves. Ultimatley it represents some piece of business value.
 
 Ticket
-    For kardboard's purposes a ticket is an item contained in a seperate system, that has additional data about a particular card. For example, a Card in kardboard may know when a card was backlogged, started and completed but it's Ticket would know who it's assigned to currently. A Card and a Ticket are linked together via the Card's **key** value.
+    For kardboard's purposes a ticket is an item contained in a seperate system, that has additional data about a particular card. For example, a Card in kardboard may know when a card was backlogged, started and completed but its Ticket would know who it's assigned to currently. A Card and a Ticket are linked together via the Card's **key** value.
 
 Backlog
     A card that is still in a planning, or Todo state. Backlog is one of three core states a card can be in.
