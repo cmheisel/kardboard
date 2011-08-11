@@ -716,14 +716,28 @@ class CardFormTest(FormTests):
         from kardboard.forms import get_card_form
         return get_card_form(new=True)
 
-    def test_required_fields(self):
-        f = self.Form(self.post_data)
+    def _test_form(self, post_data):
+        f = self.Form(post_data)
         f.validate()
         self.assertEquals(0, len(f.errors))
 
         card = self._get_card_class()()
         f.populate_obj(card)
         card.save()
+
+        for key, value in self.post_data.items():
+            self.assertNotEqual(
+                None,
+                getattr(card, key, None))
+
+    def test_fields(self):
+        self.optional_data = {
+            'start_date': u'06/11/2011',
+            'done_date': u'06/12/2011',
+            'priority': u'2',
+        }
+        self.post_data.update(self.optional_data)
+        self._test_form(self.post_data)
 
     def test_datetime_coercing(self):
         f = self.Form(self.post_data)
