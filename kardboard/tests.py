@@ -709,6 +709,7 @@ class CardFormTest(FormTests):
             'backlog_date': u"06/11/2011",
             'category': u'Bug',
             'state': u'Doing',
+            'team': u'Team 1',
         }
         self.post_data = MultiDict(self.required_data)
 
@@ -764,6 +765,7 @@ class CardCRUDTests(KardboardTestCase):
             'backlog_date': u"06/11/1911",
             'category': u'Bug',
             'state': u'Todo',
+            'team': u'Team 1',
         }
         self.config['TICKET_HELPER'] = \
             'kardboard.tickethelpers.TestTicketHelper'

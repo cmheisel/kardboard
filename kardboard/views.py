@@ -199,6 +199,11 @@ def _init_card_form(*args, **kwargs):
     states = app.config.get('CARD_STATES')
     if states:
         f.state.choices = _make_choice_field_ready(states)
+
+    teams = app.config.get('CARD_TEAMS')
+    if teams:
+        f.team.choices = _make_choice_field_ready(teams)
+
     return f
 
 

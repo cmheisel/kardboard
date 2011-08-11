@@ -23,6 +23,11 @@ CARD_STATES = [
     'Done',
 ]
 
+CARD_TEAMS = [
+    'Team 1',
+    'Team 2',
+]
+
 
 CELERYD_LOG_LEVEL = 'INFO'
 BROKER_TRANSPORT = 'mongodb'

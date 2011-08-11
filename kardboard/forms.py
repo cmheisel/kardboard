@@ -38,6 +38,11 @@ STATE_CHOICES = (
     ('Done', 'Done'),
 )
 
+TEAM_CHOICES = (
+    ('Team 1', 'Team 1'),
+    ('Team 2', 'Team 2'),
+)
+
 
 class CardForm(Form):
     key = TextField(u'JIRA Key',
@@ -47,6 +52,8 @@ class CardForm(Form):
     category = SelectField(u'Category', choices=CATEGORY_CHOICES,
         validators=[validators.required()])
     state = SelectField(u'State', choices=STATE_CHOICES,
+        validators=[validators.required()])
+    team = SelectField(u'Team', choices=TEAM_CHOICES,
         validators=[validators.required()])
     backlog_date = DateField(u'Backlog date', display_format="%m/%d/%Y",
         validators=[validators.required()])

@@ -126,11 +126,15 @@ class Kard(app.db.Document):
     _lead_time = app.db.IntField(db_field="lead_time")
     category = app.db.StringField(required=True, default="Uncategorized")
     """A user-supplied taxonomy for cards. See :ref:`CARD_CATEGORIES`"""
+    team = app.db.StringField(required=True, default="")
+    """A selection from a user supplied list of teams/assignees. See :ref:`CARD_TEAMS`"""
+
 
     state = app.db.StringField(required=True, default="Unknown")
     """Which column on the kanban board the card is in."""
     priority = app.db.IntField(required=False)
     """Used when ordering cards in the backlog."""
+
 
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
