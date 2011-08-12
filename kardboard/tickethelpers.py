@@ -2,7 +2,8 @@ import urlparse
 import datetime
 
 from kardboard.models import Kard
-from kardboard import cache
+from kardboard.app import cache
+from kardboard.app import app
 from kardboard.util import ImproperlyConfigured, log_exception
 from kardboard.tasks import update_ticket
 
@@ -75,10 +76,10 @@ class TestTicketHelper(TicketHelper):
         }
         self.card._ticket_system_data = test_data
 
+
 class JIRAHelper(TicketHelper):
     def __init__(self, config, kard):
         super(JIRAHelper, self).__init__(config, kard)
-        from kardboard import app
         self.logger = app.logger
         self.testing = app.config.get('TESTING')
         self.issues = {}
@@ -109,7 +110,6 @@ class JIRAHelper(TicketHelper):
             self.Client = Client
             self.connect()
         return self._service
-
 
     def connect(self):
         auth_key = "offline_auth_%s" % self.cache_prefix

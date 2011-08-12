@@ -15,21 +15,21 @@ class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         if os.environ.get('KARDBOARD_SETTINGS'):
             os.environ['KARDBOARD_SETTINGS'] = ''
-        import kardboard
+        from kardboard.app import app
         from flaskext.mongoengine import MongoEngine
 
-        kardboard.app.config.from_object('kardboard.default_settings')
-        kardboard.app.config['MONGODB_DB'] = 'kardboard-unittest'
-        kardboard.app.config['DEBUG'] = True
-        kardboard.app.config['TESTING'] = True
-        kardboard.app.config['CELERY_ALWAYS_EAGER'] = True
-        kardboard.app.db = MongoEngine(kardboard.app)
+        app.config.from_object('kardboard.default_settings')
+        app.config['MONGODB_DB'] = 'kardboard-unittest'
+        app.config['DEBUG'] = True
+        app.config['TESTING'] = True
+        app.config['CELERY_ALWAYS_EAGER'] = True
+        app.db = MongoEngine(app)
 
         self._flush_db()
 
-        self.config = kardboard.app.config
-        self.app = kardboard.app.test_client()
-        self.flask_app = kardboard.app
+        self.config = app.config
+        self.app = app.test_client()
+        self.flask_app = app
 
         self.used_keys = []
         self._setup_logging()
@@ -87,6 +87,7 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         k = self._get_card_class()(**fields)
         return k
+
 
 class UtilTests(unittest2.TestCase):
     def test_business_days(self):
@@ -302,8 +303,8 @@ class KardTests(KardboardTestCase):
         k3 = self._make_one(key="K-3", priority=4,
             backlog_date=oldestester, start_date=None)
 
-        test_cards = [ k, k1, k2, k3 ]
-        [ c.save() for c in test_cards ]
+        test_cards = [k, k1, k2, k3]
+        [c.save() for c in test_cards]
 
         expected = [
             (k.key, k.priority),
@@ -312,7 +313,7 @@ class KardTests(KardboardTestCase):
             (k3.key, k3.priority),
         ]
 
-        actual = [(c.key, c.priority) for c in klass.backlogged() ]
+        actual = [(c.key, c.priority) for c in klass.backlogged()]
 
         self.assertEqual(expected, actual)
 
@@ -495,6 +496,7 @@ class TeamTests(DashboardTestCase):
     def test_team_page(self):
         res = self.app.get(self._get_target_url(self.team1))
         self.assertEqual(200, res.status_code)
+
 
 class HomepageTests(DashboardTestCase):
     def _get_target_url(self):

@@ -3,35 +3,35 @@ import re
 import traceback
 import logging
 import os
-import subprocess
 
 from flaskext.mongoengine import MongoEngine
+from werkzeug import import_string, cached_property
 import mongoengine
 
 
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
+
 class ImproperlyConfigured(Exception):
     pass
 
-def get_git_version():
-    p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
-    returncode = os.wait()
-    has_git = returncode[-1] if returncode else -1
-    if has_git == 0:
-        location = os.path.dirname(os.path.abspath(__file__))
-        p = subprocess.Popen(
-            ['cd %s && git describe' % location],
-            stdout=subprocess.PIPE, shell=True)
-        result = p.communicate()[0]
-        return result
-    else:
-        return 'no-git'
+
+class LazyView(object):
+    def __init__(self, import_name):
+        self.__module__, self.__name__ = import_name.rsplit('.', 1)
+        self.import_name = import_name
+
+    @cached_property
+    def view(self):
+        return import_string(self.import_name)
+
+    def __call__(self, *args, **kwargs):
+        return self.view(*args, **kwargs)
 
 
 def get_current_app():
-    from kardboard import app
+    from kardboard.app import app
     return app
 
 
@@ -175,9 +175,13 @@ class PortAwareMongoEngine(MongoEngine):
 
         # more settings e.g. port etc needed
 
-        self.connection = mongoengine.connect(
-            db=db, username=username, password=password, port=port)
-
+        try:
+            self.connection = mongoengine.connect(
+                db=db, username=username, password=password, port=port)
+        except mongoengine.connection.ConnectionError:
+            # Useful for when code is accessed, like say a sphinx docs
+            # build and there's no database running.
+            self.connection = None
 
 
 def configure_logging(app):
@@ -206,4 +210,3 @@ def configure_logging(app):
         new_handler.setFormatter(logging.Formatter(log_format))
 
         app.logger.addHandler(new_handler)
-

@@ -1,5 +1,5 @@
 import sys
-from kardboard import app
+from kardboard.app import app
 import logging
 
 
