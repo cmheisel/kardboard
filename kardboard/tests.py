@@ -70,10 +70,6 @@ class KardboardTestCase(unittest2.TestCase):
         from kardboard.models import Kard
         return Kard
 
-    def _get_board_class(self):
-        from kardboard.models import Board
-        return Board
-
     def _make_unique_key(self):
         key = random.randint(1, 10000)
         if key not in self.used_keys:
@@ -91,18 +87,6 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         k = self._get_card_class()(**fields)
         return k
-
-    def make_board(self, **kwargs):
-        key = self._make_unique_key()
-        fields = {
-            'name': "Teamocil Board %s" % (key, ),
-            'categories':
-                ["Numbness", "Short-term memory loss", "Reduced sex-drive"],
-        }
-        fields.update(**kwargs)
-        b = self._get_board_class()(**fields)
-        return b
-
 
 class UtilTests(unittest2.TestCase):
     def test_business_days(self):
@@ -153,25 +137,6 @@ class UtilTests(unittest2.TestCase):
         self.assertEqual(6, end.month)
         self.assertEqual(11, end.day)
         self.assertEqual(2011, end.year)
-
-
-class BoardTests(KardboardTestCase):
-    def _get_target_class(self):
-        return self._get_board_class()
-
-    def _make_one(self, **kwargs):
-        return self.make_board(**kwargs)
-
-    def test_valid_board(self):
-        b = self._make_one()
-        b.save()
-        self.assert_(b.id)
-
-    def test_board_slug(self):
-        b = self._make_one(name="Operation Hot Mother")
-        b.save()
-        expected = u"operation-hot-mother"
-        self.assertEqual(expected, b.slug)
 
 
 class KardTests(KardboardTestCase):
@@ -475,58 +440,46 @@ class DashboardTestCase(KardboardTestCase):
         self.month = 6
         self.day = 15
 
-        self.board = self.make_board()
-        self.board1 = self.make_board()
+        self.team1 = self.config['CARD_TEAMS'][0]
+        self.team2 = self.config['CARD_TEAMS'][1]
+
         self.backlogged_date = datetime.datetime(
             year=self.year, month=self.month, day=12)
 
         for i in xrange(0, 5):
             #board will have 5 cards in elabo, started, and done
-            k = self.make_card(backlog_date=self.backlogged_date)  # elabo
+            k = self.make_card(backlog_date=self.backlogged_date, team=self.team1)  # elabo
             k.save()
-            self.board.cards.append(k)
 
             k = self.make_card(start_date=datetime.datetime(
-                year=self.year, month=self.month, day=12))
+                year=self.year, month=self.month, day=12), team=self.team1)
             k.save()
-            self.board.cards.append(k)
 
             k = self.make_card(
                 start_date=datetime.datetime(year=self.year,
                     month=self.month, day=12),
                 done_date=datetime.datetime(year=self.year,
-                    month=self.month, day=19))
+                    month=self.month, day=19), team=self.team1)
             k.save()
-            self.board.cards.append(k)
-
-            self.board.save()
 
         for i in xrange(0, 3):
             #board will have 3 cards in elabo, started, and done
-            k = self.make_card(backlog_date=self.backlogged_date)  # backlogged
+            k = self.make_card(backlog_date=self.backlogged_date, team=self.team2)  # backlogged
             k.save()
-            self.board1.cards.append(k)
 
             k = self.make_card(start_date=datetime.datetime(
-                year=2011, month=6, day=12))
+                year=2011, month=6, day=12), team=self.team2)
             k.save()
-            self.board1.cards.append(k)
 
             k = self.make_card(
                 start_date=datetime.datetime(year=2011, month=6, day=12),
-                done_date=datetime.datetime(year=2011, month=6, day=19))
+                done_date=datetime.datetime(year=2011, month=6, day=19), team=self.team2)
             k.save()
-            self.board1.cards.append(k)
-
-            self.board1.save()
 
 
 class StateTests(DashboardTestCase):
     def _get_target_url(self, state=None):
-        base_url = '/state/'
-        if state:
-            state_slug = slugify(state)
-            base_url = base_url + '%s/' % state_slug
+        base_url = '/'
         return base_url
 
     def test_state_page(self):
@@ -534,11 +487,21 @@ class StateTests(DashboardTestCase):
         self.assertEqual(200, res.status_code)
 
 
+class TeamTests(DashboardTestCase):
+    def _get_target_url(self, team):
+        team_slug = slugify(team)
+        return '/team/%s/' % team_slug
+
+    def test_team_page(self):
+        res = self.app.get(self._get_target_url(self.team1))
+        self.assertEqual(200, res.status_code)
+
 class HomepageTests(DashboardTestCase):
     def _get_target_url(self):
         # We have to specify a day, because otherwise just / would
         # be whatever day it is when you run the tests
-        return '/%s/%s/%s/' % (self.year, self.month, self.day)
+
+        return '/overview/%s/%s/%s/' % (self.year, self.month, self.day)
 
     def test_wip(self):
         rv = self.app.get(self._get_target_url())
@@ -578,7 +541,7 @@ class DetailPageTests(DashboardTestCase):
 
 class MonthPageTests(DashboardTestCase):
     def _get_target_url(self):
-        return '/%s/%s/' % (self.year, self.month)
+        return '/overview/%s/%s/' % (self.year, self.month)
 
     def test_wip(self):
         from kardboard.util import month_range
@@ -619,7 +582,7 @@ class MonthPageTests(DashboardTestCase):
 
 class DayPageTests(DashboardTestCase):
     def _get_target_url(self):
-        return '/%s/%s/%s/' % (self.year, self.month, self.day)
+        return '/overview/%s/%s/%s/' % (self.year, self.month, self.day)
 
     def test_done_in_week_metric(self):
         rv = self.app.get(self._get_target_url())

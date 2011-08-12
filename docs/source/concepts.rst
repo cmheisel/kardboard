@@ -26,3 +26,9 @@ Cycle time
 
 Throughput
     The number of cards that can be completed in a given time frame. The lower the cycle time, the higher the throughput. In Disney World terms, it's riders-per-hour.
+
+States
+    The user-defined steps cards go through on their way from the Backlog to Done. For some teams this may be a single step "Doing", for others it can be a very complex workflow. See :ref:`CARD_STATES`
+
+Team
+    If you're managing multiple development teams, you can use the Team concept in kardboard to have what are essentially "mini-boards" for each team while still seeing a "meta-board" that shows you cards across all states from all teams. See :ref:`CARD_TEAMS`

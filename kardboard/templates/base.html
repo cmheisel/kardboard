@@ -16,11 +16,12 @@
         <h1>{% block title %}{{ title }}{% endblock %}</h1>
 
         <p class="nav">
-            <a href="/">Overview</a>&nbsp;/&nbsp;
-            <a href="/state/">By state</a>&nbsp;/&nbsp;
+            <a href="/">Dashboard</a>&nbsp;/&nbsp;
+            <a href="/overview">Overview</a>&nbsp;/&nbsp;
             <a href="/done/">Completed cards</a>&nbsp;/&nbsp;
-            <a href="/card/add/">Add a card</a>&nbsp;/&nbsp;
-            <a href="/chart/">Charts</a>
+            <a href="/chart/">Charts</a>&nbsp;/&nbsp;
+            <a href="/card/add/">Add a card</a>
+
         </p>
         <p class="nav">
             <form action="/quick/" method="GET">

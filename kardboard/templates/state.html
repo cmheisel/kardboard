@@ -1,30 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% for data in states_data %}
-
-<div id="wip_data">
-
-{% if states_count != 1 %}
-<h2>{{ data['title'] }}</h2>
-{% endif %}
-
 {% import "card_macros.html" as card_macros %}
 
-{% if data['wip_cards']|length > 0 %}
-    {% set section_title = "Building / %s" % (data['wip_cards']|length, ) %}
-    {{ card_macros.card_table(data['wip_cards'], caption=section_title, show_state=False) }}
+{% if metrics %}
+<!-- Reference date: {{ date }} -->
+
+{% for m in metrics %}
+    <div class="metric">
+      {% for name, value in m.items() %}
+          <h2>{{ name }}</h2>
+          <p class="value">{{ value }}</p>
+      {% endfor %}
+    </div>
+    {% endfor %}
 {% endif %}
 
-{% if data['backlog_cards']|length > 0 %}
-    {% set section_title = "Planning / %s" % (data['backlog_cards']|length, ) %}
-    {{ card_macros.card_table(data['backlog_cards'], caption=section_title, show_state=False, show_priority=True, show_cycle=False) }}
-
-{% endif %}
-
-
-</div>
-
+<p class="nav">
+{% for team in config.get('CARD_TEAMS', []) %}
+    {% if team %}
+    <a href="{{ url_for('team', team_slug=team|slugify) }}">{{ team }}</a>{% if not loop.last %} / {% endif %}
+    {% endif %}
 {% endfor %}
+</p>
+
+
+{% if states_data %}
+    {% for data in states_data %}
+    {{ card_macros.state_display(data) }}
+    {% endfor %}
+{% elif state_data %}
+    {{ card_macros.state_display(state_data) }}
+{% endif %}
+
 
 {% endblock content %}

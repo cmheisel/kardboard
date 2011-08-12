@@ -93,6 +93,8 @@ The list of categories users should be able to assign cards to. Example::
     CARD_CATEGORIES = [ 'CMS', 'iPhone', 'Android', ]
     CARD_CATEGORIES = [ 'Project X', 'Project Y', 'Project Z']
 
+.. _CARD_STATES:
+
 CARD_STATES
 ^^^^^^^^^^^^^
 Default: ``[ 'Todo', 'Doing', 'Done', ]``
@@ -101,6 +103,13 @@ The list of states, or columns, that a card could be in. **The last state should
 
 .. TIP::
     When a user sets a Done date for a card, it's automatically set to the last state in your CARD_STATES setting.
+
+CARD_TEAMS
+^^^^^^^^^^^^
+Default: ``[ 'Team 1', 'Team 2', ]``
+
+The list of teams or individuals working on cards. This allows you to have "mini-boards" for each team/person while still seeing a "meta-board" that shows you cards across all states from all teams.
+
 
 CELERYD_LOG_LEVEL
 ^^^^^^^^^^^^^^^^^^

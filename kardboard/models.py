@@ -18,18 +18,6 @@ from kardboard.util import (
 )
 
 
-class Board(app.db.Document):
-    name = app.db.StringField(required=True, unique=True)
-    categories = app.db.ListField(app.db.StringField())
-    cards = app.db.ListField(app.db.EmbeddedDocumentField('Kard'))
-    slug = app.db.StringField(required=True, unique=True)
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super(Board, self).save(*args, **kwargs)
-
-
 class KardQuerySet(QuerySet):
     def done_in_week(self, year=None, month=None, day=None):
         """

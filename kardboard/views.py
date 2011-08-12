@@ -32,9 +32,9 @@ from kardboard.charts import (
 )
 
 
-@app.route('/')
-@app.route('/<int:year>/<int:month>/')
-@app.route('/<int:year>/<int:month>/<int:day>/')
+@app.route('/overview/<int:year>/<int:month>/')
+@app.route('/overview/<int:year>/<int:month>/<int:day>/')
+@app.route('/overview/')
 def dashboard(year=None, month=None, day=None):
     date = datetime.datetime.now()
     now = datetime.datetime.now()
@@ -100,28 +100,71 @@ def dashboard(year=None, month=None, day=None):
 
     return render_template('dashboard.html', **context)
 
+@app.route('/team/<team_slug>/')
+def team(team_slug=None):
+    date = datetime.datetime.now()
+    date = make_end_date(date=date)
+    teams = app.config.get('CARD_TEAMS', [])
 
-@app.route('/state/')
-@app.route('/state/<state_slug>/')
-def state(state_slug=None):
-    states = app.config.get('CARD_STATES', [])
-    state_mapping = {}
-    for state in states:
-        state_mapping[slugify(state)] = state
+    team_mapping = {}
+    for team in teams:
+        team_mapping[slugify(team)] = team
 
-    target_state = None
-    if state_slug:
-        target_state = state_mapping.get(state_slug, None)
-        if not state:
+    target_team = None
+    if team_slug:
+        target_team = team_mapping.get(team_slug, None)
+        if not team:
             abort(404)
 
-    if target_state:
-        target_states = [target_state, ]
-    else:
-        target_states = states
+    metrics = [
+        {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
+            year=date.year, month=date.month, day=date.day)},
+        {'Done this week': Kard.objects.filter(team=target_team).done_in_week(
+            year=date.year, month=date.month, day=date.day).count()},
+        {'Done this month':
+            Kard.objects.filter(team=target_team).done_in_month(
+                year=date.year, month=date.month, day=date.day).count()},
+        {'On the board': Kard.objects.filter(team=target_team).count()},
+    ]
+
+    states = app.config.get('CARD_STATES', [])
+    states_data = []
+    for state in states:
+        state_data = {}
+        wip_cards = Kard.in_progress().filter(state=state, team=target_team)
+        wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time())
+        wip_cards.reverse()
+        state_data['wip_cards'] = wip_cards
+        state_data['backlog_cards'] = Kard.backlogged().filter(state=state, team=target_team)
+        state_data['done_cards'] = Kard.objects.done().filter(state=state, team=target_team)
+        state_data['title'] = state
+        if len(state_data['wip_cards']) > 0 or \
+            state_data['backlog_cards'].count() > 0 or\
+            state_data['done_cards'].count() > 0:
+            states_data.append(state_data)
+
+    title = "%s cards" % target_team
+
+    context = {
+        'title': title,
+        'states_data': states_data,
+        'states_count': len(states_data),
+        'metrics': metrics,
+        'date': date,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    return render_template('state.html', **context)
+
+@app.route('/')
+def state():
+    date = datetime.datetime.now()
+    date = make_end_date(date=date)
+    states = app.config.get('CARD_STATES', [])
 
     states_data = []
-    for state in target_states:
+    for state in states:
         state_data = {}
         wip_cards = Kard.in_progress().filter(state=state)
         wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time())
@@ -134,18 +177,31 @@ def state(state_slug=None):
             states_data.append(state_data)
 
     title = "Cards in progress"
-    if target_state:
-        title = "Cards in %s" % (state, )
+
+    wip_cards = Kard.in_progress(date)
+    backlog_cards = Kard.backlogged(date)
+    metrics = [
+        {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
+            year=date.year, month=date.month, day=date.day)},
+        {'Done this week': Kard.objects.done_in_week(
+            year=date.year, month=date.month, day=date.day).count()},
+        {'Done this month':
+            Kard.objects.done_in_month(
+                year=date.year, month=date.month, day=date.day).count()},
+        {'On the board': wip_cards.count() + backlog_cards.count()},
+    ]
 
     context = {
         'title': title,
         'states_data': states_data,
         'states_count': len(states_data),
+        'metrics': metrics,
+        'date': date,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-    return render_template('state.html', **context)
 
+    return render_template('state.html', **context)
 
 @app.route('/done/')
 def done():
