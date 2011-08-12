@@ -1,12 +1,14 @@
 import datetime
 
-from kardboard import celery
 from kardboard.models import Kard
+from flaskext.celery import Celery
+from kardboard.app import app
 
+celery = Celery(app)
 
 @celery.task(name="tasks.update_ticket", ignore_result=True)
 def update_ticket(card_id):
-    from kardboard import app
+    from kardboard.app import app
     threshold = app.config.get('TICKET_UPDATE_THRESHOLD', 60*60)
     now = datetime.datetime.now()
 
@@ -26,7 +28,7 @@ def update_ticket(card_id):
 
 @celery.task(name="tasks.queue_updates", ignore_result=True)
 def queue_updates():
-    from kardboard import app
+    from kardboard.app import app
 
     logger = queue_updates.get_logger()
     new_cards = Kard.objects.filter(_ticket_system_updated_at__not__exists=True)
