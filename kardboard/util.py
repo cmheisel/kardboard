@@ -25,9 +25,9 @@ def get_git_version():
             ['cd %s && git describe' % location],
             stdout=subprocess.PIPE, shell=True)
         result = p.communicate()[0]
-        return result
+        return '-%s' % result
     else:
-        return 'no-git'
+        return ''
 
 
 def get_current_app():
