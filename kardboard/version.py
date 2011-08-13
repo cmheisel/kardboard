@@ -16,7 +16,13 @@ def get_git_version():
         return ''
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
-version = file(os.path.join(this_folder, 'VERSION.txt'), 'r').read()
+
+try:
+    version = file(os.path.join(this_folder, 'VERSION.txt'), 'r').read()
+except IOError:
+    print this_folder
+    os.system('ls -l %s' % this_folder)
+    raise
 
 __git_version__ = get_git_version()
 __version__ = version
