@@ -14,6 +14,10 @@ setup(
     url="https://github.com/cmheisel/kardboard",
     zip_safe=False,
     include_package_data=True,
+    package_data = {
+        # If any package contains *.txt or *.rst files, include them:
+        '': ['*.txt', '*.rst', '.html',],
+    },
     packages=find_packages(),
     classifiers=[
         "Environment :: Web Environment",
