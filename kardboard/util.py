@@ -3,7 +3,6 @@ import re
 import traceback
 import logging
 import os
-import subprocess
 
 from flaskext.mongoengine import MongoEngine
 import mongoengine
@@ -17,7 +16,7 @@ class ImproperlyConfigured(Exception):
 
 
 def get_current_app():
-    from kardboard import app
+    from kardboard.app import app
     return app
 
 

@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from mongoengine.queryset import QuerySet, Q
 
-from kardboard import app
+from kardboard.app import app
 from kardboard.util import (
     business_days_between,
     slugify,

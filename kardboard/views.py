@@ -15,7 +15,8 @@ from flask import (
     abort,
 )
 
-from kardboard import app, VERSION
+from kardboard.version import VERSION
+from kardboard.app import app
 from kardboard.models import Kard
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import (
