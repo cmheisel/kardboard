@@ -12,7 +12,7 @@
 # serve to show the default.
 
 import sys, os
-from kardboard import __version__, VERSION
+from kardboard.version import __version__, VERSION
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
