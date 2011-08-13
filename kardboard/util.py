@@ -175,8 +175,13 @@ class PortAwareMongoEngine(MongoEngine):
 
         # more settings e.g. port etc needed
 
-        self.connection = mongoengine.connect(
-            db=db, username=username, password=password, port=port)
+        try:
+            self.connection = mongoengine.connect(
+                db=db, username=username, password=password, port=port)
+        except mongoengine.connection.ConnectionError:
+            # Useful for when code is accessed, like say a sphinx docs
+            # build and there's no database running.
+            self.connection = None
 
 
 def configure_logging(app):
