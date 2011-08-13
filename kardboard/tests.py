@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 
 from kardboard.util import slugify
 
+
 class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         if os.environ.get('KARDBOARD_SETTINGS'):
@@ -86,6 +87,7 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         k = self._get_card_class()(**fields)
         return k
+
 
 class UtilTests(unittest2.TestCase):
     def test_business_days(self):
@@ -301,8 +303,8 @@ class KardTests(KardboardTestCase):
         k3 = self._make_one(key="K-3", priority=4,
             backlog_date=oldestester, start_date=None)
 
-        test_cards = [ k, k1, k2, k3 ]
-        [ c.save() for c in test_cards ]
+        test_cards = [k, k1, k2, k3]
+        [c.save() for c in test_cards]
 
         expected = [
             (k.key, k.priority),
@@ -311,7 +313,7 @@ class KardTests(KardboardTestCase):
             (k3.key, k3.priority),
         ]
 
-        actual = [(c.key, c.priority) for c in klass.backlogged() ]
+        actual = [(c.key, c.priority) for c in klass.backlogged()]
 
         self.assertEqual(expected, actual)
 
@@ -494,6 +496,7 @@ class TeamTests(DashboardTestCase):
     def test_team_page(self):
         res = self.app.get(self._get_target_url(self.team1))
         self.assertEqual(200, res.status_code)
+
 
 class HomepageTests(DashboardTestCase):
     def _get_target_url(self):

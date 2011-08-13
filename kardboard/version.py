@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+
 def get_git_version():
     p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
     returncode = os.wait()

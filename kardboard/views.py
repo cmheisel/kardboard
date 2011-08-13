@@ -98,6 +98,7 @@ def dashboard(year=None, month=None, day=None):
 
     return render_template('dashboard.html', **context)
 
+
 def team(team_slug=None):
     date = datetime.datetime.now()
     date = make_end_date(date=date)
@@ -154,6 +155,7 @@ def team(team_slug=None):
 
     return render_template('state.html', **context)
 
+
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
@@ -198,6 +200,7 @@ def state():
     }
 
     return render_template('state.html', **context)
+
 
 def done():
     cards = Kard.objects.done()
@@ -479,7 +482,6 @@ def robots():
     content_type = response.headers['Content-type']
     content_type.replace('text/html', 'text/plain')
     return response
-
 
 
 def chart_flow(months=3, end=None):

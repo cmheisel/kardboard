@@ -12,6 +12,7 @@ import mongoengine
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
+
 class ImproperlyConfigured(Exception):
     pass
 
@@ -178,7 +179,6 @@ class PortAwareMongoEngine(MongoEngine):
             db=db, username=username, password=password, port=port)
 
 
-
 def configure_logging(app):
     LEVELS = {'debug': logging.DEBUG,
               'info': logging.INFO,
@@ -205,4 +205,3 @@ def configure_logging(app):
         new_handler.setFormatter(logging.Formatter(log_format))
 
         app.logger.addHandler(new_handler)
-

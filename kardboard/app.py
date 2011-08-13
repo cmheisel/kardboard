@@ -11,8 +11,6 @@ from kardboard.util import (
     LazyView
 )
 
-from kardboard.version import __version__, VERSION
-
 
 def get_app():
     app = Flask('kardboard')
@@ -33,6 +31,7 @@ def get_app():
 
 app = get_app()
 cache = Cache(app)
+
 
 def url(url_rule, import_name, **options):
     view = LazyView('kardboard.views.' + import_name)
