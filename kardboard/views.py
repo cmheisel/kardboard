@@ -33,9 +33,6 @@ from kardboard.charts import (
 )
 
 
-@app.route('/overview/<int:year>/<int:month>/')
-@app.route('/overview/<int:year>/<int:month>/<int:day>/')
-@app.route('/overview/')
 def dashboard(year=None, month=None, day=None):
     date = datetime.datetime.now()
     now = datetime.datetime.now()
@@ -101,7 +98,6 @@ def dashboard(year=None, month=None, day=None):
 
     return render_template('dashboard.html', **context)
 
-@app.route('/team/<team_slug>/')
 def team(team_slug=None):
     date = datetime.datetime.now()
     date = make_end_date(date=date)
@@ -158,7 +154,6 @@ def team(team_slug=None):
 
     return render_template('state.html', **context)
 
-@app.route('/')
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
@@ -204,7 +199,6 @@ def state():
 
     return render_template('state.html', **context)
 
-@app.route('/done/')
 def done():
     cards = Kard.objects.done()
     cards = sorted(cards, key=lambda c: c.done_date)
@@ -220,7 +214,6 @@ def done():
     return render_template('done.html', **context)
 
 
-@app.route('/done/report/<int:year_number>/<int:month_number>/')
 def done_report(year_number, month_number):
     cards = Kard.objects.done_in_month(year_number, month_number)
     cards = sorted(cards, key=lambda c: c.done_date)
@@ -264,7 +257,6 @@ def _init_card_form(*args, **kwargs):
     return f
 
 
-@app.route('/card/add/', methods=["GET", "POST"])
 def card_add():
     f = _init_new_card_form(request.values)
     card = Kard()
@@ -295,7 +287,6 @@ def card_add():
     return render_template('card-add.html', **context)
 
 
-@app.route('/card/<key>/edit/', methods=["GET", "POST"])
 def card_edit(key):
     try:
         card = Kard.objects.get(key=key)
@@ -320,7 +311,6 @@ def card_edit(key):
     return render_template('card-add.html', **context)
 
 
-@app.route('/card/<key>/', methods=["GET", "POST"])
 def card(key):
     try:
         card = Kard.objects.get(key=key)
@@ -336,7 +326,6 @@ def card(key):
     return render_template('card.html', **context)
 
 
-@app.route('/card/<key>/delete/', methods=["GET", "POST"])
 def card_delete(key):
     try:
         card = Kard.objects.get(key=key)
@@ -358,7 +347,6 @@ def card_delete(key):
     return render_template('card-delete.html', **context)
 
 
-@app.route('/quick/', methods=["GET"])
 def quick():
     key = request.args.get('key', None)
     if not key:
@@ -384,7 +372,6 @@ def quick():
     return redirect(url)
 
 
-@app.route('/card/export/')
 def card_export():
     output = cStringIO.StringIO()
     export = csv.DictWriter(output, Kard.EXPORT_FIELDNAMES)
@@ -412,7 +399,6 @@ def card_export():
     return response
 
 
-@app.route('/chart/')
 def chart_index():
     context = {
         'title': "Charts",
@@ -422,8 +408,6 @@ def chart_index():
     return render_template('charts.html', **context)
 
 
-@app.route('/chart/throughput/')
-@app.route('/chart/throughput/<int:months>/')
 def chart_throughput(months=6, start=None):
     start = start or datetime.datetime.today()
 
@@ -450,9 +434,6 @@ def chart_throughput(months=6, start=None):
     return render_template('chart-throughput.html', **context)
 
 
-@app.route('/chart/cycle/')
-@app.route('/chart/cycle/<int:months>/')
-@app.route('/chart/cycle/from/<int:year>/<int:month>/<int:day>/')
 def chart_cycle(months=6, year=None, month=None, day=None):
     today = datetime.datetime.today()
     if day:
@@ -493,7 +474,6 @@ def chart_cycle(months=6, year=None, month=None, day=None):
     return render_template('chart-cycle.html', **context)
 
 
-@app.route('/robots.txt')
 def robots():
     response = make_response(render_template('robots.txt'))
     content_type = response.headers['Content-type']
@@ -501,8 +481,7 @@ def robots():
     return response
 
 
-@app.route('/chart/flow/')
-@app.route('/chart/flow/<int:months>/')
+
 def chart_flow(months=3, end=None):
     end = end or datetime.datetime.now()
     months_ranges = month_ranges(end, months)
