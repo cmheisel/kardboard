@@ -2,6 +2,7 @@ import datetime
 import re
 import traceback
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 
 from flaskext.mongoengine import MongoEngine
@@ -194,7 +195,7 @@ def configure_logging(app):
     if app.config.get('LOG_FILE'):
         log_file = app.config['LOG_FILE']
         log_file = os.path.abspath(os.path.expanduser(log_file))
-        new_handler = logging.handlers.RotatingFileHandler(
+        new_handler = RotatingFileHandler(
             log_file, maxBytes=100000, backupCount=3)
         if app.config.get('LOG_LEVEL'):
             new_level = app.config['LOG_LEVEL']
