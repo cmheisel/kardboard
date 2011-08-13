@@ -8,7 +8,7 @@ def get_git_version():
     if has_git == 0:
         location = os.path.dirname(os.path.abspath(__file__))
         p = subprocess.Popen(
-            ['cd %s && git describe' % location],
+            ['cd %s && git describe --tags' % location],
             stdout=subprocess.PIPE, shell=True)
         result = p.communicate()[0]
         return '-%s' % result
