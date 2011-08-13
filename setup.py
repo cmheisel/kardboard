@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
-version_file = os.path.join(this_folder, 'kardboard', 'VERSION')
+version_file = os.path.join(this_folder, 'kardboard', 'VERSION.txt')
 
 setup(
     name="kardboard",
