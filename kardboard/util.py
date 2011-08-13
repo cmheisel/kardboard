@@ -15,20 +15,6 @@ from dateutil.relativedelta import relativedelta
 class ImproperlyConfigured(Exception):
     pass
 
-def get_git_version():
-    p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
-    returncode = os.wait()
-    has_git = returncode[-1] if returncode else -1
-    if has_git == 0:
-        location = os.path.dirname(os.path.abspath(__file__))
-        p = subprocess.Popen(
-            ['cd %s && git describe' % location],
-            stdout=subprocess.PIPE, shell=True)
-        result = p.communicate()[0]
-        return '-%s' % result
-    else:
-        return ''
-
 
 def get_current_app():
     from kardboard import app

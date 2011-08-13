@@ -1,6 +1,18 @@
 import os
 
-from kardboard.util import get_git_version
+def get_git_version():
+    p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
+    returncode = os.wait()
+    has_git = returncode[-1] if returncode else -1
+    if has_git == 0:
+        location = os.path.dirname(os.path.abspath(__file__))
+        p = subprocess.Popen(
+            ['cd %s && git describe' % location],
+            stdout=subprocess.PIPE, shell=True)
+        result = p.communicate()[0]
+        return '-%s' % result
+    else:
+        return ''
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
 version = file(os.path.join(this_folder, 'VERSION.txt'), 'r').read()
