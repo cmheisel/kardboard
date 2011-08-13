@@ -76,6 +76,7 @@ class TestTicketHelper(TicketHelper):
         }
         self.card._ticket_system_data = test_data
 
+
 class JIRAHelper(TicketHelper):
     def __init__(self, config, kard):
         super(JIRAHelper, self).__init__(config, kard)
@@ -109,7 +110,6 @@ class JIRAHelper(TicketHelper):
             self.Client = Client
             self.connect()
         return self._service
-
 
     def connect(self):
         auth_key = "offline_auth_%s" % self.cache_prefix

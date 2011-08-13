@@ -104,6 +104,8 @@ The list of states, or columns, that a card could be in. **The last state should
 .. TIP::
     When a user sets a Done date for a card, it's automatically set to the last state in your CARD_STATES setting.
 
+.. _CARD_TEAMS:
+
 CARD_TEAMS
 ^^^^^^^^^^^^
 Default: ``[ 'Team 1', 'Team 2', ]``

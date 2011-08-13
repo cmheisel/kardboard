@@ -1,4 +1,3 @@
-import os
 from setuptools import setup, find_packages
 
 version = __import__('kardboard.version', fromlist=['version', ]).version
@@ -14,9 +13,9 @@ setup(
     url="https://github.com/cmheisel/kardboard",
     zip_safe=False,
     include_package_data=True,
-    package_data = {
+    package_data={
         # If any package contains *.txt or *.rst files, include them:
-        '': ['*.txt', '*.rst', '.html',],
+        '': ['*.txt', '*.rst', '.html'],
     },
     packages=find_packages(),
     classifiers=[

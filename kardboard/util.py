@@ -5,14 +5,29 @@ import logging
 import os
 
 from flaskext.mongoengine import MongoEngine
+from werkzeug import import_string, cached_property
 import mongoengine
 
 
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
+
 class ImproperlyConfigured(Exception):
     pass
+
+
+class LazyView(object):
+    def __init__(self, import_name):
+        self.__module__, self.__name__ = import_name.rsplit('.', 1)
+        self.import_name = import_name
+
+    @cached_property
+    def view(self):
+        return import_string(self.import_name)
+
+    def __call__(self, *args, **kwargs):
+        return self.view(*args, **kwargs)
 
 
 def get_current_app():
@@ -164,7 +179,6 @@ class PortAwareMongoEngine(MongoEngine):
             db=db, username=username, password=password, port=port)
 
 
-
 def configure_logging(app):
     LEVELS = {'debug': logging.DEBUG,
               'info': logging.INFO,
@@ -191,4 +205,3 @@ def configure_logging(app):
         new_handler.setFormatter(logging.Formatter(log_format))
 
         app.logger.addHandler(new_handler)
-
