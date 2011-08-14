@@ -40,7 +40,7 @@ CELERY_IMPORTS = ('kardboard.tasks', )
 TICKET_HELPER = 'kardboard.tickethelpers.NullHelper'
 
 # How old can tickets get before we refresh
-TICKET_UPDATE_THRESHOLD = 60 * 5
+TICKET_UPDATE_THRESHOLD = 60 * 10
 
 # How often should we look for old tickets and queue them for updates
 CELERYBEAT_SCHEDULE = {
