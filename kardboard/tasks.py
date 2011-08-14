@@ -37,10 +37,12 @@ def queue_updates():
     now = datetime.datetime.now()
     old_time = now - datetime.timedelta(seconds=app.config.get('TICKET_UPDATE_THRESHOLD', 60 * 60))
 
-    old_cards = Kard.objects.filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
+    old_cards = Kard.objects.filter(_ticket_system_updated_at__lte=old_time, done_date=None).order_by('_ticket_system_updated_at')
+    old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
     [update_ticket.delay(k.id) for k in new_cards]
     [update_ticket.delay(k.id) for k in old_cards.limit(50)]
+    [update_ticket.delay(k.id) for k in old_done_cards.limit(20)]
 
-    logger.info("Queued updates for %s new and %s old tickets" %
-        (new_cards.count(), old_cards.count()))
+    logger.info("Queued updates -- NEW: %s EXISTING: %s DONE: %s" %
+        (new_cards.count(), old_cards.count(), old_done_cards.count()))
