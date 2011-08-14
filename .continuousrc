@@ -1,4 +1,4 @@
 EXTRA_PACKAGES="gcc libevent-1.4-2 libevent-dev"
 PIP_REQUIREMENTS="requirements.txt"
-TEST_COMMAND="kardboard/tests.py"
+TEST_COMMAND="kardboard/runtests.py"
 #COVERAGE_COMMAND='coverage run --omit "env*" --'
