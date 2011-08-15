@@ -15,6 +15,7 @@ celery==2.2.7
 Flask-Celery==2.2.5
 python-memcached==1.47
 git+git://github.com/sbook/flask-mongoengine.git@a14907896fdaef5cc25deae5c3546c72532e0e4a#egg=Flask-MongoEngine
+markdown2==1.0.1.19
 
 
 #Needed for deployment
@@ -32,3 +33,4 @@ tdaemon==0.1.1
 #Needed for docs
 Pygments==1.4
 Sphinx==1.0.7
+
