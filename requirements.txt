@@ -1,8 +1,6 @@
 Flask==0.6.1
 Flask-WTF==0.5.2
 Jinja2==2.5.5
-Pygments==1.4
-Sphinx==1.0.7
 WTForms==0.6.3
 Werkzeug==0.6.2
 mongoengine==0.4
@@ -11,19 +9,26 @@ unittest2==0.5.1
 python-dateutil==1.5.0
 pygooglechart==0.3.0
 suds==0.4
-mock==0.7.2
-
 translitcodec==0.2 #Used by util.slugify
-
 Flask-Cache==0.3.3
-
 celery==2.2.7
 Flask-Celery==2.2.5
 python-memcached==1.47
 git+git://github.com/sbook/flask-mongoengine.git@a14907896fdaef5cc25deae5c3546c72532e0e4a#egg=Flask-MongoEngine
-Fabric==1.2.0
 
 
 #Needed for deployment
 gevent==0.13.6
 gunicorn==0.12.2
+Fabric==1.2.0
+
+
+#Needed for testing
+mock==0.7.2
+unittest2==0.5.1
+nosegrowl2==0.2
+tdaemon==0.1.1
+
+#Needed for docs
+Pygments==1.4
+Sphinx==1.0.7
