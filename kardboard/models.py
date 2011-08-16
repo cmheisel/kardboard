@@ -18,12 +18,13 @@ from kardboard.util import (
 
 
 class KardQuerySet(QuerySet):
-    def done_in_week(self, year=None, month=None, day=None):
+    def done_in_week(self, year=None, month=None, day=None, date=None):
         """
         Kards that were completed in the week of the specified day.
         """
-
-        date = munge_date(year, month, day)
+        if not date:
+            date = munge_date(year, month, day)
+            date = make_end_date(date=date)
         start_date, end_date = week_range(date)
 
         results = self.done().filter(done_date__lte=date,
@@ -76,12 +77,13 @@ class KardQuerySet(QuerySet):
         """
         return self.filter(done_date__exists=True)
 
-    def done_in_month(self, year=None, month=None, day=None):
+    def done_in_month(self, year=None, month=None, day=None, date=None):
         """
         Kards that have been completed in the specified month.
         """
-
-        date = munge_date(year=year, month=month, day=day)
+        if not date:
+            date = munge_date(year=year, month=month, day=day)
+            date = make_end_date(date=date)
 
         start_date, faux_end_date = month_range(date)
 

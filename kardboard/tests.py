@@ -245,7 +245,24 @@ class KardTests(KardboardTestCase):
 
     def test_completed_in_month(self):
         klass = self._get_target_class()
-        self.assertEqual(1,
+        klass.objects.all().delete()
+
+        done_date = datetime.date(
+            year=2011, month=6, day=15)
+        card = self._make_one(done_date=done_date)
+        card.save()
+
+        done_date = datetime.date(
+            year=2011, month=6, day=17)
+        card = self._make_one(done_date=done_date)
+        card.save()
+
+        done_date = datetime.date(
+            year=2011, month=6, day=30)
+        card = self._make_one(done_date=done_date)
+        card.save()
+
+        self.assertEqual(3,
             klass.objects.done_in_month(year=2011, month=6, day=30).count())
 
     def test_moving_cycle_time(self):
@@ -259,6 +276,13 @@ class KardTests(KardboardTestCase):
 
     def test_done_in_week(self):
         klass = self._get_target_class()
+        klass.objects.all().delete()
+
+        done_date = datetime.date(
+            year=2011, month=6, day=15)
+        card = self._make_one(done_date=done_date)
+        card.save()
+
         expected = 1
         actual = klass.objects.done_in_week(
             year=2011, month=6, day=15)
