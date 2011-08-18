@@ -22,6 +22,7 @@ def update_ticket(card_id):
         if not diff or diff and diff.seconds >= threshold:
             logger.info("update_ticket running for %s" % (k.key, ))
             k.ticket_system.actually_update()
+
     except Kard.DoesNotExist:
         logger.error(
             "update_ticket: Kard with id %s does not exist" % (card_id, ))
@@ -41,8 +42,8 @@ def queue_updates():
     old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
     [update_ticket.delay(k.id) for k in new_cards]
-    [update_ticket.delay(k.id) for k in old_cards.limit(50)]
-    [update_ticket.delay(k.id) for k in old_done_cards.limit(20)]
+    [update_ticket.delay(k.id) for k in old_cards.limit(100)]
+    [update_ticket.delay(k.id) for k in old_done_cards.limit(50)]
 
     logger.info("Queued updates -- NEW: %s EXISTING: %s DONE: %s" %
         (new_cards.count(), old_cards.count(), old_done_cards.count()))
