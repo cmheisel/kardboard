@@ -78,6 +78,8 @@ class TestTicketHelper(TicketHelper):
 
 
 class JIRAHelper(TicketHelper):
+    clients = {}
+
     def __init__(self, config, kard):
         super(JIRAHelper, self).__init__(config, kard)
         self.logger = app.logger
@@ -106,8 +108,6 @@ class JIRAHelper(TicketHelper):
     @property
     def service(self):
         if self._service is None:
-            from suds.client import Client
-            self.Client = Client
             self.connect()
         return self._service
 
@@ -115,7 +115,20 @@ class JIRAHelper(TicketHelper):
         auth_key = "offline_auth_%s" % self.cache_prefix
         auth = cache.get(auth_key)
 
-        client = self.Client(self.wsdl_url)
+        client = self.clients.get(self.wsdl_url, None)
+        if not client:
+            from suds.client import Client
+            client = Client(self.wsdl_url)
+
+            #We cache the client because there's
+            #major overhead in instantiating
+            #and the initial connection
+            #and since this mostly is run
+            #by a long running celeryd
+            #process a simple in-memory
+            #cache suffices
+            self.clients[self.wsdl_url] = client
+
         if not auth:
             self.logger.warn("Cache miss for %s" % auth_key)
             auth = client.service.login(self.username, self.password)
