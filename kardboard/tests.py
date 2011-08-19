@@ -72,6 +72,10 @@ class KardboardTestCase(unittest2.TestCase):
         from kardboard.models import Kard
         return Kard
 
+    def _get_record_class(self):
+        from kardboard.models import DailyRecord
+        return DailyRecord
+
     def _make_unique_key(self):
         key = random.randint(1, 10000)
         if key not in self.used_keys:
@@ -89,6 +93,66 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         k = self._get_card_class()(**fields)
         return k
+
+    def make_record(self, date, **kwargs):
+        fields = {
+            'date': date,
+            'backlog': 3,
+            'in_progress': 8,
+            'done': 10,
+            'completed': 1,
+            'moving_cycle_time': 12,
+            'moving_lead_time': 16,
+        }
+        fields.update(**kwargs)
+        r = self._get_record_class()(**fields)
+        return r
+
+
+class DailyRecordTests(KardboardTestCase):
+    def setUp(self):
+        super(DailyRecordTests, self).setUp()
+
+        self.year = 2011
+        self.month = 8
+        self.day = 15
+
+        self.date = datetime.datetime(
+            year=self.year, month=self.month,
+            day=self.day)
+        self.date2 = self.date + relativedelta(days=7)
+        self.date3 = self.date2 + relativedelta(days=14)
+
+        self.dates = [self.date, self.date2, self.date3]
+
+    def _set_up_days(self):
+        k = self.make_card(
+            backlog_date=self.date,
+            start_date=self.date2,
+            done_date=self.date3)
+        k.save()
+
+    def _get_target_class(self):
+        from kardboard.models import DailyRecord
+        return DailyRecord
+
+    def test_calculate(self):
+        klass = self._get_target_class()
+        for date in self.dates:
+            klass.calculate(date)
+
+        self.assertEqual(len(self.dates), klass.objects.all().count())
+
+    def test_batch_update(self):
+        klass = self._get_target_class()
+        from kardboard.tasks import update_daily_records
+
+        update_daily_records.apply(args=[7, ], throw=True)
+        self.assertEqual(7, klass.objects.count())
+
+        # update_daily_records should be idempotent
+        update_daily_records.apply(args=[7, ], throw=True)
+        self.assertEqual(7, klass.objects.count())
 
 
 class UtilTests(unittest2.TestCase):
@@ -461,8 +525,9 @@ class DashboardTestCase(KardboardTestCase):
     def setUp(self):
         super(DashboardTestCase, self).setUp()
 
-        from kardboard.models import Kard
+        from kardboard.models import Kard, DailyRecord
         self.Kard = Kard
+        self.DailyRecord = DailyRecord
         self.year = 2011
         self.month = 6
         self.day = 15
@@ -502,6 +567,22 @@ class DashboardTestCase(KardboardTestCase):
                 start_date=datetime.datetime(year=2011, month=6, day=12),
                 done_date=datetime.datetime(year=2011, month=6, day=19), team=self.team2)
             k.save()
+
+    def _set_up_records(self):
+        from kardboard.util import make_start_date
+        from kardboard.util import make_end_date
+
+        start_date = datetime.datetime(2011, 1, 1)
+        end_date = datetime.datetime(2011, 6, 30)
+
+        start_date = make_start_date(date=start_date)
+        end_date = make_end_date(date=end_date)
+
+        current_date = start_date
+        while current_date <= end_date:
+            r = self.make_record(current_date)
+            r.save()
+            current_date = current_date + relativedelta(days=1)
 
 
 class StateTests(DashboardTestCase):
@@ -937,7 +1018,11 @@ class CycleTimeHistoryTests(KardboardTestCase):
         self.assertIn(expected, res.data)
 
 
-class CumulativeFlowTests(KardboardTestCase):
+class CumulativeFlowTests(DashboardTestCase):
+    def setUp(self):
+        super(CumulativeFlowTests, self).setUp()
+        self._set_up_records()
+
     def _get_target_url(self, months=None):
         base_url = '/chart/flow/'
         if months:

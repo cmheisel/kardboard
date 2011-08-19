@@ -1,5 +1,7 @@
 import datetime
 
+from dateutil import relativedelta
+
 from kardboard.models import Kard
 from flaskext.celery import Celery
 from kardboard.app import app
@@ -47,3 +49,14 @@ def queue_updates():
 
     logger.info("Queued updates -- NEW: %s EXISTING: %s DONE: %s" %
         (new_cards.count(), old_cards.count(), old_done_cards.count()))
+
+
+@celery.task(name="tasks.update_daily_records", ignore_result=True)
+def update_daily_records(days=365):
+    from kardboard.models import DailyRecord
+
+    now = datetime.datetime.now()
+
+    for i in xrange(0, days):
+        target_date = now + relativedelta.relativedelta(days=i)
+        DailyRecord.calculate(target_date)

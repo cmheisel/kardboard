@@ -156,10 +156,25 @@ CELERYBEAT_SCHEDULE
 Default::
 
     {
+        # How often should we look for old tickets and queue them for updates
         'load-update-queue': {
             'task': 'tasks.queue_updates',
             'schedule': timedelta(seconds=90),
         },
+        # How often (probably nighly) should we update daily records for the past
+        # 365 days
+        'calc-daily-records-year': {
+            'task': 'tasks.update_daily_records',
+            'schedule': timedelta(seconds=86400),
+            'args': (365, ),
+        },
+        # How often should we update daily records for the past
+        # 7 days
+        'calc-daily-records-week': {
+            'task': 'tasks.update_daily_records',
+            'schedule': timedelta(seconds=90),
+            'args': (7, ),
+        }
     }
 
 If you're using a :ref:`TICKET_HELPER` then you probably don't want to adjust this setting. The `timedelta(seconds=90)` determines how often kardboard should check for out of date cards. See  :ref:`TICKET_UPDATE_THRESHOLD` for more.
