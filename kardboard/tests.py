@@ -996,7 +996,10 @@ class ThroughputChartTests(KardboardTestCase):
         self.assertEqual(200, res.status_code)
 
 
-class CycleTimeHistoryTests(KardboardTestCase):
+class CycleTimeHistoryTests(DashboardTestCase):
+    def setUp(self):
+        super(CycleTimeHistoryTests, self).setUp()
+        self._set_up_records()
 
     def _get_target_url(self, months=None, date=None):
         base_url = '/chart/cycle/'

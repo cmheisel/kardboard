@@ -1,9 +1,29 @@
+import base64
+import md5
+
+import requests
+
 from pygooglechart import StackedVerticalBarChart, SimpleLineChart, Axis
 
 
 class KardboardChartMixer(object):
     def find_even_number(self, num, divisor=10):
         return num - (num % divisor)
+
+    @property
+    def cache_key(self):
+        return str(md5.new(self.get_url()).hexdigest())
+
+    def b64_image_src(self):
+        from kardboard.app import cache
+        image_src = cache.get(self.cache_key)
+        if not image_src:
+            b64_image_src = "data:image/png;base64,%s"
+            r = requests.post(self.BASE_URL, data='&'.join(self.get_url_bits()))
+            b64_image_src = b64_image_src % base64.b64encode(r.content)
+            cache.set(self.cache_key, b64_image_src, 60 * 10)
+            image_src = b64_image_src
+        return image_src
 
 
 class ThroughputChart(StackedVerticalBarChart, KardboardChartMixer):
@@ -46,9 +66,16 @@ class MovingCycleTimeChart(SimpleLineChart, KardboardChartMixer):
     def add_first_line(self, daily_average):
         self.set_x_range = (0, len(daily_average))
         self.add_data([m[1] for m in daily_average])
-        self.set_axis_labels(Axis.BOTTOM,
-                [m[0].strftime("%m/%d") for m in daily_average])
 
+        x_labels = []
+        counter = 1
+        for row in daily_average:
+            if counter % 7 == 0 or counter == 1:
+                x_labels.append(row[0].strftime("%m/%d"))
+            else:
+                x_labels.append('')
+            counter = counter + 1
+        self.set_axis_labels(Axis.BOTTOM, x_labels)
         self.setup_grid(daily_average)
 
     def add_line(self, daily_average):
@@ -71,7 +98,7 @@ class CumulativeFlowChart(MovingCycleTimeChart):
         x_labels = []
         counter = 1
         for row in dataset:
-            if counter % 7 == 0 or counter == 1:
+            if counter % 14 == 0 or counter == 1:
                 x_labels.append(row.date.strftime("%m/%d"))
             else:
                 x_labels.append('')

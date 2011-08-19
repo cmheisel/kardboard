@@ -17,11 +17,12 @@ from flask import (
 
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard
+from kardboard.models import Kard, DailyRecord
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import (
     month_range,
     slugify,
+    make_start_date,
     make_end_date,
     month_ranges,
     log_exception,
@@ -447,18 +448,15 @@ def chart_cycle(months=6, year=None, month=None, day=None):
         end_day = today
 
     start_day = end_day - relativedelta.relativedelta(months=months)
+    start_day = make_start_date(date=start_day)
+    end_day = make_end_date(date=end_day)
 
-    daily_moving_averages = []
-    daily_moving_lead = []
-    day_context = start_day
-    while day_context <= end_day:
-        mean = Kard.objects.moving_cycle_time(year=day_context.year,
-            month=day_context.month, day=day_context.day)
-        lead = Kard.objects.moving_lead_time(year=day_context.year,
-            month=day_context.month, day=day_context.day)
-        daily_moving_averages.append((day_context, mean))
-        daily_moving_lead.append((day_context, lead))
-        day_context = day_context + relativedelta.relativedelta(days=7)
+    records = DailyRecord.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day)
+
+    daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
+    daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
 
     chart = MovingCycleTimeChart(900, 300)
     chart.add_first_line(daily_moving_lead)
@@ -488,31 +486,25 @@ def chart_flow(months=3, end=None):
     end = end or datetime.datetime.now()
     months_ranges = month_ranges(end, months)
 
-    start_day = months_ranges[0][0]
+    start_day = make_start_date(date=months_ranges[0][0])
+    end_day = make_end_date(date=end)
 
-    FlowRecord = namedtuple('FlowRecord',
-        'date backlog in_progress done backlog_cum in_progress_cum')
-    day_context = start_day
-    rows = []
-    while day_context <= end:
-        backlog = Kard.backlogged(day_context).count()
-        in_progress = Kard.in_progress(day_context).count()
-        done = Kard.objects.filter(done_date__lte=day_context).count()
-        f = FlowRecord(day_context, backlog, in_progress, done,
-            backlog + in_progress + done, in_progress + done)
-        rows.append(f)
-        day_context = day_context + relativedelta.relativedelta(days=1)
+    records = DailyRecord.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day)
 
     chart = CumulativeFlowChart(900, 300)
-    chart.add_data([f.backlog_cum for f in rows])
-    chart.add_data([f.in_progress_cum for f in rows])
-    chart.add_data([f.done for f in rows])
-    chart.setup_grid(rows)
+    chart.add_data([r.backlog_cum for r in records])
+    chart.add_data([r.in_progress_cum for r in records])
+    chart.add_data([r.done for r in records])
+    chart.setup_grid(records)
+
+    records.order_by('-date')
     context = {
         'title': "Cumulative Flow",
         'updated_at': datetime.datetime.now(),
         'chart': chart,
-        'flowdata': rows,
+        'flowdata': records,
         'version': VERSION,
     }
 
