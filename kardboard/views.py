@@ -135,7 +135,7 @@ def team(team_slug=None):
         wip_cards.reverse()
         state_data['wip_cards'] = wip_cards
         state_data['backlog_cards'] = Kard.backlogged().filter(state=state, team=target_team)
-        state_data['done_cards'] = Kard.objects.done().filter(state=state, team=target_team)
+        state_data['done_cards'] = Kard.objects.done().filter(state=state, team=target_team).order_by('-done_date')
         state_data['title'] = state
         if len(state_data['wip_cards']) > 0 or \
             state_data['backlog_cards'].count() > 0 or\
