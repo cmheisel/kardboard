@@ -37,6 +37,7 @@
         <li><strong>Backlog date:</strong> {{ none_or_date(card.backlog_date) }}</li>
         <li><strong>Start date:</strong> {{ none_or_date(card.start_date) }}</li>
         <li><strong>Done date:</strong> {{ none_or_date(card.done_date) }}</li>
+        <li><strong>Team:</strong> {{ card.team }}</li>
       </ul>
 
       {% if card.ticket_system_data %}
