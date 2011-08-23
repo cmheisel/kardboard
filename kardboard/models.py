@@ -268,6 +268,39 @@ class Kard(app.db.Document):
             today = datetime.datetime.now()
         return business_days_between(self.start_date, today)
 
+    @property
+    def cycle_goal(self):
+        goal_range = app.config.get('CYCLE_TIME_GOAL', ())
+        try:
+            lower, upper = goal_range
+        except ValueError:
+            return None
+        return lower, upper
+
+    @property
+    def cycle_in_goal(self):
+        if self.cycle_goal:
+            lower, upper = self.cycle_goal
+            if self.done_date:
+                current = self.cycle_time
+            else:
+                current = self.current_cycle_time()
+            if current >= lower and current <= upper:
+                return True
+        return False
+
+    @property
+    def cycle_over_goal(self):
+        if self.cycle_goal:
+            lower, upper = self.cycle_goal
+            if self.done_date:
+                current = self.cycle_time
+            else:
+                current = self.current_cycle_time()
+            if current > upper:
+                return True
+        return False
+
     def __unicode__(self):
         backlog, start, done = self.backlog_date, self.start_date, \
             self.done_date

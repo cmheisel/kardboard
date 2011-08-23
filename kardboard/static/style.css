@@ -133,6 +133,14 @@ table .key_col {
     width: 20%;
 }
 
+table td.cycle_in_goal {
+    background-color: #F5E3CB;
+}
+
+table td.cycle_over_goal {
+    background-color: #FCB59D;
+}
+
 form table {
     width: 50%;
     margin: 0 25% 20px 25%;

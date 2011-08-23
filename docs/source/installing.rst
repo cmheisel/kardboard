@@ -112,6 +112,15 @@ Default: ``[ 'Team 1', 'Team 2', ]``
 
 The list of teams or individuals working on cards. This allows you to have "mini-boards" for each team/person while still seeing a "meta-board" that shows you cards across all states from all teams.
 
+CYCLE_TIME_GOAL
+^^^^^^^^^^^^^^^^
+Default: No default
+
+A Python two-element tuple containing the lower and upper bounds of a cycle time goal for the board. Used to highlight cards in the range and beyond the range.::
+
+    CYCYLE_TIME_GOAL = (10, 15)
+    CYCYLE_TIME_GOAL = (15, 15)
+
 
 CELERYD_LOG_LEVEL
 ^^^^^^^^^^^^^^^^^^

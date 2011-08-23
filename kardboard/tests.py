@@ -408,6 +408,19 @@ class KardTests(KardboardTestCase):
         self.assertEqual(expected, actual)
 
 
+class KardWarningTests(KardTests):
+    def setUp(self):
+        super(KardWarningTests, self).setUp()
+
+        lower = self.wip_card.current_cycle_time() - 1
+        upper = self.wip_card.current_cycle_time() + 5
+        self.config['CYCLE_TIME_GOAL'] = (lower, upper)
+
+    def test_warning(self):
+        self.assertEqual(True, self.wip_card.cycle_in_goal)
+        self.assertEqual(False, self.wip_card.cycle_over_goal)
+
+
 class JIRAHelperTests(KardboardTestCase):
     def setUp(self):
         super(JIRAHelperTests, self).setUp()

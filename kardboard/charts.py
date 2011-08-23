@@ -48,8 +48,14 @@ class MovingCycleTimeChart(SimpleLineChart, KardboardChartMixer):
         super(MovingCycleTimeChart, self).__init__(*args, **kwargs)
         self.set_colours(['DC3912', '3366CC'])
 
-        self.desired_min = 10
-        self.desired_max = 15
+        from kardboard.app import app
+        goal = app.config.get('CYCLE_TIME_GOAL', ())
+        if goal:
+            self.desired_min = goal[0]
+            self.desired_max = goal[1]
+        else:
+            self.desired_max = 0
+            self.desired_min = 0
 
     def setup_grid(self, dataset):
         max_y = max(dataset, key=lambda x: x[1])[1]
