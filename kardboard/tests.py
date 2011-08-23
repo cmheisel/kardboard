@@ -1009,6 +1009,33 @@ class ThroughputChartTests(KardboardTestCase):
         self.assertEqual(200, res.status_code)
 
 
+class CycleDistributionTests(KardboardTestCase):
+    def _get_target_url(self, months=None):
+        base_url = '/chart/cycle/distribution/'
+        if months:
+            base_url = base_url = "%s/" % months
+        return base_url
+
+    def setUp(self):
+        super(CycleDistributionTests, self).setUp()
+
+        for i in xrange(0, 30):
+            today = datetime.datetime.now()
+            backlog_date = today - relativedelta(days=2 + i)
+            start_date = today - relativedelta(days=1 + i)
+            done_date = today
+            k = self.make_card(
+                backlog_date=backlog_date,
+                start_date=start_date,
+                done_date=done_date,)
+            k.save()
+
+    def test_distribution(self):
+        target_url = self._get_target_url()
+        res = self.app.get(target_url)
+        self.assertEqual(200, res.status_code)
+
+
 class CycleTimeHistoryTests(DashboardTestCase):
     def setUp(self):
         super(CycleTimeHistoryTests, self).setUp()

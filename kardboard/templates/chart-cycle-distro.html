@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if not error %}
+<img src="{{ chart.get_url() }}" />
+{% endif %}
+
+<div id="wip_data">
+{% if error %}
+    <h3>{{ error }}</h3>
+{% else %}
+<table>
+    <tr>
+    	<th>Range</th>
+    	<th>% of cards</th>
+    </tr>
+
+    {% for row in distro %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+    	<td>{{ row[0] }}</td>
+    	<td>{{ "%.0f%%"|format(row[1]*100) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+</div>
+{% endblock %}

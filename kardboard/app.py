@@ -26,7 +26,6 @@ def get_app():
     app.jinja_env.filters['slugify'] = slugify
     app.jinja_env.filters['timesince'] = timesince
 
-
     configure_logging(app)
 
     return app
@@ -51,6 +50,8 @@ url('/chart/throughput/', 'chart_throughput')
 url('/chart/throughput/<int:months>/', 'chart_throughput')
 url('/chart/cycle/', 'chart_cycle')
 url('/chart/cycle/<int:months>/', 'chart_cycle')
+url('/chart/cycle/distribution/', 'chart_cycle_distribution')
+url('/chart/cycle/distribution/<int:months>/', 'chart_cycle_distribution')
 url('/chart/cycle/from/<int:year>/<int:month>/<int:day>/', 'chart_cycle')
 url('/chart/flow/', 'chart_flow')
 url('/chart/flow/<int:months>/', 'chart_flow')
