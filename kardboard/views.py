@@ -17,7 +17,7 @@ from flask import (
 
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord
+from kardboard.models import Kard, DailyRecord, Q
 from kardboard.forms import get_card_form, _make_choice_field_ready
 from kardboard.util import (
     month_range,
@@ -30,7 +30,8 @@ from kardboard.util import (
 from kardboard.charts import (
     ThroughputChart,
     MovingCycleTimeChart,
-    CumulativeFlowChart
+    CumulativeFlowChart,
+    CycleDistributionChart
 )
 
 
@@ -473,6 +474,57 @@ def chart_cycle(months=6, year=None, month=None, day=None):
     }
 
     return render_template('chart-cycle.html', **context)
+
+
+def chart_cycle_distribution(months=3):
+    ranges = (
+        (0, 4, "< 5 days"),
+        (5, 10, "5-10 days"),
+        (11, 15, "11-15 days"),
+        (16, 20, "16-20 days"),
+        (21, 25, "21-25 days"),
+        (26, 30, "26-30 days",),
+        (31, 9999, "> 30 days"),
+    )
+    today = datetime.datetime.today()
+    start_day = today - relativedelta.relativedelta(months=months)
+    start_day = make_start_date(date=start_day)
+    end_day = make_end_date(date=today)
+
+    context = {
+        'title': "How quick can we do it?",
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
+    total = Kard.objects.filter(query).count()
+    if total == 0:
+        context = {
+            'error': "Zero cards were completed in the past %s months" % months
+        }
+        return render_template('chart-cycle-distro.html', **context)
+
+    distro = []
+    for row in ranges:
+        lower, upper, label = row
+        query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
+            Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
+        pct = Kard.objects.filter(query).count() / float(total)
+        distro.append((label, pct))
+
+    chart = CycleDistributionChart(700, 400)
+    chart.add_data([r[1] for r in distro])
+    chart.set_pie_labels([r[0] for r in distro])
+    context = {
+        'data': distro,
+        'chart': chart,
+        'title': "How quick can we do it?",
+        'updated_at': datetime.datetime.now(),
+        'distro': distro,
+        'version': VERSION,
+    }
+    return render_template('chart-cycle-distro.html', **context)
 
 
 def robots():

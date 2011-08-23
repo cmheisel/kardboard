@@ -3,7 +3,7 @@ import md5
 
 import requests
 
-from pygooglechart import StackedVerticalBarChart, SimpleLineChart, Axis
+from pygooglechart import StackedVerticalBarChart, SimpleLineChart, Axis, PieChart2D
 
 
 class KardboardChartMixer(object):
@@ -117,3 +117,11 @@ class CumulativeFlowChart(MovingCycleTimeChart):
         self.add_fill_range("F4C3B7", 0, 1)
         self.add_fill_range("FFE0B2", 1, 2)
         self.add_fill_range("B7DFB9", 2, 3)
+
+
+class CycleDistributionChart(PieChart2D):
+    def __init__(self, *args, **kwargs):
+        super(CycleDistributionChart, self).__init__(*args, **kwargs)
+
+        self.colours = ['3366CC', 'DC3912', 'FF9900', '109618', '990099', '0099C6', 'DD4477']
+        self.set_colours(self.colours)
