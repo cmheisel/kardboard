@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 
 version = __import__('kardboard.version', fromlist=['version', ]).version
-print version
 
 setup(
     name="kardboard",
