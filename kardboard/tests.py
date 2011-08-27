@@ -7,7 +7,7 @@ import copy
 import logging
 
 import unittest2
-from mock import patch
+from mock import patch, Mock
 from dateutil.relativedelta import relativedelta
 
 from kardboard.util import slugify
@@ -35,6 +35,11 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.used_keys = []
         self._setup_logging()
+
+        from kardboard.charts import KardboardChartMixer
+        KardboardChartMixer.b64_image_src = Mock()
+
+
         super(KardboardTestCase, self).setUp()
 
     def tearDown(self):
