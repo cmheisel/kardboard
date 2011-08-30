@@ -58,5 +58,5 @@ def update_daily_records(days=365):
     now = datetime.datetime.now()
 
     for i in xrange(0, days):
-        target_date = now + relativedelta.relativedelta(days=i)
+        target_date = now - relativedelta.relativedelta(days=i)
         DailyRecord.calculate(target_date)
