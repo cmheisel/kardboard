@@ -378,6 +378,10 @@ class DailyRecord(app.db.Document):
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
 
+    meta = {
+        'indexes': ['date', ]
+    }
+
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
         super(DailyRecord, self).save(*args, **kwargs)
