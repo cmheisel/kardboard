@@ -2,8 +2,6 @@ import csv
 import cStringIO
 import datetime
 
-from collections import namedtuple
-
 from dateutil import relativedelta
 from flask import (
     render_template,
@@ -19,6 +17,7 @@ from kardboard.version import VERSION
 from kardboard.app import app
 from kardboard.models import Kard, DailyRecord, Q
 from kardboard.forms import get_card_form, _make_choice_field_ready
+import kardboard.util
 from kardboard.util import (
     month_range,
     slugify,
@@ -36,8 +35,8 @@ from kardboard.charts import (
 
 
 def dashboard(year=None, month=None, day=None):
-    date = datetime.datetime.now()
-    now = datetime.datetime.now()
+    date = kardboard.util.now()
+    now = kardboard.util.now()
     scope = 'current'
 
     if year:
@@ -534,8 +533,8 @@ def robots():
     return response
 
 
-def chart_flow(months=3, end=None):
-    end = end or datetime.datetime.now()
+def chart_flow(months=3):
+    end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
 
     start_day = make_start_date(date=months_ranges[0][0])

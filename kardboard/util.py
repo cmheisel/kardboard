@@ -34,6 +34,10 @@ class LazyView(object):
         return self.view(*args, **kwargs)
 
 
+def now():
+    return datetime.datetime.now()
+
+
 def get_current_app():
     from kardboard.app import app
     return app
