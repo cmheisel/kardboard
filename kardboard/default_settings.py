@@ -39,6 +39,7 @@ CELERY_MONGODB_BACKEND_SETTINGS = {
 CELERY_IMPORTS = ('kardboard.tasks', )
 
 TICKET_HELPER = 'kardboard.tickethelpers.NullHelper'
+TICKET_AUTH = False
 
 # How old can tickets get before we refresh
 TICKET_UPDATE_THRESHOLD = 60 * 10

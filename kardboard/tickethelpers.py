@@ -40,6 +40,12 @@ class TicketHelper(object):
         """
         pass
 
+    def login(self, username, password):
+        """
+        Method used to authenticate a user. If successfull, it returns True.
+        """
+        pass
+
 
 class NullHelper(TicketHelper):
     def get_title(self, key=None):
@@ -53,6 +59,9 @@ class NullHelper(TicketHelper):
         return None
 
     def actually_update(self):
+        return None
+
+    def login(self, username, password):
         return None
 
 
@@ -75,6 +84,9 @@ class TestTicketHelper(TicketHelper):
             'summary': u"""Dummy Title from Dummy Ticket System""",
         }
         self.card._ticket_system_data = test_data
+
+    def login(self, username, password):
+        return True
 
 
 class JIRAHelper(TicketHelper):
@@ -136,6 +148,12 @@ class JIRAHelper(TicketHelper):
 
         self.auth = auth
         self._service = client.service
+
+    def login(self, username, password):
+        if not self._service:
+            self.connect()
+        auth = self._service.login(username, password)
+        return auth
 
     def get_issue(self, key=None):
         key = key or self.card.key

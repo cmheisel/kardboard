@@ -271,6 +271,19 @@ A secret key for this particular kardboard instance. Used to provide a seed in s
 As the default implies, you're going to want to change this.
 
 
+TICKET_AUTH
+^^^^^^^^^^^^
+Default: ``False``
+
+If True, then add/edit/delete views become protected by authentication tied to your TICKET_HELPER instance.
+
+So for example if you had the following::
+    TICKET_HELPER = 'kardboard.tickethelpers.JIRAHelper'
+    TICKET_AUTH = True
+
+Then users would be required to login with their JIRA credentials.
+
+
 .. _TICKET_HELPER:
 
 TICKET_HELPER

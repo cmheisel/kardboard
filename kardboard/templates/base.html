@@ -12,6 +12,15 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
     </head>
     <body>
+        {% if config.get('TICKET_AUTH', False) %}
+            <p class="auth nav">
+                {% if 'username' in session %}
+                    Hi {{ session['username'] }}! | <a href="{{ url_for('logout', next=request.url) }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login', next=request.url) }}">Login</a>
+                {% endif %}
+            </p>
+        {% endif %}
 
         <h1>{% block title %}{{ title }}{% endblock %}</h1>
 

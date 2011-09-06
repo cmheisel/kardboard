@@ -76,6 +76,11 @@ p.updated {
     opacity: 0.5;
 }
 
+p.auth {
+    text-align: left;
+    font-size: .8em;
+}
+
 p.nav a {
     color: #92CC47;
     text-decoration: none;

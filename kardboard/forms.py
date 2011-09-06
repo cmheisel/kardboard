@@ -1,7 +1,7 @@
 
 #import datetime
 
-from wtforms import Form, TextField, SelectField, IntegerField, validators, ValidationError
+from wtforms import Form, TextField, SelectField, IntegerField, PasswordField, validators, ValidationError
 from wtforms.ext.dateutil.fields import DateField
 
 from kardboard.models import Kard
@@ -71,3 +71,10 @@ def get_card_form(new=False):
         if hasattr(CardForm, 'validate_key'):
             delattr(CardForm, 'validate_key')
     return CardForm
+
+
+class LoginForm(Form):
+    username = TextField(u'Username',
+        validators=[validators.required()])
+    password = PasswordField(u'Password',
+        validators=[validators.required()])

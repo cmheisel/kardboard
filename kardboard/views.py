@@ -1,6 +1,7 @@
 import csv
 import cStringIO
 import datetime
+import importlib
 
 from dateutil import relativedelta
 from flask import (
@@ -8,15 +9,17 @@ from flask import (
     make_response,
     request,
     redirect,
+    session,
     url_for,
     flash,
     abort,
 )
 
+import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
 from kardboard.models import Kard, DailyRecord, Q
-from kardboard.forms import get_card_form, _make_choice_field_ready
+from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm
 import kardboard.util
 from kardboard.util import (
     month_range,
@@ -261,6 +264,7 @@ def _init_card_form(*args, **kwargs):
     return f
 
 
+#@kardboard.auth.login_required
 def card_add():
     f = _init_new_card_form(request.values)
     card = Kard()
@@ -291,6 +295,7 @@ def card_add():
     return render_template('card-add.html', **context)
 
 
+#@kardboard.auth.login_required
 def card_edit(key):
     try:
         card = Kard.objects.get(key=key)
@@ -330,6 +335,7 @@ def card(key):
     return render_template('card.html', **context)
 
 
+@kardboard.auth.login_required
 def card_delete(key):
     try:
         card = Kard.objects.get(key=key)
@@ -560,3 +566,42 @@ def chart_flow(months=3):
     }
 
     return render_template('chart-flow.html', **context)
+
+
+def login():
+    f = LoginForm(request.form)
+
+    if not session.get('next_url'):
+        next_url = request.args.get('next', '/')
+        session['next_url'] = next_url
+
+    if request.method == "POST" and f.validate():
+        helper_setting = app.config['TICKET_HELPER']
+        modname = '.'.join(helper_setting.split('.')[:-1])
+        klassnam = helper_setting.split('.')[-1]
+        mod = importlib.import_module(modname)
+        klass = getattr(mod, klassnam)
+
+        helper = klass(app.config, None)
+        result = helper.login(f.username.data, f.password.data)
+        if result:
+            session['username'] = f.username.data
+            next_url = session.get('next_url', '/')
+            if 'next_url' in session:
+                del session['next_url']
+            return redirect(next_url)
+
+    context = {
+        'title': "Login",
+        'form': f,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+    return render_template('login.html', **context)
+
+
+def logout():
+    if 'username' in session:
+        del session['username']
+    next_url = request.args.get('next') or '/'
+    return redirect(next_url)
