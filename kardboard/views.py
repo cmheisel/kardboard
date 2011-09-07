@@ -205,7 +205,6 @@ def state():
 
     return render_template('state.html', **context)
 
-
 def done():
     cards = Kard.objects.done()
     cards = sorted(cards, key=lambda c: c.done_date)
@@ -264,7 +263,7 @@ def _init_card_form(*args, **kwargs):
     return f
 
 
-#@kardboard.auth.login_required
+@kardboard.auth.login_required
 def card_add():
     f = _init_new_card_form(request.values)
     card = Kard()
@@ -295,7 +294,7 @@ def card_add():
     return render_template('card-add.html', **context)
 
 
-#@kardboard.auth.login_required
+@kardboard.auth.login_required
 def card_edit(key):
     try:
         card = Kard.objects.get(key=key)
@@ -319,7 +318,7 @@ def card_edit(key):
 
     return render_template('card-add.html', **context)
 
-
+@kardboard.auth.login_required
 def card(key):
     try:
         card = Kard.objects.get(key=key)
@@ -381,7 +380,7 @@ def quick():
 
     return redirect(url)
 
-
+@kardboard.auth.login_required
 def card_export():
     output = cStringIO.StringIO()
     export = csv.DictWriter(output, Kard.EXPORT_FIELDNAMES)
