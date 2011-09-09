@@ -2,11 +2,12 @@
 
 # For use by continuous.io
 
-import unittest_continuous
-unittest_continuous.setup()
-
-from kardboard.tests import *
+try:
+    import unittest_continuous
+    unittest_continuous.setup()
+except ImportError:
+    pass
 
 import unittest2
 
-unittest2.main()
+unittest2.main('kardboard.tests')
