@@ -14,4 +14,5 @@ def load_tests(loader, tests, pattern):
     the_suite = loader.discover(os.path.dirname(os.path.abspath(__file__)))
     return the_suite
 
+
 load_tests.__test__ = False # Make nose ignore this

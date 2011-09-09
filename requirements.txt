@@ -34,6 +34,8 @@ nose==1.1.2
 nosegrowl2==0.2
 tdaemon==0.1.1
 
+git+git://github.com/continuous/nose-continuous.git#egg=nose-continuous
+
 #Needed for docs
 Pygments==1.4
 Sphinx==1.0.7
