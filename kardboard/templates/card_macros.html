@@ -63,7 +63,7 @@
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>
             {% if card.ticket_system_data %}
-                {% set icon = card.ticket_system_data.get('status', {}).get('icon') %}
+                {% set icon = card.ticket_system_data.get('status', {}).get('icon').replace('http:', 'https:') %}
                 {% set status_label = card.ticket_system_data.get('status', {}).get('name', '') %}
                 {% if icon %}
                 <img src="{{ icon }}" alt="{{ status_label }}" title="{{ status_label }}" width="16" height="16" />
