@@ -43,6 +43,20 @@ class JIRAHelperTests(KardboardTestCase):
         diff = now - updated_at
         self.assert_(diff.seconds <= 1)
 
+    def test_people(self):
+        k = self.card
+        k.save()
+
+        k.ticket_system.update()
+        k.reload()
+
+        self.assert_('developers' in k._ticket_system_data.keys())
+        self.assert_('qaers' in k._ticket_system_data.keys())
+        self.assert_('reporter' in k._ticket_system_data.keys())
+
+        data = k._ticket_system_data
+        self.assertEqual(['cheisel', ], data['developers'])
+
     def test_get_title(self):
         h = self._make_one()
         expected = self.ticket.summary

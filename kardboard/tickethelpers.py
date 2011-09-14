@@ -181,6 +181,7 @@ class JIRAHelper(TicketHelper):
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
         idic['type'] = self.resolve_type(idic['type'])
+
         return idic
 
     def object_to_dict(self, obj):
@@ -232,6 +233,35 @@ class JIRAHelper(TicketHelper):
             # first fetch
             self.actually_update()
 
+    def _get_custom_field_values(self, field_id, fields):
+        for field in fields:
+            if field.customfieldId == 'customfield_%s' % field_id:
+                return field.values
+        return None
+
+    def id_devs(self, issue):
+        backend_developer_id = 10210
+        ui_devs_id = 10211
+        custom_fields = issue.customFieldValues
+        devs = self._get_custom_field_values(backend_developer_id, custom_fields)
+        ui_devs = self._get_custom_field_values(ui_devs_id, custom_fields)
+
+        if devs and ui_devs:
+            devs = devs + ui_devs
+
+        if not devs:
+            return []
+
+        return list(set(devs))
+
+    def id_qaers(self, issue):
+        qa_resource_id = 10133
+        custom_fields = issue.customFieldValues
+        qaers = self._get_custom_field_values(qa_resource_id, custom_fields)
+        if not qaers:
+            return []
+        return list(set(qaers))
+
     def actually_update(self):
         super(JIRAHelper, self).update()
         self.logger.info("Fetching JIRA data for %s" % self.card.key)
@@ -242,6 +272,10 @@ class JIRAHelper(TicketHelper):
             log_exception("Couldn't fetch JIRA issue %s" % self.card.key)
         if issue:
             issue_dict = self.issue_to_dictionary(issue)
+
+            # TODO: This is super specific to CMG's JIRA setup. Fixme.
+            issue_dict['developers'] = self.id_devs(issue)
+            issue_dict['qaers'] = self.id_qaers(issue)
         elif self.card._ticket_system_data:
             return None
         else:

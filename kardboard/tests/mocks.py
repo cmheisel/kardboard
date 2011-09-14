@@ -1,6 +1,14 @@
 from mock import Mock
 
 
+class MockRemoteCustomFieldValue(object):
+    def __init__(self, customfieldId, key, values):
+        super(MockRemoteCustomFieldValue, self).__init__()
+        self.customfieldId = customfieldId
+        self.key = key
+        self.values = values
+
+
 class MockJIRAIssue(Mock):
     summary = "There's been a lot of lies in this family"
     key = "CMSAD-1"
@@ -9,6 +17,24 @@ class MockJIRAIssue(Mock):
     description = ''
     status = '6'
     type = '4'
+
+    customFieldValues = [
+        MockRemoteCustomFieldValue(
+            customfieldId='customfield_10210',
+            key=None,
+            values=['cheisel', ]
+        ),
+        MockRemoteCustomFieldValue(
+            customfieldId='customfield_10211',
+            key=None,
+            values=['cheisel', ]
+        ),
+        MockRemoteCustomFieldValue(
+            customfieldId='customfield_10133',
+            key=None,
+            values=['cheisel', ]
+        ),
+    ]
 
 
 class MockJIRAObject(object):
