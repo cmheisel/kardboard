@@ -51,6 +51,13 @@ CELERYBEAT_SCHEDULE = {
         'task': 'tasks.queue_updates',
         'schedule': crontab(minute="*/3"),
     },
+    # How often (probably nighly) should we update all the Person
+    # objects to make sure they reflect reality, due to deleted cards
+    # or people being removed from a card
+    'normalize_people_nightly': {
+        'task': 'tasks.normalize_people',
+        'schedule': crontab(minute=45, hour=0),
+    },
     # How often (probably nighly) should we update daily records for the past
     # 365 days
     'calc-daily-records-year': {

@@ -50,12 +50,19 @@ class JIRAHelperTests(KardboardTestCase):
         k.ticket_system.update()
         k.reload()
 
-        self.assert_('developers' in k._ticket_system_data.keys())
-        self.assert_('qaers' in k._ticket_system_data.keys())
-        self.assert_('reporter' in k._ticket_system_data.keys())
+        self.assert_(k.reporter.name == 'cheisel')
+        k.reporter.reload()
+        self.assert_(k in k.reporter.reported)
 
-        data = k._ticket_system_data
-        self.assertEqual(['cheisel', ], data['developers'])
+        self.assert_(len(k.developers) > 0)
+        for d in k.developers:
+            self.assert_(len(d.developed) > 0)
+            self.assert_(k in d.developed)
+
+        self.assert_(len(k.testers) > 0)
+        for t in k.testers:
+            self.assert_(len(t.tested) > 0)
+            self.assert_(k in t.tested)
 
     def test_get_title(self):
         h = self._make_one()

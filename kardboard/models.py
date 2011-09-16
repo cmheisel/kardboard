@@ -92,6 +92,38 @@ class KardQuerySet(QuerySet):
         return results
 
 
+class Person(app.db.Document):
+    name = app.db.StringField(required=True, unique=True)
+    """A unique string that identifies the person"""
+
+    reported = app.db.ListField(
+        app.db.ReferenceField('Kard'),
+        required=False)
+    """The list of cards the person was responsible for reporting."""
+
+    developed = app.db.ListField(
+        app.db.ReferenceField('Kard'),
+        required=False)
+    """The list of cards the person was responsible for developing."""
+
+    tested = app.db.ListField(
+        app.db.ReferenceField('Kard'),
+        required=False)
+    """The list of cards the person was responsible for testing."""
+
+    def report(self, kard):
+        if kard not in self.reported:
+            self.reported.append(kard)
+
+    def develop(self, kard):
+        if kard not in self.developed:
+            self.developed.append(kard)
+
+    def test(self, kard):
+        if kard not in self.tested:
+            self.tested.append(kard)
+
+
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
@@ -122,6 +154,20 @@ class Kard(app.db.Document):
     """Which column on the kanban board the card is in."""
     priority = app.db.IntField(required=False)
     """Used when ordering cards in the backlog."""
+
+    reporter = app.db.ReferenceField(Person, required=False)
+    """Who reported the ticket per the Kard's .ticket_system"""
+
+    developers = app.db.SortedListField(
+        app.db.ReferenceField(Person),
+        required=False)
+    """Who developed the ticket per the Kard's .ticket_system"""
+
+    testers = app.db.SortedListField(
+        app.db.ReferenceField(Person),
+        required=False)
+    """Who tested the ticket per the Kard's .ticket_system"""
+
 
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()

@@ -263,3 +263,95 @@ class KardWarningTests(KardTests):
     def test_warning(self):
         self.assertEqual(True, self.wip_card.cycle_in_goal)
         self.assertEqual(False, self.wip_card.cycle_over_goal)
+
+
+class PersonTests(KardboardTestCase):
+    def setUp(self):
+        super(PersonTests, self).setUp()
+        self.cards = [self.make_card() for i in xrange(0, 3)]
+        [c.save() for c in self.cards]
+        self.person = self._make_one()
+
+    def _get_target_class(self):
+        from kardboard.models import Person
+        return Person
+
+    def _make_one(self, **kwargs):
+        return self.make_person(**kwargs)
+
+    def test_doing_more_than_one_thing(self):
+        """
+            A person should be able to perform
+            all roles on a kard: reporter,
+            developer, tester.
+        """
+        card = self.cards[0]
+        self.person.report(card)
+        self.person.save()
+
+        self.person.develop(card)
+        self.person.save()
+
+        self.person.test(card)
+        self.person.save()
+
+        self.assertEqual(1, len(self.person.reported))
+        self.assertEqual(1, len(self.person.developed))
+        self.assertEqual(1, len(self.person.tested))
+
+    def test_report(self):
+        """
+            Multiple calls with the same card to a Person's
+            report() method should result in only one record
+            of them being the reporter on that card.
+        """
+        card = self.cards[0]
+        other_card = self.cards[1]
+
+        self.assertEqual(0, len(self.person.reported))
+
+        self.person.report(card)
+        self.assertEqual(1, len(self.person.reported))
+        self.person.report(card)
+        self.assertEqual(1, len(self.person.reported))
+
+        self.person.report(other_card)
+        self.assertEqual(2, len(self.person.reported))
+
+    def test_develop(self):
+        """
+            Multiple calls with the same card to a Person's
+            develop() method should result in only one record
+            of them being the developer on that card.
+        """
+        card = self.cards[0]
+        other_card = self.cards[1]
+
+        self.assertEqual(0, len(self.person.developed))
+
+        self.person.develop(card)
+        self.assertEqual(1, len(self.person.developed))
+        self.person.develop(card)
+        self.assertEqual(1, len(self.person.developed))
+
+        self.person.develop(other_card)
+        self.assertEqual(2, len(self.person.developed))
+
+    def test_test(self):
+        """
+            Multiple calls with the same card to a Person's
+            test() method should result in only one record
+            of them being the developer on that card.
+        """
+        card = self.cards[0]
+        other_card = self.cards[1]
+
+        self.assertEqual(0, len(self.person.tested))
+
+        self.person.test(card)
+        self.assertEqual(1, len(self.person.tested))
+        self.person.test(card)
+        self.assertEqual(1, len(self.person.tested))
+
+        self.person.test(other_card)
+        self.assertEqual(2, len(self.person.tested))

@@ -2,7 +2,7 @@ import datetime
 
 from dateutil import relativedelta
 
-from kardboard.models import Kard
+from kardboard.models import Kard, Person
 from flaskext.celery import Celery
 from kardboard.app import app
 
@@ -60,3 +60,50 @@ def update_daily_records(days=365):
     for i in xrange(0, days):
         target_date = now - relativedelta.relativedelta(days=i)
         DailyRecord.calculate(target_date)
+
+
+@celery.task(name="tasks.normalize_people", ignore_result=True)
+def normalize_people():
+    """
+    Data migration that sets up the initial set of Person
+    objects. After this is run they'll be created
+    and updated by the actually_update method of
+    a card's ticket helper.
+    """
+    logger = normalize_people.get_logger()
+
+    for k in Kard.objects.all():
+        logger.debug("Condiering %s" % k.key)
+        reporter = k.ticket_system_data.get('reporter', '')
+        devs = k.ticket_system_data.get('developers', [])
+        testers = k.ticket_system_data.get('qaers', [])
+
+        logger.debug("Reporter: %s / Devs: %s / Testers: %s" % (reporter, devs, testers))
+
+        if reporter:
+            try:
+                p = Person.objects.get(name=reporter)
+            except Person.DoesNotExist:
+                p = Person(name=reporter)
+
+            p.report(k)
+            p.save()
+
+        for d in devs:
+            try:
+                p = Person.objects.get(name=d)
+            except Person.DoesNotExist:
+                p = Person(name=d)
+
+            p.develop(k)
+            p.save()
+
+        for t in testers:
+            try:
+                p = Person.objects.get(name=t)
+            except Person.DoesNotExist:
+                p = Person(name=t)
+
+            p.test(k)
+            p.save()
+

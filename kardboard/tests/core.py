@@ -77,6 +77,10 @@ class KardboardTestCase(unittest2.TestCase):
         from kardboard.models import DailyRecord
         return DailyRecord
 
+    def _get_person_class(self):
+        from kardboard.models import Person
+        return Person
+
     def _make_unique_key(self):
         key = random.randint(1, 10000)
         if key not in self.used_keys:
@@ -108,6 +112,15 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         r = self._get_record_class()(**fields)
         return r
+
+    def make_person(self, **kwargs):
+        key = self._make_unique_key()
+        fields = {
+            'name': 'cheisel-%s' % key,
+        }
+        fields.update(**kwargs)
+        p = self._get_person_class()(**fields)
+        return p
 
 
 class DashboardTestCase(KardboardTestCase):
