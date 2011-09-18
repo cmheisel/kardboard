@@ -314,3 +314,18 @@ class RobotsTests(KardboardTestCase):
         target_url = self._get_target_url()
         res = self.app.get(target_url)
         self.assertEqual(200, res.status_code)
+
+
+class PersonTests(KardboardTestCase):
+    def setUp(self):
+        super(PersonTests, self).setUp()
+        self.person = self.make_person()
+        self.person.save()
+
+    def _get_target_url(self):
+        return '/person/%s/' % self.person.name
+
+    def test_person(self):
+        target_url = self._get_target_url()
+        res = self.app.get(target_url)
+        self.assertEqual(200, res.status_code)
