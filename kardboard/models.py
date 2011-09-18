@@ -111,6 +111,8 @@ class Person(app.db.Document):
         required=False)
     """The list of cards the person was responsible for testing."""
 
+    updated_at = app.db.DateTimeField(required=True)
+
     def report(self, kard):
         if kard not in self.reported:
             self.reported.append(kard)
@@ -122,6 +124,10 @@ class Person(app.db.Document):
     def test(self, kard):
         if kard not in self.tested:
             self.tested.append(kard)
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.datetime.now()
+        super(Person, self).save(*args, **kwargs)
 
 
 class Kard(app.db.Document):

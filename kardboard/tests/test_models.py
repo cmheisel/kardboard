@@ -279,6 +279,17 @@ class PersonTests(KardboardTestCase):
     def _make_one(self, **kwargs):
         return self.make_person(**kwargs)
 
+    def test_updated_at(self):
+        p = self._make_one()
+        self.assertEqual(None, p.updated_at)
+        p.save()
+
+        p.reload()
+        now = datetime.datetime.now()
+        updated_at = p.updated_at
+        diff = now - updated_at
+        self.assert_(diff.seconds <= 1)
+
     def test_doing_more_than_one_thing(self):
         """
             A person should be able to perform
