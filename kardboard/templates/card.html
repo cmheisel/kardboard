@@ -43,20 +43,23 @@
       {% if card.ticket_system_data %}
       <h4>Ticket information</h4>
       <ul>
+
+        {% set assignee = card.ticket_system_data.get('assignee', '') %}
+        {% set reporter = card.ticket_system_data.get('reporter', '') %}
         <li>Last synced: {{ card._ticket_system_updated_at|timesince }}</li>
-        <li>Assigned: {{ card.ticket_system_data.get('assignee', '') }}</li>
-        <li>Reporter: {{ card.ticket_system_data.get('reporter', '') }}</li>
+        <li>Assigned: {% if assignee %}<a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}</li>
+        <li>Reporter: {% if reporter %}<a href="{{ url_for('person', name=reporter) }}">{{ reporter }}</a>{% endif %}</li>
         <li>Developers:
                 <ul>
                 {% for dev in card.ticket_system_data.get('developers', []) %}
-                <li>{{ dev }}</li>
+                <li><a href="{{ url_for('person', name=dev) }}">{{ dev }}</a></li>
                 {% endfor %}
                 </ul>
         </li>
-        <li>QA:
+        <li>Testers:
                 <ul>
                 {% for qa in card.ticket_system_data.get('qaers', []) %}
-                <li>{{ qa }}</li>
+                <li><a href="{{ url_for('person', name=qa) }}">{{ qa }}</a></li>
                 {% endfor %}
                 </ul>
         </li>

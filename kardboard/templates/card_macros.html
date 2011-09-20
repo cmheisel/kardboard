@@ -96,7 +96,9 @@
         {% if show_assigned %}
         <td>
           {% if card.ticket_system_data %}
-          {{ card.ticket_system_data.get('assignee', '') }}
+          {% set assignee = card.ticket_system_data.get('assignee', '') %}
+          {% if assignee %}
+          <a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}
           {% endif %}
         </td>
         {% endif %}
