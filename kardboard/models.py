@@ -31,6 +31,15 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date)
         return results
 
+    def average(self, field_str):
+        count = self.count()
+        the_sum = sum([getattr(k, field_str) for k in self.filter()])
+
+        if count == 0:
+            return float('nan')
+
+        return the_sum / float(count)
+
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
         """
         The moving average of cycle time for every day in the last N weeks.
@@ -173,7 +182,6 @@ class Kard(app.db.Document):
         app.db.ReferenceField(Person),
         required=False)
     """Who tested the ticket per the Kard's .ticket_system"""
-
 
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
