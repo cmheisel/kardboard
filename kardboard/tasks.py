@@ -23,7 +23,11 @@ def update_ticket(card_id):
             diff = now - k._ticket_system_updated_at
         if not diff or diff and diff.seconds >= threshold:
             logger.info("update_ticket running for %s" % (k.key, ))
-            k.ticket_system.actually_update()
+            try:
+                k.ticket_system.actually_update()
+            except AttributeError:
+                logger.warn('Updating kard: %s and we got an AttributeError' % k.key)
+                raise
 
     except Kard.DoesNotExist:
         logger.error(
