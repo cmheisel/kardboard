@@ -254,7 +254,7 @@ class JIRAHelper(TicketHelper):
 
         return list(set(devs))
 
-    def id_qaers(self, issue):
+    def id_testers(self, issue):
         qa_resource_id = 10133
         custom_fields = issue.customFieldValues
         qaers = self._get_custom_field_values(qa_resource_id, custom_fields)
@@ -275,21 +275,7 @@ class JIRAHelper(TicketHelper):
 
             # TODO: This is super specific to CMG's JIRA setup. Fixme.
             issue_dict['developers'] = self.id_devs(issue)
-            issue_dict['qaers'] = self.id_qaers(issue)
-
-            reporter, created = Person.objects.get_or_create(name=issue_dict['reporter'])
-
-            developers = []
-            for d in issue_dict['developers']:
-                dev, created = Person.objects.get_or_create(name=d)
-                if dev not in developers:
-                    developers.append(dev)
-
-            testers = []
-            for t in issue_dict['qaers']:
-                tester, created = Person.objects.get_or_create(name=t)
-                if tester not in testers:
-                    testers.append(tester)
+            issue_dict['testers'] = self.id_testers(issue)
 
         elif self.card._ticket_system_data:
             return None
@@ -305,30 +291,7 @@ class JIRAHelper(TicketHelper):
             Kard.objects(id=self.card.id).update_one(
                 set___ticket_system_data=issue_dict,
                 set___ticket_system_updated_at=now,
-                set__reporter=reporter,
-                set__developers=developers,
-                set__testers=testers,
             )
-            people = []
-            people.append(reporter)
-            people.extend(developers)
-            people.extend(testers)
-            people = set(people)
-            people = dict([(p.name, p) for p in people])
-
-            p = people.get(reporter.name, reporter)
-            p.report(self.card)
-
-            for d in developers:
-                p = people.get(d.name, d)
-                p.develop(self.card)
-
-            for t in testers:
-                p = people.get(t.name, t)
-                p.test(self.card)
-
-            for person in people.values():
-                person.save()
 
             self.card.reload()
             self.logger.info(

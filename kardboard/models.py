@@ -170,19 +170,6 @@ class Kard(app.db.Document):
     priority = app.db.IntField(required=False)
     """Used when ordering cards in the backlog."""
 
-    reporter = app.db.ReferenceField(Person, required=False)
-    """Who reported the ticket per the Kard's .ticket_system"""
-
-    developers = app.db.SortedListField(
-        app.db.ReferenceField(Person),
-        required=False)
-    """Who developed the ticket per the Kard's .ticket_system"""
-
-    testers = app.db.SortedListField(
-        app.db.ReferenceField(Person),
-        required=False)
-    """Who tested the ticket per the Kard's .ticket_system"""
-
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
