@@ -33,7 +33,7 @@ class KardQuerySet(QuerySet):
 
     def average(self, field_str):
         count = self.count()
-        the_sum = sum([getattr(k, field_str) for k in self.filter()])
+        the_sum = sum([getattr(k, field_str) for k in self.filter().only(field_str)])
 
         if count == 0:
             return float('nan')
