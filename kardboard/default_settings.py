@@ -27,15 +27,18 @@ CARD_TEAMS = [
     'Team 2',
 ]
 
+BROKER_TRANSPORT = "redis"
+BROKER_HOST = "localhost"  # Maps to redis host.
+BROKER_PORT = 6379         # Maps to redis port.
+BROKER_VHOST = "0"         # Maps to database number.
 
 CELERYD_LOG_LEVEL = 'INFO'
 CELERYBEAT_LOG_LEVEL = CELERYD_LOG_LEVEL
-BROKER_TRANSPORT = 'mongodb'
-CELERY_RESULT_BACKEND = 'mongodb'
-CELERY_MONGODB_BACKEND_SETTINGS = {
-    'database': MONGODB_DB,
-    'taskmeta_collection': 'kardboard_taskmeta',
-}
+CELERY_RESULT_BACKEND = "redis"
+CELERY_REDIS_HOST = "localhost"
+CELERY_REDIS_PORT = 6379
+CELERY_REDIS_DB = 0
+CELERY_IGNORE_RESULT = True
 CELERY_IMPORTS = ('kardboard.tasks', )
 
 TICKET_HELPER = 'kardboard.tickethelpers.NullHelper'

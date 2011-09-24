@@ -130,24 +130,13 @@ See `Celery configuration documentation`_ for details
 
 BROKER_TRANSPORT
 ^^^^^^^^^^^^^^^^
-Default: ``'mongodb'``
+Default: ``'redis'``
 
 See `Celery configuration documentation`_ for details
 
 CELERY_RESULT_BACKEND
 ^^^^^^^^^^^^^^^^^^^^^^
-Default: ``'mongodb'``
-
-See `Celery configuration documentation`_ for details
-
-CELERY_MONGODB_BACKEND_SETTINGS
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Default::
-
-    {
-        'database': MONGODB_DB,
-        'taskmeta_collection': 'kardboard_taskmeta',
-    }
+Default: ``'redis'``
 
 See `Celery configuration documentation`_ for details
 
@@ -168,25 +157,32 @@ Default::
         # How often should we look for old tickets and queue them for updates
         'load-update-queue': {
             'task': 'tasks.queue_updates',
-            'schedule': timedelta(seconds=90),
+            'schedule': crontab(minute="*/3"),
+        },
+        # How often should we update all the Person
+        # objects to make sure they reflect reality, due to deleted cards
+        # or people being removed from a card
+        'update_person': {
+            'task': 'tasks.normalize_people',
+            'schedule': crontab(minute="*/30"),
         },
         # How often (probably nighly) should we update daily records for the past
         # 365 days
         'calc-daily-records-year': {
             'task': 'tasks.update_daily_records',
-            'schedule': timedelta(seconds=86400),
+            'schedule': crontab(minute=1, hour=0),
             'args': (365, ),
         },
         # How often should we update daily records for the past
         # 7 days
         'calc-daily-records-week': {
             'task': 'tasks.update_daily_records',
-            'schedule': timedelta(seconds=90),
-            'args': (7, ),
+            'schedule': crontab(minute="*/5"),
+            'args': (14, ),
         }
     }
 
-If you're using a :ref:`TICKET_HELPER` then you probably don't want to adjust this setting. The `timedelta(seconds=90)` determines how often kardboard should check for out of date cards. See  :ref:`TICKET_UPDATE_THRESHOLD` for more.
+If you're using a :ref:`TICKET_HELPER` then you probably don't want to adjust this setting. The `crontab(minute="*/3")` determines how often kardboard should check for out of date cards. See  :ref:`TICKET_UPDATE_THRESHOLD` for more.
 
 See `Celery configuration documentation`_ for details
 
