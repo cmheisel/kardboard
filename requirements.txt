@@ -2,7 +2,7 @@ Flask==0.6.1
 Flask-WTF==0.5.2
 Jinja2==2.5.5
 WTForms==0.6.3
-Werkzeug==0.6.2
+Werkzeug==0.7
 mongoengine==0.5
 pymongo==2.0.1
 git+git://github.com/sbook/flask-mongoengine.git@d907e36e8055#egg=Flask-MongoEngine

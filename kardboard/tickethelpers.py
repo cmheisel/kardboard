@@ -1,7 +1,9 @@
 import urlparse
 import datetime
+import cPickle as pickle
 
-from kardboard.models import Kard, Person
+
+from kardboard.models import Kard
 from kardboard.app import cache
 from kardboard.app import app
 from kardboard.util import ImproperlyConfigured, log_exception
@@ -192,12 +194,17 @@ class JIRAHelper(TicketHelper):
     def resolve_status(self, status_id):
         key = "%s_statuses" % self.cache_prefix
         statuses = cache.get(key)
+        if statuses:
+            try:
+                statuses = pickle.loads(statuses)
+            except pickle.UnpicklingError:
+                statuses = None
         if not statuses:
             self.logger.warn("Cache miss for %s" % key)
             statuses = self.service.getStatuses()
             statuses = [self.object_to_dict(s) for s in statuses]
-            cache.set(key, statuses)
-        status = [s for s in statuses if s['id'] == status_id]
+            cache.set(key, pickle.dumps(statuses))
+        status = [s for s in statuses if s.get('id') == status_id]
         try:
             return status[0]
         except IndexError:
@@ -208,11 +215,16 @@ class JIRAHelper(TicketHelper):
     def resolve_type(self, type_id):
         key = "%s_issue_types" % self.cache_prefix
         the_types = cache.get(key)
+        if the_types:
+            try:
+                the_types = pickle.loads(the_types)
+            except pickle.UnpicklingError:
+                the_types = None
         if not the_types:
             self.logger.warn("Cache miss for %s" % key)
             the_types = self.service.getIssueTypes()
             the_types = [self.object_to_dict(t) for t in the_types]
-            cache.set(key, the_types)
+            cache.set(key, pickle.dumps(the_types))
         the_type = [t for t in the_types if t['id'] == type_id]
         try:
             return the_type[0]

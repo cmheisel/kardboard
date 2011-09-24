@@ -10,6 +10,7 @@ import markdown2
 
 from flaskext.mongoengine import MongoEngine
 from werkzeug import import_string, cached_property
+from werkzeug.contrib.cache import RedisCache
 import mongoengine
 
 
@@ -19,6 +20,11 @@ from dateutil.relativedelta import relativedelta
 
 class ImproperlyConfigured(Exception):
     pass
+
+
+def redis_cache(app, args, kwargs):
+    timeout = app.config.get('CACHE_DEFAULT_TIMEOUT', 300)
+    return RedisCache(default_timeout=timeout)
 
 
 class LazyView(object):
