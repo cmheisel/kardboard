@@ -5,6 +5,7 @@ WTForms==0.6.3
 Werkzeug==0.6.2
 mongoengine==0.5
 pymongo==2.0.1
+git+git://github.com/sbook/flask-mongoengine.git@d907e36e8055#egg=Flask-MongoEngine
 python-dateutil==1.5.0
 pygooglechart==0.3.0
 suds==0.4
