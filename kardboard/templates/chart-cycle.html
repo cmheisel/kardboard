@@ -8,13 +8,15 @@
 <table>
     <tr>
     	<th>Day</th>
-    	<th>Moving Average</th>
+    	<th>Cycle Time</th>
+        <th>Lead Time</th>
     </tr>
 
     {% for row in daily_averages %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
     	<td>{{ row[0].strftime("%m/%d/%Y") }}</td>
     	<td>{{ row[1] }}</td>
+        <td>{{ daily_lead[loop.index0][1] }}</td>
     </tr>
     {% endfor %}
 </table>

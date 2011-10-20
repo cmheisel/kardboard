@@ -474,6 +474,7 @@ def chart_cycle(months=6, year=None, month=None, day=None):
         'updated_at': datetime.datetime.now(),
         'chart': chart,
         'daily_averages': daily_moving_averages,
+        'daily_lead': daily_moving_lead,
         'version': VERSION,
     }
 
