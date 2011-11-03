@@ -210,6 +210,8 @@ class Kard(app.db.Document):
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
+        self.key = self.key.upper()
+
         super(Kard, self).save(*args, **kwargs)
 
     @classmethod

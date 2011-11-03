@@ -252,6 +252,13 @@ class KardTests(KardboardTestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_key_uppercase(self):
+        k = self._make_one()
+        k.key = "cmscmh-1"
+        k.save()
+
+        self.assertEqual("CMSCMH-1", k.key)
+
 
 class KardWarningTests(KardTests):
     def setUp(self):
