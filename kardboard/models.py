@@ -139,6 +139,21 @@ class Person(app.db.Document):
         super(Person, self).save(*args, **kwargs)
 
 
+class BlockerRecord(app.db.EmbeddedDocument):
+    """
+    Represents a blockage of work for a card.
+    """
+
+    reason = app.db.StringField(required=True)
+    """The reason why the card was considered blocked."""
+
+    blocked_at = app.db.DateTimeField(required=True)
+    """When the card's blockage started."""
+
+    unblocked_at = app.db.DateTimeField(required=False)
+    """When the card's blockage stopped."""
+
+
 class Kard(app.db.Document):
     """
     Represents a card on a Kanban board.
@@ -170,6 +185,16 @@ class Kard(app.db.Document):
     priority = app.db.IntField(required=False)
     """Used when ordering cards in the backlog."""
 
+    blocked = app.db.BooleanField(default=False)
+    """Is the card currently blocked."""
+
+    blocked_ever = app.db.BooleanField(default=False)
+    """Was the card ever blocked in its history."""
+
+    blockers = app.db.ListField(
+        app.db.EmbeddedDocumentField(BlockerRecord),
+    )
+
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
@@ -196,6 +221,28 @@ class Kard(app.db.Document):
             return datetime.datetime(date.year, date.month, date.day,
                 23, 59, 59, 0)
         return date
+
+    def block(self, reason, blocked_at=None):
+        if not blocked_at:
+            blocked_at = datetime.datetime.now()
+
+        self.blocked = True
+        self.ever_blocked = True
+
+        b = BlockerRecord(
+            reason=reason,
+            blocked_at=blocked_at
+        )
+        self.blockers = [b, ]
+
+    def unblock(self, unblocked_at=None):
+        if not unblocked_at:
+            unblocked_at = datetime.datetime.now()
+        self.blocked = False
+
+        open_blockers = [b for b in self.blockers if b.unblocked_at == None]
+        for b in open_blockers:
+            b.unblocked_at = unblocked_at
 
     def save(self, *args, **kwargs):
         self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)

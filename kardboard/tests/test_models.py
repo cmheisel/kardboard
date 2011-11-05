@@ -272,6 +272,63 @@ class KardWarningTests(KardTests):
         self.assertEqual(False, self.wip_card.cycle_over_goal)
 
 
+class KardBlockingTests(KardTests):
+    def setUp(self):
+        super(KardBlockingTests, self).setUp()
+
+    def test_basic_blocking(self):
+        # Requires a reason
+        self.assertRaises(TypeError,
+            self.wip_card.block)
+
+        self.wip_card.block("For British eyes only!")
+
+        self.assertEqual(True, self.wip_card.blocked)
+        self.assertEqual(True, self.wip_card.ever_blocked)
+
+        self.wip_card.unblock()
+        self.assertEqual(False, self.wip_card.blocked)
+        self.assertEqual(True, self.wip_card.ever_blocked)
+
+    def test_blocking_history(self):
+        blocked_at = datetime.datetime(2011, 9, 14)
+        self.wip_card.block("Annyong", blocked_at)
+        self.wip_card.save()
+
+        self.assertEqual(1, len(self.wip_card.blockers))
+        blocker = self.wip_card.blockers[0]
+        self.assertEqual(blocker.reason, "Annyong")
+        self.assertEqual(
+            blocker.blocked_at.year,
+            blocked_at.year
+        )
+        self.assertEqual(
+            blocker.blocked_at.month,
+            blocked_at.month
+        )
+        self.assertEqual(
+            blocker.blocked_at.day,
+            blocked_at.day
+        )
+
+        unblocked_at = datetime.datetime(2012, 9, 14)
+        self.wip_card.unblock(unblocked_at=unblocked_at)
+        self.wip_card.save()
+        blocker = self.wip_card.blockers[0]
+        self.assertEqual(blocker.reason, "Annyong")
+        self.assertEqual(
+            blocker.unblocked_at.year,
+            unblocked_at.year
+        )
+        self.assertEqual(
+            blocker.unblocked_at.month,
+            unblocked_at.month
+        )
+        self.assertEqual(
+            blocker.unblocked_at.day,
+            unblocked_at.day
+        )
+
 class PersonTests(KardboardTestCase):
     def setUp(self):
         super(PersonTests, self).setUp()
