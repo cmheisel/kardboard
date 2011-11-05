@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 MONGODB_DB = 'kardboard'
 
 MONGODB_PORT = 27017
