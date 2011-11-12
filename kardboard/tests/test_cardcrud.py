@@ -17,10 +17,7 @@ class CardBlockTests(KardboardTestCase):
             'kardboard.tickethelpers.TestTicketHelper'
 
     def tearDown(self):
-        self.card.blocked = False
-        self.card.blocked_ever = False
-        self.card.blockers = []
-        self.card.save()
+        self.card.delete()
 
     def _get_target_url(self, card=None):
         if not card:
@@ -38,6 +35,7 @@ class CardBlockTests(KardboardTestCase):
         self.assertIn(self.card.title, res.data)
 
     def test_blocking_post(self):
+        self.assertEqual(False, self.card.blocked)
         res = self.app.post(self._get_target_url(),
             data=self.required_data)
         self.assertEqual(302, res.status_code)
@@ -48,6 +46,48 @@ class CardBlockTests(KardboardTestCase):
         url = self._get_target_url("CMS-404")
         res = self.app.get(url)
         self.assertEqual(404, res.status_code)
+
+
+class CardUnblockTests(KardboardTestCase):
+    def setUp(self):
+        super(CardUnblockTests, self).setUp()
+        self.blocked_at = datetime.datetime(
+            2011, 6, 12)
+        self.card = self.make_card()
+        self.card.block("Foo", self.blocked_at)
+        self.card.save()
+        self.required_data = {
+            'unblocked_at': '06/13/2011',
+        }
+        self.config['TICKET_HELPER'] = \
+            'kardboard.tickethelpers.TestTicketHelper'
+
+    def tearDown(self):
+        self.card.delete()
+
+    def _get_target_url(self, card=None):
+        if not card:
+            card = self.card.key
+        return '/card/%s/block/' % (card, )
+
+    def _get_target_class(self):
+        return self._get_card_class()
+
+
+    def test_unblocking(self):
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+        self.assertIn('<form', res.data)
+        self.assertIn(self.card.key, res.data)
+        self.assertIn(self.card.title, res.data)
+
+    def test_unblocking_post(self):
+        self.assertEqual(True, self.card.blocked)
+        res = self.app.post(self._get_target_url(),
+            data=self.required_data)
+        self.assertEqual(302, res.status_code)
+        self.card.reload()
+        self.assertEqual(False, self.card.blocked)
 
 
 class CardCRUDTests(KardboardTestCase):
