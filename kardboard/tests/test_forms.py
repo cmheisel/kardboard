@@ -3,6 +3,35 @@ import datetime
 from kardboard.tests.core import FormTests
 
 
+class BlockFormTest(FormTests):
+    def setUp(self):
+        super(BlockFormTest, self).setUp()
+        self.Form = self._get_target_class()
+        self.required_data = {
+            'reason': u'You gotta lock that down',
+            'blocked_at': u"06/11/2011",
+        }
+        self.post_data = self._make_post_data(self.required_data)
+
+    def _make_post_data(self, data):
+        from werkzeug.datastructures import MultiDict
+        return MultiDict(data)
+
+    def _get_target_class(self):
+        from kardboard.forms import CardBlockForm
+        return CardBlockForm
+
+    def test_form(self):
+        f = self.Form(self.post_data)
+        f.validate()
+        self.assertEquals(0, len(f.errors))
+
+    def test_datetime_coercing(self):
+        f = self.Form(self.post_data)
+        data = f.blocked_at.data
+        self.assertEquals(6, data.month)
+
+
 class CardFormTest(FormTests):
     def setUp(self):
         from werkzeug.datastructures import MultiDict

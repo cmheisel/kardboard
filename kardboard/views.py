@@ -18,8 +18,8 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person
-from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm
+from kardboard.models import Kard, DailyRecord, Q, Person, BlockerRecord
+from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
     month_range,
@@ -205,6 +205,7 @@ def state():
 
     return render_template('state.html', **context)
 
+
 def done():
     cards = Kard.objects.done()
     cards = sorted(cards, key=lambda c: c.done_date)
@@ -318,6 +319,7 @@ def card_edit(key):
 
     return render_template('card-add.html', **context)
 
+
 @kardboard.auth.login_required
 def card(key):
     try:
@@ -354,6 +356,58 @@ def card_delete(key):
         'version': VERSION,
     }
     return render_template('card-delete.html', **context)
+
+
+@kardboard.auth.login_required
+def card_block(key):
+    try:
+        card = Kard.objects.get(key=key)
+        action = 'block'
+        if card.blocked:
+            action = 'unblock'
+    except Kard.DoesNotExist:
+        abort(404)
+
+    if not session.get('next_url'):
+        next_url = request.args.get('next', '/')
+        session['next_url'] = next_url
+
+    now = datetime.datetime.now()
+    if action == 'block':
+        f = CardBlockForm(request.form, blocked_at=now)
+    if action == 'unblock':
+        f = CardUnblockForm(request.form, unblocked_at=now)
+
+    if request.method == "POST" and f.validate():
+        if action == 'block':
+            blocked_at = datetime.datetime.combine(
+                f.blocked_at.data, datetime.time())
+            blocked_at = make_start_date(date=blocked_at)
+            card.block(f.reason.data, blocked_at)
+            card.save()
+            flash("%s blocked" % card.key)
+        if action == 'unblock':
+            unblocked_at = datetime.datetime.combine(
+                f.unblocked_at.data, datetime.time())
+            make_end_date(date=unblocked_at)
+            card.unblock(unblocked_at)
+            card.save()
+            flash("%s unblocked" % card.key)
+        next_url = session.get('next_url', '/')
+        if 'next_url' in session:
+            del session['next_url']
+        return redirect(next_url)
+
+    context = {
+        'title': "%s a card" % (action.capitalize(), ),
+        'action': action,
+        'card': card,
+        'form': f,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    return render_template('card-block.html', **context)
 
 
 def quick():

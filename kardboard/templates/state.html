@@ -27,10 +27,10 @@
 
 {% if states_data %}
     {% for data in states_data %}
-    {{ card_macros.state_display(data) }}
+    {{ card_macros.state_display(data, request) }}
     {% endfor %}
 {% elif state_data %}
-    {{ card_macros.state_display(state_data) }}
+    {{ card_macros.state_display(state_data, request) }}
 {% endif %}
 
 

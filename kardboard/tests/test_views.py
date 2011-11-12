@@ -206,6 +206,7 @@ class ExportTests(KardboardTestCase):
         for k in Kard.objects.all():
             self.assertIn(k.key, res.data)
 
+
 class ChartIndexTests(KardboardTestCase):
     def _get_target_url(self):
         return '/chart/'

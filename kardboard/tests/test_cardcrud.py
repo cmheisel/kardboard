@@ -4,6 +4,52 @@ import datetime
 from kardboard.tests.core import KardboardTestCase
 
 
+class CardBlockTests(KardboardTestCase):
+    def setUp(self):
+        super(CardBlockTests, self).setUp()
+        self.card = self.make_card()
+        self.card.save()
+        self.required_data = {
+            'reason': 'You gotta lock that down',
+            'blocked_at': '06/11/1911',
+        }
+        self.config['TICKET_HELPER'] = \
+            'kardboard.tickethelpers.TestTicketHelper'
+
+    def tearDown(self):
+        self.card.blocked = False
+        self.card.blocked_ever = False
+        self.card.blockers = []
+        self.card.save()
+
+    def _get_target_url(self, card=None):
+        if not card:
+            card = self.card.key
+        return '/card/%s/block/' % (card, )
+
+    def _get_target_class(self):
+        return self._get_card_class()
+
+    def test_blocking(self):
+        res = self.app.get(self._get_target_url())
+        self.assertEqual(200, res.status_code)
+        self.assertIn('<form', res.data)
+        self.assertIn(self.card.key, res.data)
+        self.assertIn(self.card.title, res.data)
+
+    def test_blocking_post(self):
+        res = self.app.post(self._get_target_url(),
+            data=self.required_data)
+        self.assertEqual(302, res.status_code)
+        self.card.reload()
+        self.assertEqual(True, self.card.blocked)
+
+    def test_blocking_not_found(self):
+        url = self._get_target_url("CMS-404")
+        res = self.app.get(url)
+        self.assertEqual(404, res.status_code)
+
+
 class CardCRUDTests(KardboardTestCase):
     def setUp(self):
         super(CardCRUDTests, self).setUp()

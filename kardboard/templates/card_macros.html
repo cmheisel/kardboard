@@ -1,4 +1,4 @@
-{% macro state_display(state_data) -%}
+{% macro state_display(state_data, request) -%}
 <div id="wip_data">
 
 {% if states_count != 1 %}
@@ -8,18 +8,18 @@
 
 {% if state_data['wip_cards']|length > 0 %}
     {% set section_title = "Building / %s" % (state_data['wip_cards']|length, ) %}
-    {{ card_table(state_data['wip_cards'], caption=section_title, show_state=False) }}
+    {{ card_table(state_data['wip_cards'], request, caption=section_title, show_state=False) }}
 {% endif %}
 
 {% if state_data['backlog_cards']|length > 0 %}
     {% set section_title = "Planning / %s" % (state_data['backlog_cards']|length, ) %}
-    {{ card_table(state_data['backlog_cards'], caption=section_title, show_state=False, show_priority=True, show_cycle=False) }}
+    {{ card_table(state_data['backlog_cards'], request, caption=section_title, show_state=False, show_priority=True, show_cycle=False) }}
 
 {% endif %}
 
 {% if state_data.get('done_cards', [])|length > 0 %}
     {% set section_title = "Done / %s" % (state_data['done_cards']|length, ) %}
-    {{ card_table(state_data['done_cards'], caption=section_title, show_state=False, show_priority=False, show_cycle=True, show_assigned=False, show_done=True, show_in_goal=False) }}
+    {{ card_table(state_data['done_cards'], request, caption=section_title, show_state=False, show_priority=False, show_cycle=True, show_assigned=False, show_done=True, show_in_goal=False) }}
 
 {% endif %}
 
@@ -27,13 +27,13 @@
 </div>
 {%- endmacro %}
 
-{% macro card_table(card_collection, caption="", show_done=False, show_state=True, show_priority=False, show_cycle=True, show_assigned=True, show_in_goal=True) -%}
+{% macro card_table(card_collection, request, caption="", show_done=False, show_state=True, show_priority=False, show_cycle=True, show_assigned=True, show_in_goal=True) -%}
 <table>
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Ticket</th>
         <th>Category</th>
-        <th>&nbsp;</th>
+        <th class="controls">&nbsp;</th>
         <th>Title</th>
 
 
@@ -60,7 +60,7 @@
     </tr>
 
     {% for card in card_collection %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{{ loop.cycle('odd', 'even') }}" id="card_{{ card.key }}">
         <td>
             {% if card.ticket_system_data %}
                 {% set icon = card.ticket_system_data.get('status', {}).get('icon').replace('http:', 'https:') %}
@@ -84,6 +84,10 @@
 
         <td>
             <a href="{{ url_for('card_edit', key=card.key) }}">Edit</a>
+            {% set next_url = request.path + "#card_" + card.key %}
+            {% if not card.done_data %}
+                / <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a>
+            {% endif %}
         </td>
 
         <td>

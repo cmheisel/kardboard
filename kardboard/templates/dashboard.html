@@ -35,10 +35,10 @@
 <div id="wip_data">
 
 {% import "card_macros.html" as card_macros %}
-{{ card_macros.card_table(wip_cards, caption="Building") }}
+{{ card_macros.card_table(wip_cards, request, caption="Building") }}
 
 {% set section_title = "Planning / %s" % (backlog_cards|length, ) %}
-{{ card_macros.card_table(backlog_cards, caption=section_title, show_state=False, show_priority=False, show_cycle=False) }}
+{{ card_macros.card_table(backlog_cards, request, caption=section_title, show_state=False, show_priority=False, show_cycle=False) }}
 
 </div>
 

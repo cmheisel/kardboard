@@ -64,6 +64,18 @@ class CardForm(Form):
     priority = IntegerField(u'Ordering', validators=[validators.optional()])
 
 
+class CardBlockForm(Form):
+    reason = TextField(u'Reason',
+        validators=[validators.required()])
+    blocked_at = DateField(u'Blocked starting', display_format="%m/%d/%Y",
+        validators=[validators.required()])
+
+
+class CardUnblockForm(Form):
+    unblocked_at = DateField(u'Unblocked date', display_format="%m/%d/%Y",
+        validators=[validators.required()])
+
+
 def get_card_form(new=False):
     if new:
         CardForm.validate_key = Unique(Kard, 'key')
