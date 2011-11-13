@@ -378,21 +378,30 @@ def card_block(key):
     if action == 'unblock':
         f = CardUnblockForm(request.form, unblocked_at=now)
 
-    if request.method == "POST" and f.validate():
+    should_redir = False
+
+    if 'cancel' in request.form.keys():
+        should_redir = True
+    elif request.method == "POST" and f.validate():
+        should_redir = True
         if action == 'block':
             blocked_at = datetime.datetime.combine(
                 f.blocked_at.data, datetime.time())
             blocked_at = make_start_date(date=blocked_at)
-            card.block(f.reason.data, blocked_at)
-            card.save()
-            flash("%s blocked" % card.key)
+            result = card.block(f.reason.data, blocked_at)
+            if result:
+                card.save()
+                flash("%s blocked" % card.key)
         if action == 'unblock':
             unblocked_at = datetime.datetime.combine(
                 f.unblocked_at.data, datetime.time())
-            make_end_date(date=unblocked_at)
-            card.unblock(unblocked_at)
-            card.save()
-            flash("%s unblocked" % card.key)
+            unblocked_at = make_end_date(date=unblocked_at)
+            result = card.unblock(unblocked_at)
+            if result:
+                card.save()
+                flash("%s unblocked" % card.key)
+
+    if should_redir:
         next_url = session.get('next_url', '/')
         if 'next_url' in session:
             del session['next_url']

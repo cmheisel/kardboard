@@ -41,11 +41,21 @@ class CardBlockTests(KardboardTestCase):
         self.assertEqual(302, res.status_code)
         self.card.reload()
         self.assertEqual(True, self.card.blocked)
+        self.assertEqual(1, len(self.card.blockers))
+        self.assertEqual(True, self.card.blocked_ever)
 
     def test_blocking_not_found(self):
         url = self._get_target_url("CMS-404")
         res = self.app.get(url)
         self.assertEqual(404, res.status_code)
+
+    def test_blocking_cancel(self):
+        self.assertEqual(False, self.card.blocked)
+        res = self.app.post(self._get_target_url(),
+            data={'cancel': "Cancel"})
+        self.assertEqual(302, res.status_code)
+        self.card.reload()
+        self.assertEqual(False, self.card.blocked)
 
 
 class CardUnblockTests(KardboardTestCase):
@@ -73,7 +83,6 @@ class CardUnblockTests(KardboardTestCase):
     def _get_target_class(self):
         return self._get_card_class()
 
-
     def test_unblocking(self):
         res = self.app.get(self._get_target_url())
         self.assertEqual(200, res.status_code)
@@ -88,6 +97,16 @@ class CardUnblockTests(KardboardTestCase):
         self.assertEqual(302, res.status_code)
         self.card.reload()
         self.assertEqual(False, self.card.blocked)
+        self.assertEqual(True, self.card.blocked_ever)
+        self.assertEqual(1, len(self.card.blockers))
+
+    def test_unblocking_cancel(self):
+        self.assertEqual(True, self.card.blocked)
+        res = self.app.post(self._get_target_url(),
+            data={'cancel': "Cancel"})
+        self.assertEqual(302, res.status_code)
+        self.card.reload()
+        self.assertEqual(True, self.card.blocked)
 
 
 class CardCRUDTests(KardboardTestCase):

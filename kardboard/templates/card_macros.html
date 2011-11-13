@@ -60,7 +60,7 @@
     </tr>
 
     {% for card in card_collection %}
-    <tr class="{{ loop.cycle('odd', 'even') }}" id="card_{{ card.key }}">
+    <tr class="{{ loop.cycle('odd', 'even') }} {% if card.blocked %}blocked{% endif %}" id="card_{{ card.key }}">
         <td>
             {% if card.ticket_system_data %}
                 {% set icon = card.ticket_system_data.get('status', {}).get('icon').replace('http:', 'https:') %}
@@ -85,7 +85,7 @@
         <td>
             <a href="{{ url_for('card_edit', key=card.key) }}">Edit</a>
             {% set next_url = request.path + "#card_" + card.key %}
-            {% if not card.done_data %}
+            {% if not card.done_date and card.start_date %}
                 / <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a>
             {% endif %}
         </td>

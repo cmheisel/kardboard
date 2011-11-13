@@ -146,6 +146,26 @@ table td.cycle_over_goal {
     background-color: #FCB59D;
 }
 
+table tr.blocked {
+    background-color: #A60000;
+    color: #dddddd;
+}
+
+table tr.blocked a {
+    color: #eeeeee;
+    font-weight: bold;
+}
+
+table tr.blocked td.cycle_in_goal {
+    background-color: #A60000;
+    color: #dddddd;
+}
+table tr.blocked td.cycle_over_goal {
+    background-color: #A60000;
+    color: #dddddd;
+}
+
+
 form table {
     width: 50%;
     margin: 0 25% 20px 25%;

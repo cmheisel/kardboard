@@ -40,6 +40,16 @@
         <li><strong>Team:</strong> {{ card.team }}</li>
       </ul>
 
+      {% if card.blocked_ever %}
+      <h4>Blocked history</h4>
+      <ul>
+      {% for blocker in card.blockers %}
+      <li>{{ none_or_date(blocker.blocked_at) }} - {{ none_or_date(blocker.unblocked_at) }}<br />
+      {{ blocker.reason }}</li>
+      {% endfor %}
+      </ul>
+      {% endif %}
+
       {% if card.ticket_system_data %}
       <h4>Ticket information</h4>
       <ul>
@@ -90,7 +100,12 @@
 
       {% endif %}
 
-      <p><a href="{{ url_for('card_edit', key=card.key) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key) }}">Delete</a> / <a href="{{ url_for('dashboard') }}">Home</a>
+      <p><a href="{{ url_for('card_edit', key=card.key) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key) }}">Delete</a> /
+       {% set next_url = request.path %}
+            {% if not card.done_date and card.start_date %}
+                <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a> /
+            {% endif %}
+<a href="{{ url_for('dashboard') }}">Home</a>
       </div>
 
 </div>

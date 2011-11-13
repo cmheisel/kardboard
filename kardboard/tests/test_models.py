@@ -282,13 +282,27 @@ class KardBlockingTests(KardTests):
             self.wip_card.block)
 
         self.wip_card.block("For British eyes only!")
+        self.wip_card.save()
 
         self.assertEqual(True, self.wip_card.blocked)
-        self.assertEqual(True, self.wip_card.ever_blocked)
+        self.assertEqual(True, self.wip_card.blocked_ever)
 
         self.wip_card.unblock()
         self.assertEqual(False, self.wip_card.blocked)
-        self.assertEqual(True, self.wip_card.ever_blocked)
+        self.assertEqual(True, self.wip_card.blocked_ever)
+
+    def test_multiple_blockings(self):
+        self.wip_card.block("Did someone say... wonder?!")
+        self.wip_card.unblock()
+        self.wip_card.save()
+        self.assertEqual(1, len(self.wip_card.blockers))
+        self.assertEqual(True, self.wip_card.blocked_ever)
+
+        self.wip_card.block("I want the animation rights")
+        self.wip_card.unblock()
+        self.wip_card.save()
+        self.assertEqual(2, len(self.wip_card.blockers))
+        self.assertEqual(True, self.wip_card.blocked_ever)
 
     def test_blocking_history(self):
         blocked_at = datetime.datetime(2011, 9, 14)
@@ -328,6 +342,7 @@ class KardBlockingTests(KardTests):
             blocker.unblocked_at.day,
             unblocked_at.day
         )
+
 
 class PersonTests(KardboardTestCase):
     def setUp(self):

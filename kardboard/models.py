@@ -226,14 +226,15 @@ class Kard(app.db.Document):
         if not blocked_at:
             blocked_at = datetime.datetime.now()
 
-        self.blocked = True
-        self.ever_blocked = True
-
         b = BlockerRecord(
             reason=reason,
             blocked_at=blocked_at
         )
-        self.blockers = [b, ]
+        self.blockers.append(b)
+
+        self.blocked = True
+        self.blocked_ever = True
+        return True
 
     def unblock(self, unblocked_at=None):
         if not unblocked_at:
@@ -243,6 +244,8 @@ class Kard(app.db.Document):
         open_blockers = [b for b in self.blockers if b.unblocked_at == None]
         for b in open_blockers:
             b.unblocked_at = unblocked_at
+
+        return True
 
     def save(self, *args, **kwargs):
         self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)
