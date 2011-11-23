@@ -10,6 +10,17 @@
     {% endif %}
 {% endmacro %}
 
+{% macro card_controls(request, card) %}
+      <p class="card_controls">
+           {% set next_url = request.path %}
+            <a href="{{ url_for('card_edit', key=card.key, next=next_url) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key, next=next_url) }}">Delete</a> /
+            {% if not card.done_date and card.start_date %}
+                <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a> /
+            {% endif %}
+<a href="{{ url_for('state') }}">Home</a>
+      </p>
+{% endmacro %}
+
 {% block content %}
 
 <div class="metric card_detail">
@@ -22,7 +33,10 @@
             {% endif %} days
       </h2>
       <div class="content">
-      <h3>{{ card.title }}</h2>
+
+      {{ card_controls(request, card) }}
+
+      <h3>{{ card.ticket_system_data.get('summary', card.title) }}</h2>
       <ul>
         <li>
             <strong>Cycle time:</strong>
@@ -100,13 +114,9 @@
 
       {% endif %}
 
-      <p>
-           {% set next_url = request.path %}
-            <a href="{{ url_for('card_edit', key=card.key, next=next_url) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key, next=next_url) }}">Delete</a> /
-            {% if not card.done_date and card.start_date %}
-                <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a> /
-            {% endif %}
-<a href="{{ url_for('state') }}">Home</a>
+      {{ card_controls(request, card) }}
+
+
       </div>
 
 </div>

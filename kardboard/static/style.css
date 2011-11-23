@@ -76,6 +76,10 @@ p.updated {
     opacity: 0.5;
 }
 
+p.card_controls {
+    text-align: right;
+}
+
 p.auth {
     text-align: left;
     font-size: .8em;
