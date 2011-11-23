@@ -22,7 +22,6 @@ redis==2.4.9
 
 
 #Needed for deployment
-gevent==0.13.6
 gunicorn==0.12.2
 Fabric==1.2.0
 
