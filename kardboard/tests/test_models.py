@@ -304,6 +304,34 @@ class KardBlockingTests(KardTests):
         self.assertEqual(2, len(self.wip_card.blockers))
         self.assertEqual(True, self.wip_card.blocked_ever)
 
+    def test_blocking_and_moving(self):
+        """
+        A card that is blocked, if it's states move
+        should be unblocked with the date
+        at which the state edit is made.
+
+        Cards that are blocked, if they're moving state,
+        one direction or the other must be unblocked.
+        """
+        states = self.config.get('CARD_STATES')
+
+        blocked_at = datetime.datetime(2011, 9, 14)
+        self.wip_card.block("Annyong", blocked_at)
+        self.wip_card.save()
+
+        self.wip_card.state = states[-2]
+        self.wip_card.save()
+
+        self.assertEqual(False, self.wip_card.blocked)
+
+        now = datetime.datetime.now()
+        blocker = self.wip_card.blockers[0]
+        unblocked_at = blocker.unblocked_at
+        self.assertEqual(
+            [now.year, now.month, now.day],
+            [unblocked_at.year, unblocked_at.month, unblocked_at.day]
+        )
+
     def test_blocking_history(self):
         blocked_at = datetime.datetime(2011, 9, 14)
         self.wip_card.block("Annyong", blocked_at)

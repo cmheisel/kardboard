@@ -260,6 +260,16 @@ class Kard(app.db.Document):
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
+        if self.blocked:
+            try:
+                k = Kard.objects.only('state').get(key=self.key, )
+                if k.state != self.state:
+                    # Card is blocked and it's state is about to change
+                    self.unblock()
+            except Kard.DoesNotExist:
+                #Card isn't saved can't find its previous state
+                pass
+
         self.key = self.key.upper()
 
         super(Kard, self).save(*args, **kwargs)
