@@ -296,6 +296,7 @@ def card_add():
 
 
 @kardboard.auth.login_required
+@kardboard.util.redirect_to_next_url
 def card_edit(key):
     try:
         card = Kard.objects.get(key=key)
@@ -308,7 +309,7 @@ def card_edit(key):
         f.populate_obj(card)
         card.save()
         flash("Card %s successfully edited" % card.key)
-        return redirect(url_for("card_edit", key=card.key))
+        return True #Redirect
 
     context = {
         'title': "Edit a card",
@@ -337,6 +338,7 @@ def card(key):
 
 
 @kardboard.auth.login_required
+@kardboard.util.redirect_to_next_url
 def card_delete(key):
     try:
         card = Kard.objects.get(key=key)
@@ -345,9 +347,9 @@ def card_delete(key):
 
     if request.method == "POST" and request.form.get('delete'):
         card.delete()
-        return redirect(url_for("dashboard"))
+        return redirect("/")
     elif request.method == "POST" and request.form.get('cancel'):
-        return redirect(url_for("card", key=card.key))
+        return True #redirect
 
     context = {
         'title': "%s -- %s" % (card.key, card.title),
@@ -359,6 +361,7 @@ def card_delete(key):
 
 
 @kardboard.auth.login_required
+@kardboard.util.redirect_to_next_url
 def card_block(key):
     try:
         card = Kard.objects.get(key=key)
@@ -368,22 +371,15 @@ def card_block(key):
     except Kard.DoesNotExist:
         abort(404)
 
-    if not session.get('next_url'):
-        next_url = request.args.get('next', '/')
-        session['next_url'] = next_url
-
     now = datetime.datetime.now()
     if action == 'block':
         f = CardBlockForm(request.form, blocked_at=now)
     if action == 'unblock':
         f = CardUnblockForm(request.form, unblocked_at=now)
 
-    should_redir = False
-
     if 'cancel' in request.form.keys():
-        should_redir = True
+        return True #redirect
     elif request.method == "POST" and f.validate():
-        should_redir = True
         if action == 'block':
             blocked_at = datetime.datetime.combine(
                 f.blocked_at.data, datetime.time())
@@ -392,6 +388,7 @@ def card_block(key):
             if result:
                 card.save()
                 flash("%s blocked" % card.key)
+                return True #redirect
         if action == 'unblock':
             unblocked_at = datetime.datetime.combine(
                 f.unblocked_at.data, datetime.time())
@@ -400,12 +397,7 @@ def card_block(key):
             if result:
                 card.save()
                 flash("%s unblocked" % card.key)
-
-    if should_redir:
-        next_url = session.get('next_url', '/')
-        if 'next_url' in session:
-            del session['next_url']
-        return redirect(next_url)
+                return True #redurect
 
     context = {
         'title': "%s a card" % (action.capitalize(), ),
@@ -415,6 +407,7 @@ def card_block(key):
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
+
 
     return render_template('card-block.html', **context)
 
@@ -631,12 +624,9 @@ def chart_flow(months=3):
     return render_template('chart-flow.html', **context)
 
 
+@kardboard.util.redirect_to_next_url
 def login():
     f = LoginForm(request.form)
-
-    if not session.get('next_url'):
-        next_url = request.args.get('next', '/')
-        session['next_url'] = next_url
 
     if request.method == "POST" and f.validate():
         helper_setting = app.config['TICKET_HELPER']
@@ -649,10 +639,7 @@ def login():
         result = helper.login(f.username.data, f.password.data)
         if result:
             session['username'] = f.username.data
-            next_url = session.get('next_url', '/')
-            if 'next_url' in session:
-                del session['next_url']
-            return redirect(next_url)
+            return True #redirect
 
     context = {
         'title': "Login",

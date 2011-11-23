@@ -4,6 +4,7 @@ import traceback
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+import functools
 
 import jinja2.ext
 import markdown2
@@ -21,6 +22,33 @@ from dateutil.relativedelta import relativedelta
 class ImproperlyConfigured(Exception):
     pass
 
+def redirect_to_next_url(fn):
+    """
+    Views wrapped in this decorator will
+    look for a 'next_url' in the session or
+    as a query string in the URL. If the view
+    returns True (not a value that equates to True)
+    then the user is redirected to next_url.
+    """
+    @functools.wraps(fn)
+    def _wrapped_view_fn(*args, **kwargs):
+        from flask import session, redirect, request
+        if not session.get('next_url'):
+            next_url = request.args.get('next', '/')
+            session['next_url'] = next_url
+
+        # Call the decorated function
+        retval = fn(*args, **kwargs)
+
+        if retval == True:
+            next_url = session.get('next_url', '/')
+            if 'next_url' in session:
+                del session['next_url']
+            return redirect(next_url)
+        
+        # Must not need the redirect, return the original return value
+        return retval
+    return _wrapped_view_fn
 
 def redis_cache(app, args, kwargs):
     timeout = app.config.get('CACHE_DEFAULT_TIMEOUT', 300)
