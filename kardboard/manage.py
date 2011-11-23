@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from __future__ import absolute_import
-from flaskext.script import Manager
-from flaskext.celery import Celery
-from flaskext.celery import install_commands as install_celery_commands
+from flask.ext.script import Manager
+from flask.ext.celery import Celery
+from flask.ext.celery import install_commands as install_celery_commands
 
 from kardboard.app import app
 

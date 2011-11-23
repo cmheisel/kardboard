@@ -3,7 +3,7 @@ import datetime
 from dateutil import relativedelta
 
 from kardboard.models import Kard, Person
-from flaskext.celery import Celery
+from flask.ext.celery import Celery
 from kardboard.app import app
 
 celery = Celery(app)

@@ -1,4 +1,4 @@
-Flask==0.6.1
+Flask==0.8
 Flask-WTF==0.5.2
 Jinja2==2.5.5
 WTForms==0.6.3
@@ -11,8 +11,9 @@ pygooglechart==0.3.0
 suds==0.4
 translitcodec==0.2 #Used by util.slugify
 Flask-Cache==0.3.3
-celery==2.2.7
-Flask-Celery==2.2.5
+celery==2.4.3
+Flask-Script-fix==0.3
+Flask-Celery==2.4.1
 python-memcached==1.47
 
 
