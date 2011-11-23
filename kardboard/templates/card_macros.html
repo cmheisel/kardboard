@@ -91,10 +91,8 @@
         </td>
 
         <td>
-            <a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a>
+            <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
         </td>
-
-
 
 
         {% if show_assigned %}
