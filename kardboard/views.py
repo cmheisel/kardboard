@@ -430,7 +430,7 @@ def quick():
             pass
 
     if card:
-        url = url_for('card_edit', key=card.key)
+        url = url_for('card', key=card.key)
     else:
         url = url_for('card_add', key=key)
 

@@ -166,7 +166,7 @@ class QuickJumpTests(DashboardTestCase):
         res = self.app.get(self._get_target_url(key))
         self.assertEqual(302, res.status_code)
 
-        expected = "/card/%s/edit/" % (key, )
+        expected = "/card/%s/" % (key, )
         self.assertIn(expected, res.headers['Location'])
 
     def test_quick_case_insenitive(self):
@@ -176,7 +176,7 @@ class QuickJumpTests(DashboardTestCase):
         res = self.app.get(self._get_target_url(lower_key))
         self.assertEqual(302, res.status_code)
 
-        expected = "/card/%s/edit/" % (key.upper(), )
+        expected = "/card/%s/" % (key.upper(), )
         self.assertIn(expected, res.headers['Location'])
 
     def test_quick_add(self):
