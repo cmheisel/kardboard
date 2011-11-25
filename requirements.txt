@@ -14,8 +14,6 @@ Flask-Cache==0.3.3
 celery==2.4.3
 Flask-Script-fix==0.3
 Flask-Celery==2.4.1
-python-memcached==1.47
-
 
 markdown2==1.0.1.19
 requests==0.6.1
@@ -34,7 +32,7 @@ nose==1.1.2
 nosegrowl2==0.2
 tdaemon==0.1.1
 
-git+git://github.com/continuous/nose-continuous.git#egg=nose-continuous
+#git+git://github.com/continuous/nose-continuous.git#egg=nose-continuous
 
 #Needed for docs
 Pygments==1.4
