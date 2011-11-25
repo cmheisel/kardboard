@@ -221,24 +221,6 @@ def done():
     return render_template('done.html', **context)
 
 
-def done_report(year_number, month_number):
-    cards = Kard.objects.done_in_month(year_number, month_number)
-    cards = sorted(cards, key=lambda c: c.done_date)
-    cards.reverse()
-
-    context = {
-        'title': "Completed Cards: %s/%s: %s Done" % (month_number,
-            year_number, len(cards)),
-        'cards': cards,
-        'updated_at': datetime.datetime.now(),
-        'version': VERSION,
-    }
-
-    response = make_response(render_template('done-report.txt', **context))
-    response.headers['Content-Type'] = "text/plain"
-    return response
-
-
 def _init_new_card_form(*args, **kwargs):
     return _init_card_form(*args, new=True, **kwargs)
 
