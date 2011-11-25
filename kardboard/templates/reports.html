@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="metric card_detail" id="reports">
+<h2>All teams</h2>
+
+<div class="content">
+
+
+<ul>
+    <li>
+        <a href="/reports/all/done/">Done</a>
+    </li>
+
+    <li>
+        <a href="/reports/all/throughput/3/">Throughput</a> / <a href="/reports/all/throughput/6/">6</a> / <a href="/reports/all/throughput/9/">9</a> / <a href="/reports/all/throughput/12/">12</a>
+    </li>
+
+    <li>
+        <a href="/reports/all/cycle/3/">Cycle Time History</a> / <a href="/reports/all/cycle/6/">6</a> / <a href="/reports/all/cycle/9/">9</a> / <a href="/reports/all/cycle/12/">12</a>
+    </li>
+
+    <li>
+        <a href="/reports/all/cycle/distribution/3/">Cycle Time Distribution</a> / <a href="/reports/all/cycle/distribution/6/">6</a> / <a href="/reports/all/cycle/distribution/9/">9</a> / <a href="/reports/all/cycle/distribution/12/">12</a>
+    </li>
+
+    <li>
+        <a href="/reports/all/flow/3/">Cumulative Flow</a> / <a href="/reports/all/flow/6">6</a> / <a href="/reports/all/flow/6">9</a> / <a href="/reports/all/flow/12">12</a>
+    </li>
+</ul>
+</div></div>
+
+{% endblock %}

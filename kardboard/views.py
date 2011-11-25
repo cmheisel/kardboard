@@ -206,7 +206,7 @@ def state():
     return render_template('state.html', **context)
 
 
-def done():
+def done(group="all"):
     cards = Kard.objects.done()
     cards = sorted(cards, key=lambda c: c.done_date)
     cards.reverse()
@@ -291,7 +291,7 @@ def card_edit(key):
         f.populate_obj(card)
         card.save()
         flash("Card %s successfully edited" % card.key)
-        return True #Redirect
+        return True   # Redirect
 
     context = {
         'title': "Edit a card",
@@ -331,7 +331,7 @@ def card_delete(key):
         card.delete()
         return redirect("/")
     elif request.method == "POST" and request.form.get('cancel'):
-        return True #redirect
+        return True  # redirect
 
     context = {
         'title': "%s -- %s" % (card.key, card.title),
@@ -360,7 +360,7 @@ def card_block(key):
         f = CardUnblockForm(request.form, unblocked_at=now)
 
     if 'cancel' in request.form.keys():
-        return True #redirect
+        return True  # redirect
     elif request.method == "POST" and f.validate():
         if action == 'block':
             blocked_at = datetime.datetime.combine(
@@ -370,7 +370,7 @@ def card_block(key):
             if result:
                 card.save()
                 flash("%s blocked" % card.key)
-                return True #redirect
+                return True  # redirect
         if action == 'unblock':
             unblocked_at = datetime.datetime.combine(
                 f.unblocked_at.data, datetime.time())
@@ -379,7 +379,7 @@ def card_block(key):
             if result:
                 card.save()
                 flash("%s unblocked" % card.key)
-                return True #redurect
+                return True  # redurect
 
     context = {
         'title': "%s a card" % (action.capitalize(), ),
@@ -389,7 +389,6 @@ def card_block(key):
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-
 
     return render_template('card-block.html', **context)
 
@@ -417,6 +416,7 @@ def quick():
         url = url_for('card_add', key=key)
 
     return redirect(url)
+
 
 @kardboard.auth.login_required
 def card_export():
@@ -446,16 +446,16 @@ def card_export():
     return response
 
 
-def chart_index():
+def reports_index():
     context = {
-        'title': "Charts",
+        'title': "Reports",
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-    return render_template('charts.html', **context)
+    return render_template('reports.html', **context)
 
 
-def chart_throughput(months=6, start=None):
+def chart_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
 
     months_ranges = month_ranges(start, months)
@@ -481,7 +481,7 @@ def chart_throughput(months=6, start=None):
     return render_template('chart-throughput.html', **context)
 
 
-def chart_cycle(months=6, year=None, month=None, day=None):
+def chart_cycle(group="all", months=3, year=None, month=None, day=None):
     today = datetime.datetime.today()
     if day:
         end_day = datetime.datetime(year=year, month=month, day=day)
@@ -519,7 +519,7 @@ def chart_cycle(months=6, year=None, month=None, day=None):
     return render_template('chart-cycle.html', **context)
 
 
-def chart_cycle_distribution(months=3):
+def chart_cycle_distribution(group="all", months=3):
     ranges = (
         (0, 4, "< 5 days"),
         (5, 10, "5-10 days"),
@@ -577,7 +577,7 @@ def robots():
     return response
 
 
-def chart_flow(months=3):
+def chart_flow(group="all", months=3):
     end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
 
