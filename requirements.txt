@@ -14,6 +14,7 @@ Flask-Cache==0.3.3
 celery==2.4.3
 Flask-Script-fix==0.3
 Flask-Celery==2.4.1
+Flask-Exceptional==0.4.7
 
 markdown2==1.0.1.19
 requests==0.6.1
