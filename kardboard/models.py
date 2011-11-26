@@ -134,8 +134,33 @@ class Person(app.db.Document):
         if kard not in self.tested:
             self.tested.append(kard)
 
+    def _is_card(self, kandidate):
+        if isinstance(kandidate, Kard):
+            return True
+        return False
+
+    def in_progress(self, kardlist):
+        kards = [k for k in kardlist if self._is_card(k)]
+        wip = [k for k in kards if not k.done_date]
+        wip.sort(key=lambda r: r.current_cycle_time())
+        wip.reverse()
+        return wip
+
+    def is_done(self, kardlist):
+        kards = [k for k in kardlist if self._is_card(k)]
+        kards = [k for k in kards if k.done_date]
+        kards.sort(key=lambda r: r.done_date)
+        kards.reverse()
+        return kards
+
+    def cleanup(self):
+        [self.reported.remove(k) for k in list(self.reported) if not isinstance(k, Kard)]
+        [self.developed.remove(k) for k in list(self.developed) if not isinstance(k, Kard)]
+        [self.tested.remove(k) for k in list(self.tested) if not isinstance(k, Kard)]
+
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
+        self.cleanup()
         super(Person, self).save(*args, **kwargs)
 
 

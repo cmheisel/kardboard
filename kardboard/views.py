@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, BlockerRecord
+from kardboard.models import Kard, DailyRecord, Q, Person
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -656,45 +656,22 @@ def logout():
     next_url = request.args.get('next') or '/'
     return redirect(next_url)
 
+
 def person(name):
     try:
         person = Person.objects.get(name=name)
     except Person.DoesNotExist:
         abort(404)
 
-    in_progress_reported = [k for k in person.reported if not k.done_date]
-    in_progress_reported.sort(key=lambda r: r.current_cycle_time())
-    in_progress_reported.reverse()
-
-    in_progress_developed = [k for k in person.developed if not k.done_date]
-    in_progress_developed.sort(key=lambda r: r.current_cycle_time())
-    in_progress_developed.reverse()
-
-    in_progress_tested = [k for k in person.tested if not k.done_date]
-    in_progress_tested.sort(key=lambda r: r.current_cycle_time())
-    in_progress_tested.reverse()
-
-    reported = [k for k in person.reported if k.done_date]
-    reported.sort(key=lambda r: r.done_date)
-    reported.reverse()
-
-    developed = [k for k in person.developed if k.done_date]
-    developed.sort(key=lambda r: r.done_date)
-    developed.reverse()
-
-    tested = [k for k in person.tested if k.done_date]
-    tested.sort(key=lambda r: r.done_date)
-    tested.reverse()
-
     context = {
         'title': "%s's information" % person.name,
         'person': person,
-        'in_progress_reported': in_progress_reported,
-        'in_progress_developed': in_progress_developed,
-        'in_progres_tested': in_progress_tested,
-        'reported': reported,
-        'developed': developed,
-        'tested': tested,
+        'in_progress_reported': person.in_progress(person.reported),
+        'in_progress_developed': person.in_progress(person.developed),
+        'in_progres_tested': person.in_progress(person.tested),
+        'reported': person.is_done(person.reported),
+        'developed': person.is_done(person.developed),
+        'tested': person.is_done(person.tested),
         'updated_at': person.updated_at,
         'version': VERSION,
     }

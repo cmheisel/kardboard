@@ -397,6 +397,36 @@ class PersonTests(KardboardTestCase):
         diff = now - updated_at
         self.assert_(diff.seconds <= 1)
 
+    def test_deleted_card(self):
+        """
+        If a card is placed in any of
+        the three lists, and then later
+        deleted, it should be removed from the
+        list upon Person.save()
+        """
+        card = self.cards[0]
+        card2 = self.cards[1]
+        card3 = self.cards[2]
+
+        self.person.report(card)
+        self.person.report(card2)
+
+        self.person.develop(card)
+        self.person.develop(card3)
+
+        self.person.test(card)
+        self.person.save()
+
+        print "Deleting %s" % card
+        card.delete()
+        self.person.reload()
+        self.person.cleanup()
+        self.person.save()
+
+        self.assertEqual(1, len(self.person.reported))
+        self.assertEqual(1, len(self.person.developed))
+        self.assertEqual(0, len(self.person.tested))
+
     def test_doing_more_than_one_thing(self):
         """
             A person should be able to perform
@@ -404,17 +434,19 @@ class PersonTests(KardboardTestCase):
             developer, tester.
         """
         card = self.cards[0]
+        card2 = self.cards[1]
+        card3 = self.cards[2]
+
         self.person.report(card)
-        self.person.save()
+        self.person.report(card2)
 
         self.person.develop(card)
-        self.person.save()
+        self.person.develop(card3)
 
         self.person.test(card)
-        self.person.save()
 
-        self.assertEqual(1, len(self.person.reported))
-        self.assertEqual(1, len(self.person.developed))
+        self.assertEqual(2, len(self.person.reported))
+        self.assertEqual(2, len(self.person.developed))
         self.assertEqual(1, len(self.person.tested))
 
     def test_report(self):
