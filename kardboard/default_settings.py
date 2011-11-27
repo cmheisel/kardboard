@@ -57,7 +57,7 @@ CELERYBEAT_SCHEDULE = {
     # or people being removed from a card
     'update_person': {
         'task': 'tasks.normalize_people',
-        'schedule': crontab(minute="*/30"),
+        'schedule': crontab(minute="*/4"),
     },
     # How often (probably nighly) should we update daily records for the past
     # 365 days
