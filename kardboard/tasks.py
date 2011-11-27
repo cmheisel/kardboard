@@ -66,6 +66,17 @@ def update_daily_records(days=365):
         DailyRecord.calculate(target_date)
 
 
+def _get_person(name, cache):
+    p = cache.get(name, None)
+    if not p:
+        try:
+            p = Person.objects.get(name=name)
+        except Person.DoesNotExist:
+            p = Person(name=name)
+        cache[name] = p
+    return p
+
+
 @celery.task(name="tasks.normalize_people", ignore_result=True)
 def normalize_people():
     """
@@ -75,9 +86,10 @@ def normalize_people():
     a card's ticket helper.
     """
     logger = normalize_people.get_logger()
+    people_cache = {}
 
     for k in Kard.objects.all():
-        logger.debug("Condiering %s" % k.key)
+        logger.debug("Considering %s" % k.key)
         reporter = k.ticket_system_data.get('reporter', '')
         devs = k.ticket_system_data.get('developers', [])
         testers = k.ticket_system_data.get('qaers', [])
@@ -85,29 +97,16 @@ def normalize_people():
         logger.debug("Reporter: %s / Devs: %s / Testers: %s" % (reporter, devs, testers))
 
         if reporter:
-            try:
-                p = Person.objects.get(name=reporter)
-            except Person.DoesNotExist:
-                p = Person(name=reporter)
-
+            p = _get_person(reporter, people_cache)
             p.report(k)
-            p.save()
 
         for d in devs:
-            try:
-                p = Person.objects.get(name=d)
-            except Person.DoesNotExist:
-                p = Person(name=d)
-
+            p = _get_person(d, people_cache)
             p.develop(k)
-            p.save()
 
         for t in testers:
-            try:
-                p = Person.objects.get(name=t)
-            except Person.DoesNotExist:
-                p = Person(name=t)
-
+            p = _get_person(t, people_cache)
             p.test(k)
-            p.save()
 
+    for name, person in people_cache.items():
+        person.save()
