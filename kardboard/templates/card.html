@@ -106,9 +106,11 @@
 
         {% if card.ticket_system_data.get('description') %}
         <h4>Description</h4>
+        {% autoescape false %}
         {% markdown2 %}
-        {{ card.ticket_system_data.get('description') }}
+        {{ card.ticket_system_data.get('description')|urlize(nofollow=True) }}
         {% endmarkdown2 %}
+        {% endautoescape %}
         {% endif %}
 
 
