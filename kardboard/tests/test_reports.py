@@ -1,5 +1,6 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+from copy import deepcopy
 
 from mock import patch
 
@@ -8,6 +9,80 @@ from kardboard.tests.core import KardboardTestCase, DashboardTestCase
 
 class ReportTests(DashboardTestCase):
     base_url = '/reports'
+
+
+class ReportGroupTests(KardboardTestCase):
+    def setUp(self):
+        super(ReportGroupTests, self).setUp()
+        from kardboard.app import app
+        self._orig_groups = deepcopy(
+            app.config.get('REPORT_GROUPS', {})
+        )
+
+        app.config['REPORT_GROUPS'] = {
+            'ops': (('Ops',), 'Ops'),
+            'dev': (('Team 1', 'Team 2', 'Team 3'), 'Development'),
+        }
+
+        self._set_up_fixtures()
+
+    def _set_up_fixtures(self):
+        for i in xrange(0, 3):
+            k = self.make_card()
+            k.team = 'Team 1'
+            k.save()
+
+        for i in xrange(0, 3):
+            k = self.make_card()
+            k.team = 'Team 2'
+            k.save()
+
+        for i in xrange(0, 3):
+            k = self.make_card()
+            k.team = 'Team 3'
+            k.save()
+
+        for i in xrange(0, 3):
+            k = self.make_card()
+            k.team = 'Ops'
+            k.save()
+
+    def tearDown(self):
+        from kardboard.app import app
+        app.config['REPORT_GROUPS'] = self._orig_groups
+        Kard = self._get_card_class()
+        Kard.objects.all().delete()
+
+    def _get_target_klass(self):
+        from kardboard.models import ReportGroup
+        return ReportGroup
+
+    def test_report_group_all(self):
+        Kard = self._get_card_class()
+        klass = self._get_target_klass()
+        queryset = Kard.objects
+
+        orig_count = len(queryset)
+
+        report_group = klass('all', queryset)
+
+        self.assertEqual(orig_count, len(report_group.queryset))
+
+    def test_report_group_ops(self):
+        Kard = self._get_card_class()
+        klass = self._get_target_klass()
+
+        report_group = klass('ops', Kard.objects)
+
+        self.assertEqual(3, len(report_group.queryset))
+
+    def test_report_group_dev(self):
+        Kard = self._get_card_class()
+        klass = self._get_target_klass()
+
+        report_group = klass('dev', Kard.objects)
+
+        self.assertEqual(9, len(report_group.queryset))
 
 
 class ChartIndexTests(ReportTests):
