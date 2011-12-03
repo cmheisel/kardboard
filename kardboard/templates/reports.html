@@ -1,34 +1,43 @@
 {% extends "base.html" %}
 
-{% block content %}
-
+{% macro report_group(slug, name) %}
 <div class="metric card_detail" id="reports">
-<h2>All teams</h2>
+<h2>{{ name }}</h2>
 
 <div class="content">
 
 
 <ul>
     <li>
-        <a href="/reports/all/done/3/">Done</a> / <a href="/reports/all/done/6/">6</a> / <a href="/reports/all/done/9/">9</a> / <a href="/reports/all/done/12/">12</a>
+        <a href="/reports/{{ slug }}/done/3/">Done</a> / <a href="/reports/{{ slug }}/done/6/">6</a> / <a href="/reports/{{ slug }}/done/9/">9</a> / <a href="/reports/{{ slug }}/done/12/">12</a>
     </li>
 
     <li>
-        <a href="/reports/all/throughput/3/">Throughput</a> / <a href="/reports/all/throughput/6/">6</a> / <a href="/reports/all/throughput/9/">9</a> / <a href="/reports/all/throughput/12/">12</a>
+        <a href="/reports/{{ slug }}/throughput/3/">Throughput</a> / <a href="/reports/{{ slug }}/throughput/6/">6</a> / <a href="/reports/{{ slug }}/throughput/9/">9</a> / <a href="/reports/{{ slug }}/throughput/12/">12</a>
     </li>
 
     <li>
-        <a href="/reports/all/cycle/3/">Cycle Time History</a> / <a href="/reports/all/cycle/6/">6</a> / <a href="/reports/all/cycle/9/">9</a> / <a href="/reports/all/cycle/12/">12</a>
+        <a href="/reports/{{ slug }}/cycle/3/">Cycle Time History</a> / <a href="/reports/{{ slug }}/cycle/6/">6</a> / <a href="/reports/{{ slug }}/cycle/9/">9</a> / <a href="/reports/{{ slug }}/cycle/12/">12</a>
     </li>
 
     <li>
-        <a href="/reports/all/cycle/distribution/3/">Cycle Time Distribution</a> / <a href="/reports/all/cycle/distribution/6/">6</a> / <a href="/reports/all/cycle/distribution/9/">9</a> / <a href="/reports/all/cycle/distribution/12/">12</a>
+        <a href="/reports/{{ slug }}/cycle/distribution/3/">Cycle Time Distribution</a> / <a href="/reports/{{ slug }}/cycle/distribution/6/">6</a> / <a href="/reports/{{ slug }}/cycle/distribution/9/">9</a> / <a href="/reports/{{ slug }}/cycle/distribution/12/">12</a>
     </li>
 
     <li>
-        <a href="/reports/all/flow/3/">Cumulative Flow</a> / <a href="/reports/all/flow/6">6</a> / <a href="/reports/all/flow/6">9</a> / <a href="/reports/all/flow/12">12</a>
+        <a href="/reports/{{ slug }}/flow/3/">Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/6">6</a> / <a href="/reports/{{ slug }}/flow/6">9</a> / <a href="/reports/{{ slug }}/flow/12">12</a>
     </li>
 </ul>
 </div></div>
+{% endmacro %}
+
+{% block content %}
+
+{{ report_group(all[0], all[1]) }}
+
+{% for group in report_groups %}
+{{ report_group(group[0], group[1]) }}
+{% endfor %}
+
 
 {% endblock %}

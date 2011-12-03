@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -432,9 +432,21 @@ def card_export():
 
 
 def reports_index():
+    report_conf = app.config.get('REPORT_GROUPS', {})
+
+    report_groups = []
+    keys = report_conf.keys()
+    keys.sort()
+
+    for key in keys:
+        conf = report_conf[key]
+        report_groups.append((key, conf[1]))
+
     context = {
         'title': "Reports",
         'updated_at': datetime.datetime.now(),
+        'report_groups': report_groups,
+        'all': ('all', "All teams"),
         'version': VERSION,
     }
     return render_template('reports.html', **context)
@@ -447,7 +459,10 @@ def done(group="all", months=3, start=None):
     start = months_ranges[0][0]
     end = months_ranges[-1][-1]
 
-    cards = Kard.objects.done().filter(done_date__gte=start,
+    rg = ReportGroup(group, Kard.objects.done())
+    done = rg.queryset
+
+    cards = done.filter(done_date__gte=start,
         done_date__lte=end).order_by('-done_date')
 
     context = {
@@ -462,14 +477,17 @@ def done(group="all", months=3, start=None):
 
 def chart_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
-
     months_ranges = month_ranges(start, months)
 
     month_counts = []
     for arange in months_ranges:
         start, end = arange
-        num = Kard.objects.filter(done_date__gte=start,
-            done_date__lte=end).count()
+        filtered_cards = Kard.objects.filter(done_date__gte=start,
+            done_date__lte=end)
+        rg = ReportGroup(group, filtered_cards)
+        cards = rg.queryset
+
+        num = cards.count()
         month_counts.append((start.strftime("%B"), num))
 
     chart = ThroughputChart(900, 300)
