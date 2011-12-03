@@ -66,6 +66,7 @@ url('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'chart_cycl
 url('/reports/<group>/flow/', 'chart_flow')
 url('/reports/<group>/flow/<int:months>/', 'chart_flow')
 url('/reports/<group>/done/', 'done')
+url('/reports/<group>/done/<int:months>/', 'done')
 url('/login/', 'login', methods=["GET", "POST"])
 url('/logout/', 'logout')
 url('/overview/', 'dashboard')

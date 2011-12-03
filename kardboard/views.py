@@ -206,21 +206,6 @@ def state():
     return render_template('state.html', **context)
 
 
-def done(group="all"):
-    cards = Kard.objects.done()
-    cards = sorted(cards, key=lambda c: c.done_date)
-    cards.reverse()
-
-    context = {
-        'title': "Completed Cards",
-        'cards': cards,
-        'updated_at': datetime.datetime.now(),
-        'version': VERSION,
-    }
-
-    return render_template('done.html', **context)
-
-
 def _init_new_card_form(*args, **kwargs):
     return _init_card_form(*args, new=True, **kwargs)
 
@@ -453,6 +438,26 @@ def reports_index():
         'version': VERSION,
     }
     return render_template('reports.html', **context)
+
+
+def done(group="all", months=3, start=None):
+    start = start or datetime.datetime.today()
+    months_ranges = month_ranges(start, months)
+
+    start = months_ranges[0][0]
+    end = months_ranges[-1][-1]
+
+    cards = Kard.objects.done().filter(done_date__gte=start,
+        done_date__lte=end).order_by('-done_date')
+
+    context = {
+        'title': "Completed Cards",
+        'cards': cards,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    return render_template('done.html', **context)
 
 
 def chart_throughput(group="all", months=3, start=None):

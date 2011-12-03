@@ -30,11 +30,14 @@ class ChartIndexTests(ReportTests):
 
 
 class DonePageTests(DashboardTestCase):
-    def _get_target_url(self):
-        return '/reports/all/done/'
+    def _get_target_url(self, months=None):
+        base_url = '/reports/all/done/'
+        if months:
+            base_url = base_url + "%s/" % months
+        return base_url
 
     def test_done_page(self):
-        rv = self.app.get(self._get_target_url())
+        rv = self.app.get(self._get_target_url(months=12))
         self.assertEqual(200, rv.status_code)
 
         done = self.Kard.objects.done()
