@@ -609,7 +609,8 @@ def chart_flow(group="all", months=3):
 
     records = DailyRecord.objects.filter(
         date__gte=start_day,
-        date__lte=end_day)
+        date__lte=end_day,
+        group=group)
 
     chart = CumulativeFlowChart(900, 300)
     chart.add_data([r.backlog_cum for r in records])

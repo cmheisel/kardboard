@@ -510,7 +510,7 @@ class DailyRecord(app.db.Document):
     Represents a daily record of kard activity.
     """
 
-    date = app.db.DateTimeField(required=True, unique=True)
+    date = app.db.DateTimeField(required=True, unique=False, unique_with=['group', ])
     """The date for the records"""
 
     backlog = app.db.IntField(required=True)
@@ -534,6 +534,9 @@ class DailyRecord(app.db.Document):
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
 
+    group = app.db.StringField(required=True, default="all")
+    """The report group to which this daily report belongs."""
+
     meta = {
         'indexes': ['date', ]
     }
@@ -553,7 +556,7 @@ class DailyRecord(app.db.Document):
         return self.in_progress + self.done
 
     @classmethod
-    def calculate(klass, date):
+    def calculate(klass, date, group='all'):
         """
         Creates or updates a DailyRecord for the date provided.
         """
@@ -561,18 +564,23 @@ class DailyRecord(app.db.Document):
         date = make_end_date(date=date)
 
         try:
-            k = klass.objects.get(date=date)
+            k = klass.objects.get(date=date, group=group)
         except klass.DoesNotExist:
             k = klass()
             k.date = date
+            k.group = group
 
-        k.backlog = Kard.backlogged(date).count()
-        k.in_progress = Kard.in_progress(date).count()
-        k.done = Kard.objects.filter(done_date__lte=date).count()
-        k.completed = Kard.objects.filter(done_date=date).count()
-        k.moving_cycle_time = Kard.objects.moving_cycle_time(
+        k.backlog = ReportGroup(group, Kard.backlogged(date)).queryset.count()
+        k.in_progress = ReportGroup(group, Kard.in_progress(date)).queryset.count()
+        k.done = ReportGroup(group, Kard.objects.filter(done_date__lte=date)).queryset.count()
+        k.completed = ReportGroup(group, Kard.objects.filter(done_date=date)).queryset.count()
+        k.moving_cycle_time = ReportGroup(group, Kard.objects).queryset.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)
-        k.moving_lead_time = Kard.objects.moving_lead_time(
+        k.moving_lead_time = ReportGroup(group, Kard.objects).queryset.moving_lead_time(
             year=date.year, month=date.month, day=date.day)
 
-        k.save()
+        try:
+            k.save()
+        except Exception:
+            import pdb
+            pdb.set_trace()
