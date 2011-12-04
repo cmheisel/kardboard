@@ -534,7 +534,7 @@ class DailyRecord(app.db.Document):
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
 
-    group = app.db.StringField(required=True, default="all")
+    group = app.db.StringField(required=True, default="all", unique_with=['date', ])
     """The report group to which this daily report belongs."""
 
     meta = {
@@ -579,8 +579,4 @@ class DailyRecord(app.db.Document):
         k.moving_lead_time = ReportGroup(group, Kard.objects).queryset.moving_lead_time(
             year=date.year, month=date.month, day=date.day)
 
-        try:
-            k.save()
-        except Exception:
-            import pdb
-            pdb.set_trace()
+        k.save()
