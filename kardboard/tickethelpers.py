@@ -285,10 +285,11 @@ class JIRAHelper(TicketHelper):
         state, datefield = mappings.get(current_ticket_status, (None, None))
         if state:
             oldstate = card.state
-            card.state = state
-            self.logger.info(
-                "AUTOMOVE: %s state moved %s => %s because status was %s" % (self.card.key,
-                    oldstate, card.state, current_ticket_status))
+            if card.state != state:
+                card.state = state
+                self.logger.info(
+                    "AUTOMOVE: %s state moved %s => %s because status was %s" % (self.card.key,
+                        oldstate, card.state, current_ticket_status))
         if datefield:
             current_value = getattr(card, datefield)
             if not current_value:
