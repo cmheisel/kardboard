@@ -519,7 +519,8 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
 
     records = DailyRecord.objects.filter(
         date__gte=start_day,
-        date__lte=end_day)
+        date__lte=end_day,
+        group=group)
 
     daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
@@ -564,7 +565,9 @@ def chart_cycle_distribution(group="all", months=3):
     }
 
     query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
-    total = Kard.objects.filter(query).count()
+    rg = ReportGroup(group, Kard.objects.filter(query))
+
+    total = rg.queryset.count()
     if total == 0:
         context = {
             'error': "Zero cards were completed in the past %s months" % months
@@ -576,7 +579,7 @@ def chart_cycle_distribution(group="all", months=3):
         lower, upper, label = row
         query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
             Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
-        pct = Kard.objects.filter(query).count() / float(total)
+        pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
         distro.append((label, pct))
 
     chart = CycleDistributionChart(700, 400)
