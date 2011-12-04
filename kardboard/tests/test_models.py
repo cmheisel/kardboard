@@ -183,6 +183,15 @@ class KardTests(KardboardTestCase):
             year=2011, month=6, day=12)
         self.assertEqual(expected, actual)
 
+    def test_moving_lead_time(self):
+        klass = self._get_target_class()
+        expected = klass.objects.done().average('_lead_time')
+
+        expected = int(round(expected))
+        actual = klass.objects.moving_lead_time(
+            year=2011, month=6, day=12)
+        self.assertEqual(expected, actual)
+
     def test_done_in_week(self):
         klass = self._get_target_class()
         klass.objects.all().delete()
