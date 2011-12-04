@@ -531,6 +531,7 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
     chart.set_legend(('Lead time', 'Cycle time'))
 
     daily_moving_averages.reverse()  # reverse order for display
+    daily_moving_lead.reverse()
     context = {
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
