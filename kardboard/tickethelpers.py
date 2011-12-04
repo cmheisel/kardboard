@@ -274,6 +274,31 @@ class JIRAHelper(TicketHelper):
             return []
         return list(set(qaers))
 
+    def update_state(self, card):
+        mappings = app.config.get('TICKET_STATE_MAPPING', {})
+        if not mappings:
+            return None  # Short circuit
+
+        current_ticket_status = \
+            card._ticket_system_data.get(u'status', {}).get(u'name', '')
+
+        state, datefield = mappings.get(current_ticket_status, (None, None))
+        if state:
+            oldstate = card.state
+            card.state = state
+            self.logger.info(
+                "AUTOMOVE: %s state moved %s => %s because status was %s" % (self.card.key,
+                    oldstate, card.state, current_ticket_status))
+        if datefield:
+            current_value = getattr(card, datefield)
+            if not current_value:
+                setattr(card, datefield, datetime.datetime.now())
+                self.logger.info(
+                    "AUTOMOVE: %s %s set to %s because status was %s" % (self.card.key,
+                    datefield, getattr(card, datefield), current_ticket_status))
+
+        return card
+
     def actually_update(self):
         super(JIRAHelper, self).update()
         self.logger.info("Fetching JIRA data for %s" % self.card.key)
@@ -299,11 +324,9 @@ class JIRAHelper(TicketHelper):
         now = datetime.datetime.now()
         self.card._ticket_system_data = issue_dict
         self.card._ticket_system_updated_at = now
+        self.update_state(self.card)
         if self.card.id:
-            Kard.objects(id=self.card.id).update_one(
-                set___ticket_system_data=issue_dict,
-                set___ticket_system_updated_at=now,
-            )
+            self.card.save()
 
             self.card.reload()
             self.logger.info(
