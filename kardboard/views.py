@@ -163,22 +163,41 @@ def team(team_slug=None):
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
+
+    start_state = app.config.get('START_STATE', '')
+    done_state = app.config.get('DONE_STATE', '')
     states = app.config.get('CARD_STATES', [])
+    states = [state for state in states if state]  # remove blanks
 
-    states_data = []
-    for state in states:
-        state_data = {}
-        wip_cards = Kard.in_progress().filter(state=state)
-        wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time())
-        wip_cards.reverse()
-        state_data['wip_cards'] = wip_cards
-        state_data['backlog_cards'] = Kard.backlogged().filter(state=state)
-        state_data['title'] = state
-        if len(state_data['wip_cards']) > 0 or \
-            state_data['backlog_cards'].count() > 0:
-            states_data.append(state_data)
+    teams = app.config.get('CARD_TEAMS', [])
+    teams = [team for team in teams if team]  # remove blanks
 
-    title = "Cards in progress"
+    board = []
+    for team in teams:
+        row = []
+        row.append(team)
+        for state in states:
+            try:
+                if states.index(state) < states.index(start_state):
+                    queryset = Kard.backlogged()
+                    state_team_cards = queryset.filter(team=team, state=state).order_by('priority+')
+                elif states.index(state) < states.index(done_state):
+                    queryset = Kard.in_progress()
+                    state_team_cards = queryset.filter(team=team, state=state)
+                    state_team_cards = sorted(state_team_cards, key=lambda c: c.current_cycle_time())
+                    state_team_cards.reverse()
+                else:
+                    seven_days_ago = kardboard.util.now() - relativedelta.relativedelta(days=7)
+                    seven_days_ago = make_end_date(date=seven_days_ago)
+                    queryset = Kard.objects.done().filter(done_date__gte=seven_days_ago)
+                    state_team_cards = queryset.filter(team=team, state=state)
+            except ValueError:
+                state_team_cards = []
+
+            row.append(state_team_cards)
+        board.append(row)
+
+    title = "Overview"
 
     wip_cards = Kard.in_progress(date)
     backlog_cards = Kard.backlogged(date)
@@ -195,8 +214,8 @@ def state():
 
     context = {
         'title': title,
-        'states_data': states_data,
-        'states_count': len(states_data),
+        'board': board,
+        'states': states,
         'metrics': metrics,
         'date': date,
         'updated_at': datetime.datetime.now(),

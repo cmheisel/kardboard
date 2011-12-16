@@ -203,3 +203,40 @@ div.card_detail .content {
 .card_detail .content a {
     color: #92CC47;
 }
+
+table.board tr {
+    border-bottom: 1px solid #000;
+}
+
+table.board td {
+    border-right: 1px solid #000;
+}
+
+table.board td {
+    width: 12%;
+}
+
+table.board td.card a {
+    color: #367000;
+}
+
+table.board td.card a:hover {
+    text-decoration: none;
+}
+
+table.board a span.card_icon {
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+
+}
+
+table.board a span.blocked {
+    color: #991111;
+}
+table.board a span.cycle_in_goal {
+    color: #FFC926;
+}
+table.board span.cycle_over_goal {
+    color: #69072E;
+}

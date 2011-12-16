@@ -33,5 +33,46 @@
     {{ card_macros.state_display(state_data, request) }}
 {% endif %}
 
+<table class="board">
+<tr>
+  <th>Team</th>
+  {% for state in states %}
+    <th>{{ state }}</th>
+  {% endfor %}
+</tr>
+
+{% for row in board %}
+<tr>
+  
+  {% for cell in row %}
+    {% if loop.first %}
+      <td class="team">{{ cell }}</td>
+    {% else %}
+      <td class="card">
+        {% for card in cell %}
+          <a href="{{ url_for('card', key=card.key) }}" title="{{ card.key }} -- {{ card.title }}">
+          <span class="card_icon">
+          {% if card.blocked %}
+            <span class="blocked">▣</span>
+          {% elif card.cycle_over_goal %}
+            <span class="cycle_over_goal">◼</span>
+          {% elif card.cycle_in_goal %}
+            <span class="cycle_in_goal">◼</span>
+          {% else %}
+            ◼
+          {% endif %}
+          </span>
+          </a>
+        {% endfor %}
+        &nbsp;
+      </td>
+    {% endif %}
+  {% endfor %}
+
+</tr>
+{% endfor %}
+
+</table>
+
 
 {% endblock content %}
