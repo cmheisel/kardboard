@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -35,6 +35,8 @@ from kardboard.charts import (
     CumulativeFlowChart,
     CycleDistributionChart
 )
+
+states = States()
 
 
 def dashboard(year=None, month=None, day=None):
@@ -129,7 +131,6 @@ def team(team_slug=None):
         {'On the board': Kard.objects.filter(team=target_team).count()},
     ]
 
-    states = app.config.get('CARD_STATES', [])
     states_data = []
     for state in states:
         state_data = {}
@@ -164,11 +165,6 @@ def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
 
-    start_state = app.config.get('START_STATE', '')
-    done_state = app.config.get('DONE_STATE', '')
-    states = app.config.get('CARD_STATES', [])
-    states = [state for state in states if state]  # remove blanks
-
     teams = app.config.get('CARD_TEAMS', [])
     teams = [team for team in teams if team]  # remove blanks
 
@@ -178,10 +174,10 @@ def state():
         row.append(team)
         for state in states:
             try:
-                if states.index(state) < states.index(start_state):
+                if state in states.pre_start:
                     queryset = Kard.backlogged()
                     state_team_cards = queryset.filter(team=team, state=state).order_by('priority+')
-                elif states.index(state) < states.index(done_state):
+                elif state in states.in_progress:
                     queryset = Kard.in_progress()
                     state_team_cards = queryset.filter(team=team, state=state)
                     state_team_cards = sorted(state_team_cards, key=lambda c: c.current_cycle_time())
@@ -197,7 +193,7 @@ def state():
             row.append(state_team_cards)
         board.append(row)
 
-    title = "Overview"
+    title = "All teams"
 
     wip_cards = Kard.in_progress(date)
     backlog_cards = Kard.backlogged(date)
@@ -239,9 +235,8 @@ def _init_card_form(*args, **kwargs):
     if choices:
         f.category.choices = _make_choice_field_ready(choices)
 
-    states = app.config.get('CARD_STATES')
     if states:
-        f.state.choices = _make_choice_field_ready(states)
+        f.state.choices = states.for_forms
 
     teams = app.config.get('CARD_TEAMS')
     if teams:

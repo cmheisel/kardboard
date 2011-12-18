@@ -39,6 +39,70 @@ class ReportGroup(object):
         return self.qs
 
 
+class States(object):
+    def __init__(self, config=None):
+        if not config:
+            config = app.config
+        self.config = config
+        self.states = config.get('CARD_STATES', ())
+        self.backlog = self._find_backlog()
+        self.start = self._find_start()
+        self.done = self._find_done()
+        self.pre_start = self._find_pre_start()
+        self.in_progress = self._find_in_progress()
+
+    def _find_pre_start(self):
+        """
+        Find all states, in order, that come
+        before a start_date is applied.
+        """
+        return [s for s in self.states if self.states.index(s) < self.states.index(self.start)]
+
+    def _find_in_progress(self):
+        """
+        Find all states, in order, that come after after backlog
+        but before done.
+        """
+        pre_done = [s for s in self.states if self.states.index(s) < self.states.index(self.done)]
+        last_state_before_start = self.pre_start[-1]
+        in_progress = [s for s in pre_done if self.states.index(s) > self.states.index(last_state_before_start)]
+        return in_progress
+
+    def _find_done(self):
+        default = -1
+        done = self.config.get('DONE_STATE', default)
+        return self.states[done]
+
+    def _find_start(self):
+        default = 1
+        start = self.config.get('START_STATE', default)
+        return self.states[start]
+
+    def _find_backlog(self):
+        default = 0
+        backlog = self.config.get('BACKLOG_STATE', default)
+        return self.states[backlog]
+
+    def __iter__(self):
+        for state in self.states:
+            yield state
+
+    def __unicode__(self):
+        return unicode(self.states)
+
+    def __str__(self):
+        return str(self.states)
+
+    def index(self, *args, **kwargs):
+        return self.states.index(*args, **kwargs)
+
+    @property
+    def for_forms(self):
+        form_list = [('', ''), ]  # Add a blank
+        form_list.extend([(state, state) for state in self.states])
+        return tuple(form_list)
+
+
 class KardQuerySet(QuerySet):
     def done_in_week(self, year=None, month=None, day=None, date=None):
         """
@@ -300,8 +364,9 @@ class Kard(app.db.Document):
         self.done_date = self._convert_dates_to_datetimes(self.done_date)
 
         if self.done_date:
+            states = States()
             self.in_progress = False
-            self.state = app.config.get("CARD_STATES", [])[-1]
+            self.state = states.done
 
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time

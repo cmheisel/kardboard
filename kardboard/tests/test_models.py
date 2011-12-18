@@ -1,8 +1,99 @@
 import datetime
+from copy import deepcopy
 
 from dateutil.relativedelta import relativedelta
 
 from kardboard.tests.core import KardboardTestCase
+
+
+class StatesTests(KardboardTestCase):
+    def setUp(self):
+        super(StatesTests, self).setUp()
+        self.old_config = deepcopy(self.config)
+        self.config['CARD_STATES'] = (
+            'Backlog',
+            'In Progress',
+            'Deploy',
+            'Done',
+        )
+
+        nondefault_keys = [
+            'BACKLOG_STATE',
+            'START_STATE',
+            'DONE_STATE',
+        ]
+        for key in nondefault_keys:
+            if key in self.config.keys():
+                del(self.config[key])
+
+    def tearDown(self):
+        self.config = deepcopy(self.old_config)
+
+    def _get_target_class(self):
+        from kardboard.models import States
+        return States
+
+    def test_iteration(self):
+        states = self._make_one()
+        expected = [state for state in self.config['CARD_STATES']]
+        actual = [state for state in states]
+        self.assertEqual(expected, actual)
+
+    def test_default_state_groups(self):
+        states = self._make_one()
+        expected = 'Backlog'
+        self.assertEqual(expected, states.backlog)
+        self.assertEqual([expected, ], states.pre_start)
+
+        expected = 'In Progress'
+        self.assertEqual(expected, states.start)
+
+        expected = ['In Progress', 'Deploy']
+        self.assertEqual(expected, states.in_progress)
+
+        expected = 'Done'
+        self.assertEqual(expected, states.done)
+
+    def test_configured_state_groups(self):
+        self.config['CARD_STATES'] = (
+            'Backlog',
+            'Planning',
+            'In Progress',
+            'Testing',
+            'Deploy',
+            'Done',
+            'Archive',
+        )
+        self.config['BACKLOG_STATE'] = 0
+        self.config['START_STATE'] = 2
+        self.config['DONE_STATE'] = -2
+
+        states = self._make_one()
+
+        expected = ['Backlog', 'Planning']
+        self.assertEqual(expected[0], states.backlog)
+        self.assertEqual(expected, states.pre_start)
+
+        expected = 'In Progress'
+        self.assertEqual(expected, states.start)
+
+        expected = ['In Progress', 'Testing', 'Deploy']
+        self.assertEqual(expected, states.in_progress)
+
+        expected = 'Done'
+        self.assertEqual(expected, states.done)
+
+    def test_for_forms(self):
+        states = self._make_one()
+
+        expected = (
+            ('', ''),
+            ('Backlog', 'Backlog'),
+            ('In Progress', 'In Progress'),
+            ('Deploy', 'Deploy'),
+            ('Done', 'Done'),
+        )
+        self.assertEqual(expected, states.for_forms)
 
 
 class DailyRecordTests(KardboardTestCase):
@@ -426,7 +517,6 @@ class PersonTests(KardboardTestCase):
         self.person.test(card)
         self.person.save()
 
-        print "Deleting %s" % card
         card.delete()
         self.person.reload()
         self.person.cleanup()
