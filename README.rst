@@ -11,5 +11,4 @@ For a quickstart guide to developing with kardboard, see `docs/developing.rst <h
 System dependencies
 --------------------
 * MongoDB
-* memcached
-* libevent (for gunicorn/gevent support)
+* redis
