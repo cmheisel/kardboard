@@ -6,6 +6,103 @@ from dateutil.relativedelta import relativedelta
 from kardboard.tests.core import KardboardTestCase
 
 
+class DisplayBoardTests(KardboardTestCase):
+    def setUp(self):
+        super(DisplayBoardTests, self).setUp()
+        self.Kard = self._get_card_class()
+
+        self.start_date = self._date('start', )
+
+        from kardboard.models import States
+        self.states = States()
+        self.teams = self.config.get('CARD_TEAMS')
+        self._set_up_cards()
+
+    def _date(self, dtype, date=None, days=0):
+        from kardboard.util import make_end_date, make_start_date
+        from kardboard.util import now
+
+        if not date:
+            date = now()
+
+        if dtype == 'start':
+            date = make_start_date(date=date)
+        elif dtype == 'end':
+            date = make_end_date(date=date)
+
+        date = date + relativedelta(days=days)
+        return date
+
+    def _set_up_cards(self):
+        team1 = self.teams[0]
+        team2 = self.teams[1]
+
+        self._make_a_teams_cardset(team1, 4)
+        self._make_a_teams_cardset(team2, 2)
+
+    def _make_a_teams_cardset(self, team, num_cards):
+        backlog_date = self._date('start', days=-10)
+        start_date = self._date('start', days=-5)
+        done_date = self._date('end')
+
+        for i in xrange(0, num_cards):
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team,
+                state=self.states.backlog,
+            )
+            c.save()
+
+            c = self.make_card(
+                backlog_date=backlog_date,
+                start_date=start_date,
+                team=team,
+                state=self.states.start,
+            )
+            c.save()
+
+            c = self.make_card(
+                backlog_date=backlog_date,
+                start_date=start_date,
+                done_date=done_date,
+                team=team,
+                state=self.states.done,
+            )
+            c.save()
+
+            # Really old cards
+            c = self.make_card(
+                backlog_date=self._date('start', days=-30),
+                start_date=self._date('start', days=-25),
+                done_date=self._date('start', days=-20),
+                team=team,
+                state=self.states.done,
+            )
+            c.save()
+
+    def _get_target_class(self):
+        from kardboard.models import DisplayBoard
+        return DisplayBoard
+
+    def test_defaults(self):
+        board = self._make_one()
+
+        backlogged = self.Kard.backlogged()
+        in_progress = self.Kard.in_progress()
+        done = self.Kard.objects.done().filter(
+            done_date__gte=self._date('end', days=-7)
+        )
+
+        expected = backlogged.count() + in_progress.count() + done.count()
+
+        self.assertEqual(expected, len(board.cards))
+
+        rows = list(board.rows)  # It's a generator
+        self.assertEqual(2, len(rows))
+        self.assertEqual(self.teams[0], rows[0][0]['label'])
+        self.assertEqual(4, len(rows[0][1]['cards']))
+
+
 class StatesTests(KardboardTestCase):
     def setUp(self):
         super(StatesTests, self).setUp()

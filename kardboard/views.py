@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -165,33 +165,7 @@ def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
 
-    teams = app.config.get('CARD_TEAMS', [])
-    teams = [team for team in teams if team]  # remove blanks
-
-    board = []
-    for team in teams:
-        row = []
-        row.append(team)
-        for state in states:
-            try:
-                if state in states.pre_start:
-                    queryset = Kard.backlogged()
-                    state_team_cards = queryset.filter(team=team, state=state).order_by('priority+')
-                elif state in states.in_progress:
-                    queryset = Kard.in_progress()
-                    state_team_cards = queryset.filter(team=team, state=state)
-                    state_team_cards = sorted(state_team_cards, key=lambda c: c.current_cycle_time())
-                    state_team_cards.reverse()
-                else:
-                    seven_days_ago = kardboard.util.now() - relativedelta.relativedelta(days=7)
-                    seven_days_ago = make_end_date(date=seven_days_ago)
-                    queryset = Kard.objects.done().filter(done_date__gte=seven_days_ago)
-                    state_team_cards = queryset.filter(team=team, state=state)
-            except ValueError:
-                state_team_cards = []
-
-            row.append(state_team_cards)
-        board.append(row)
+    board = DisplayBoard()  # defaults to all teams, 7 days of done
 
     title = "All teams"
 

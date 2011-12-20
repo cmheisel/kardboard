@@ -14,7 +14,66 @@ from kardboard.util import (
     make_start_date,
     munge_date,
     week_range,
+    now,
 )
+
+
+class DisplayBoard(object):
+    def __init__(self, teams=None, done_days=7):
+        self.states = States()
+        self.done_days = done_days
+        self._cards = None
+
+        if teams == None:
+            teams = [t for t in app.config['CARD_TEAMS'] if t]  # Remove blanks
+        self.teams = teams
+
+        self.headers = [s for s in self.states]
+        if len(teams) > 1:
+            self.headers.insert(0, 'Team')
+
+    def __iter__(self):
+        for row in self.rows:
+            yield row
+
+    @property
+    def rows(self):
+        rows = []
+        for team in self.teams:
+            row = []
+            if len(self.teams) > 1:
+                row.append({'label': team})
+            for state in self.states:
+                cards = [card for card in self.cards if card.state == state and card.team == team]
+                if state in self.states.pre_start:
+                    cards = sorted(cards, key=lambda c: c.priority)
+                elif state in self.states.in_progress:
+                    cards = sorted(cards, key=lambda c: c.current_cycle_time())
+                    cards.reverse()
+                else:
+                    cards = sorted(cards, key=lambda c: c.done_date)
+                cell = {'cards': cards}
+                row.append(cell)
+            rows.append(row)
+        return rows
+
+    @property
+    def cards(self):
+        if self._cards:
+            return self._cards
+
+        in_progress_q = Q(done_date=None,
+            start_date__exists=True,
+            team__in=self.teams)
+        backlog_q = Q(backlog_date__exists=True,
+            start_date=None,
+            team__in=self.teams)
+        done_q = Q(done_date__gte=now() - relativedelta(days=self.done_days),
+            team__in=self.teams)
+        cards_query = backlog_q | in_progress_q | done_q
+
+        self._cards = list(Kard.objects.filter(cards_query))
+        return self._cards
 
 
 class ReportGroup(object):

@@ -89,11 +89,12 @@ class KardboardTestCase(unittest2.TestCase):
         return self._make_unique_key()
 
     def make_card(self, **kwargs):
+        from kardboard.util import now
         key = self._make_unique_key()
         fields = {
             'key': "CMSAD-%s" % key,
             'title': "Theres always money in the banana stand",
-            'backlog_date': datetime.datetime.now()
+            'backlog_date': now()
         }
         fields.update(**kwargs)
         k = self._get_card_class()(**fields)

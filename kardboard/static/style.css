@@ -216,11 +216,11 @@ table.board td {
     width: 12%;
 }
 
-table.board td.card a {
+table.board td.cards a {
     color: #367000;
 }
 
-table.board td.card a:hover {
+table.board td.cards a:hover {
     text-decoration: none;
 }
 

@@ -1,0 +1,52 @@
+{% macro card_overview(card, request) -%}
+<a href="{{ url_for('card', key=card.key) }}" title="{{ card.key }} -- {{ card.title }}{% if card.blocked %} BLOCKED: {{ card.blockers[0].reason }}{% endif %}">
+    <span class="card_icon">
+        {% if card.blocked %}
+        <span class="blocked">&#9635;</span>
+        {% elif card.cycle_over_goal %}
+        <span class="cycle_over_goal">&#9724;</span>
+        {% elif card.cycle_in_goal %}
+        <span class="cycle_in_goal">&#9724;</span>
+        {% else %}
+        &#9724;
+        {% endif %}
+    </span>
+</a>
+{%- endmacro %}
+
+{% macro card_detail(card, request) -%}
+{%- endmacro %}
+
+{% macro board(board, request, overview=False) -%}
+<table class="board">
+<tr>
+  {% for header in board.headers %}
+    <th>{{ header }}</th>
+  {% endfor %}
+</tr>
+
+{% for row in board %}
+<tr>
+{% for cell in row %}
+    {% if cell.get('label') %}
+        <td class="team">{{ cell['label'] }}</td>
+    {% else %}
+        <td class="cards">
+        {% for card in cell['cards'] %}
+            {% if overview %}
+                {{ card_overview(card, request) }}
+            {% else %}
+                {{ card_detail(card, request) }}
+            {% endif %}
+        {% endfor %}
+    &nbsp;
+    </td>
+    {% endif %}
+{% endfor %}
+
+</tr>
+{% endfor %}
+
+</table>
+
+{%- endmacro %}
