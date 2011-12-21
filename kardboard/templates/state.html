@@ -27,16 +27,18 @@
 </p>
 
 
-{% if states_data %}
-    {% for data in states_data %}
-    {{ card_macros.state_display(data, request) }}
-    {% endfor %}
-{% elif state_data %}
-    {{ card_macros.state_display(state_data, request) }}
+{% if done_cards %}
+<div class="team_page_board">
+{% endif %}
+{{ board_macros.board(board, request) }}
+{% if done_cards %}
+</div>
 {% endif %}
 
-{% if board %}
-    {{ board_macros.board(board, request, overview=True) }}
+
+{% if done_cards %}
+    {% set section_title = "Done / %s" % (done_cards|length, ) %}
+    {{ card_macros.card_table(done_cards, request, caption=section_title, show_state=False, show_priority=False, show_cycle=True, show_assigned=False, show_done=True, show_in_goal=False) }}
 {% endif %}
 
 

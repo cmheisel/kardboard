@@ -120,6 +120,8 @@ def team(team_slug=None):
         if not team:
             abort(404)
 
+    board = DisplayBoard(teams=[target_team, ])
+
     metrics = [
         {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
@@ -131,28 +133,15 @@ def team(team_slug=None):
         {'On the board': Kard.objects.filter(team=target_team).count()},
     ]
 
-    states_data = []
-    for state in states:
-        state_data = {}
-        wip_cards = Kard.in_progress().filter(state=state, team=target_team)
-        wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time())
-        wip_cards.reverse()
-        state_data['wip_cards'] = wip_cards
-        state_data['backlog_cards'] = Kard.backlogged().filter(state=state, team=target_team)
-        state_data['done_cards'] = Kard.objects.done().filter(state=state, team=target_team).order_by('-done_date')
-        state_data['title'] = state
-        if len(state_data['wip_cards']) > 0 or \
-            state_data['backlog_cards'].count() > 0 or\
-            state_data['done_cards'].count() > 0:
-            states_data.append(state_data)
+    done_cards = Kard.objects.done().filter(team=target_team).order_by('-done_date')
 
     title = "%s cards" % target_team
 
     context = {
         'title': title,
-        'states_data': states_data,
-        'states_count': len(states_data),
+        'done_cards': done_cards,
         'metrics': metrics,
+        'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,

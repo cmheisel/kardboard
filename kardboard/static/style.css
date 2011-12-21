@@ -240,3 +240,82 @@ table.board a span.cycle_in_goal {
 table.board span.cycle_over_goal {
     color: #69072E;
 }
+table.board td.cards {
+    text-align: center;
+    vertical-align: top;
+}
+
+table.board div.card_on_board {
+    width: 90%;
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid black;
+    margin: 0 0 10px 0;
+    color: #333;
+    text-align: left;
+}
+
+table.board div.card_on_board p {
+    color: #333;
+    font-size: 14px;
+    margin: 0 0 6px 0;
+    padding: 0;
+}
+
+table.board div.card_on_board p.assignee {
+    text-align: right;
+    font-size: 12px;
+}
+
+.team_page_board table.board td {
+    min-width: 250px;
+}
+
+.team_page_board table.board {
+    margin-right: 2%;
+    margin-left: 2%;
+}
+
+table.board div.card_on_board div.card_key {
+    font-size: 14px;
+    text-align: left;
+    padding: 0 3px 0 3px;
+    margin: -8px -8px 8px -8px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+table.board div.card_on_board div.card_key span {
+    font-weight: bold;
+}
+
+table.board div.card_on_board div.card_key {
+    background-color: #367000;
+    color: white;
+}
+
+table.board div.blocker {
+    background-color: #991111;
+    background: url('/static/stripes.png');
+    padding: 4px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+}
+
+table.board div.blocker p {
+    background-color: #fff;
+    border-radius: 4px;
+    margin: 0 0 0 0;
+    padding: 2px;
+}
+
+table.board div.cycle_in_goal div.card_key {
+    background-color: #FFC926;
+    color: #333;
+}
+
+table.board div.cycle_over_goal div.card_key{
+    background-color: #991111;
+    color: #000;
+}
