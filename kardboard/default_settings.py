@@ -50,7 +50,7 @@ CELERYBEAT_SCHEDULE = {
     # How often should we look for old tickets and queue them for updates
     'load-update-queue': {
         'task': 'tasks.queue_updates',
-        'schedule': crontab(minute="*/3"),
+        'schedule': crontab(minute="*/2"),
     },
     # How often should we update all the Person
     # objects to make sure they reflect reality, due to deleted cards

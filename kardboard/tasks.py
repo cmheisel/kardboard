@@ -12,16 +12,39 @@ celery = Celery(app)
 @celery.task(name="tasks.update_ticket", ignore_result=True)
 def update_ticket(card_id):
     from kardboard.app import app
-    threshold = app.config.get('TICKET_UPDATE_THRESHOLD', 60 * 60)
-    now = datetime.datetime.now()
 
     logger = update_ticket.get_logger()
     try:
+        # We want to update cards if their local update time
+        # is less than their origin update time
         k = Kard.objects.with_id(card_id)
-        diff = None
-        if k._ticket_system_updated_at:
-            diff = now - k._ticket_system_updated_at
-        if not diff or diff and diff.seconds >= threshold:
+        i = k.ticket_system.get_issue(k.key)
+        origin_updated = getattr(i, 'updated')
+        local_updated = k._ticket_system_updated_at
+
+        should_update = False
+        if not local_updated:
+            # We've never sync'd before, time to do it right now
+            should_update = True
+        elif origin_updated:
+            if local_updated < origin_updated:
+                logger.info(
+                    "%s UPDATED on origin: %s < %s" % (k.key, local_updated, origin_updated)
+                )
+                should_update = True
+        else:
+            # Ok well something changed with the ticket system
+            # so we need fall back to the have we updated
+            # from origin in THRESHOLD seconds, regardless
+            # of how long ago the origin was updated
+            # less efficient, but it guarantees updates
+            threshold = app.config.get('TICKET_UPDATE_THRESHOLD', 60 * 60)
+            now = datetime.datetime.now()
+            diff = now - local_updated
+            if diff.seconds >= threshold:
+                should_update = True
+
+        if should_update:
             logger.info("update_ticket running for %s" % (k.key, ))
             try:
                 k.ticket_system.actually_update()

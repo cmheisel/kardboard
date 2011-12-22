@@ -1,3 +1,5 @@
+import datetime
+
 from mock import Mock
 
 
@@ -17,6 +19,7 @@ class MockJIRAIssue(Mock):
     description = ''
     status = '6'
     type = '4'
+    updated = datetime.datetime(2011, 12, 22, 12, 40, 19)
 
     customFieldValues = [
         MockRemoteCustomFieldValue(

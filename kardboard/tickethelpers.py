@@ -178,7 +178,7 @@ class JIRAHelper(TicketHelper):
     def issue_to_dictionary(self, obj):
         idic = {}
         keys = ['summary', 'key', 'reporter', 'assignee', 'description',
-            'status', 'type']
+            'status', 'type', 'updated']
         for key in keys:
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
