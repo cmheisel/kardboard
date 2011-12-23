@@ -179,12 +179,18 @@ class JIRAHelper(TicketHelper):
 
     def get_title(self, key=None):
         title = ''
-        if self.card._ticket_system_data:
-            title = self.card._ticket_system_data.get('summary', '')
-        else:
+        if not self.card._ticket_system_data:
             self.card.ticket_system.update(sync=True)
-            title = self.card.ticket_system_data.get('summary', '')
+        title = self.card.ticket_system_data.get('summary', '')
         return title
+
+    def get_service_class(self, key=None):
+        service_class = None
+        if not self.card._ticket_system_data:
+            self.card.ticket_system.update(sync=True)
+            self.card.reload()
+        service_class = self.card._ticket_system_data.get('type', {}).get('name', '')
+        return service_class
 
     def issue_to_dictionary(self, obj):
         idic = {}
@@ -224,17 +230,21 @@ class JIRAHelper(TicketHelper):
             return {}
 
     def resolve_type(self, type_id):
-        key = "%s_issue_types" % self.cache_prefix
+        key = "%s_issue_types_and_subtasks" % self.cache_prefix
         the_types = cache.get(key)
+        the_types = None
         if the_types:
             try:
                 the_types = pickle.loads(the_types)
             except pickle.UnpicklingError:
                 the_types = None
-        if not the_types:
+        if the_types == None:
             self.logger.warn("Cache miss for %s" % key)
             the_types = self.service.getIssueTypes()
             the_types = [self.object_to_dict(t) for t in the_types]
+            the_subtask_types = self.service.getSubTaskIssueTypes()
+            the_subtask_types = [self.object_to_dict(st) for st in the_subtask_types]
+            the_types.extend(the_subtask_types)
             cache.set(key, pickle.dumps(the_types))
         the_type = [t for t in the_types if t['id'] == type_id]
         try:

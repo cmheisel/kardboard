@@ -33,8 +33,8 @@ class JIRAHelperTests(KardboardTestCase):
     def test_update(self):
         k = self.card
         k.save()
-        self.assert_(k._ticket_system_data == {})
-        self.assert_(k._ticket_system_updated_at is None)
+        self.assert_(k._ticket_system_data != {})
+        self.assert_(k._ticket_system_updated_at != None)
 
         k.ticket_system.update()
         k.reload()
@@ -60,6 +60,11 @@ class JIRAHelperTests(KardboardTestCase):
         expected = self.ticket.summary
         actual = h.get_title()
         self.assertEqual(expected, actual)
+
+    def test_get_service_class(self):
+        h = self._make_one()
+        expected = "New Feature"
+        self.assertEqual(expected, h.get_service_class())
 
     def test_get_ticket_url(self):
         h = self._make_one()
