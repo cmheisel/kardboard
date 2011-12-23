@@ -15,8 +15,7 @@
 {%- endmacro %}
 
 {% macro card_detail(card, request) -%}
-    <a href="{{ url_for('card', key=card.key) }}">
-    <div class="card_on_board {% if card.cycle_over_goal %}cycle_over_goal{% elif card.cycle_in_goal %}cycle_in_goal{% endif %}" id="card_{{ card.key }}">
+    <div class="card_on_board {% if card.cycle_over_goal %}cycle_over_goal{% elif card.cycle_in_goal %}cycle_in_goal{% endif %} card_type_{{ card.service_class|slugify }}" id="card_{{ card.key }}">
         <div class="card_key"><span>{{ card.key }}</span>
             {% if card.done_date %}
                 - {{ card.cycle_time }}d
@@ -29,7 +28,7 @@
             {% endif %}
         </div>
 
-        <p class="title">{{ card.ticket_system_data.get('summary', card.title) }}</p>
+        <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a></p>
 
         {% if card.blocked %}
         <div class="blocker">
@@ -38,11 +37,11 @@
         {% endif %}
 
         {% set assignee = card.ticket_system_data.get('assignee', '') %}
-        {% if assignee %}
-            <p class="assignee">
-                <a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>
-            </p>
-        {% endif %}
+        <p class="assignee">
+            {{ card.service_class }}
+            {% if assignee %}<br /><a href="{{ url_for('person', name=assignee) }}">{{ assignee }}{% endif %}</a>
+        </p>
+
     </div>
     </a>
 {%- endmacro %}

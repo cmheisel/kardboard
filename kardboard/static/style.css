@@ -319,3 +319,10 @@ table.board div.cycle_over_goal div.card_key{
     background-color: #991111;
     color: #000;
 }
+
+table.board p.title a {
+    color: #000;
+}
+table.board p.title a:hover {
+    color: #367000;
+}
