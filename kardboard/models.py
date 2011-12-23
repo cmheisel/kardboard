@@ -369,6 +369,8 @@ class Kard(app.db.Document):
         app.db.EmbeddedDocumentField(BlockerRecord),
     )
 
+    _service_class = app.db.StringField(required=True, db_field="service_class")
+
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
@@ -426,15 +428,19 @@ class Kard(app.db.Document):
         self.start_date = self._convert_dates_to_datetimes(self.start_date)
         self.done_date = self._convert_dates_to_datetimes(self.done_date)
 
+        # Auto move to done
         if self.done_date:
             states = States()
             self.in_progress = False
             self.state = states.done
 
+        # Auto fill in final cycle and lead time
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
+        # If a card is blocked, inspect it's previous state and
+        # if we're moving states unblock it
         if self.blocked:
             try:
                 k = Kard.objects.only('state').get(key=self.key, )
@@ -445,9 +451,20 @@ class Kard(app.db.Document):
                 #Card isn't saved can't find its previous state
                 pass
 
+        self._service_class = self.service_class
         self.key = self.key.upper()
 
         super(Kard, self).save(*args, **kwargs)
+
+    @property
+    def service_class(self):
+        # Fill in the service_class from the ticket helper if
+        # there is one, and if not the config'd default
+        if self.ticket_system.service_class:
+            service_class = self.ticket_system.service_class
+        else:
+            service_class = app.config['DEFAULT_CLASS']
+        return service_class
 
     @classmethod
     def in_progress(klass, date=None):

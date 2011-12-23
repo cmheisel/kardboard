@@ -48,6 +48,17 @@ class TicketHelper(object):
         """
         pass
 
+    @property
+    def service_class(self):
+        return self.get_service_class()
+
+    def get_service_class(self):
+        """
+        Method called to extract, if any, the service class from the upstream ticket system.
+        For example: Bug, Feature, Expedite, etc.
+        """
+        pass
+
 
 class NullHelper(TicketHelper):
     def get_title(self, key=None):

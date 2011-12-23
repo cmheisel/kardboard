@@ -239,6 +239,25 @@ class DailyRecordTests(KardboardTestCase):
         self.assertEqual(7, klass.objects.count())
 
 
+class KardClassTests(KardboardTestCase):
+    def setUp(self):
+        super(KardClassTests, self).setUp()
+        self.old_config = deepcopy(self.config)
+
+    def tearDown(self):
+        self.config = deepcopy(self.old_config)
+
+    def _get_target_class(self):
+        return self._get_card_class()
+
+    def _make_one(self, **kwargs):
+        return self.make_card(**kwargs)
+
+    def test_default_class(self):
+        card = self._make_one()
+        self.assertEqual(self.config['DEFAULT_CLASS'], card.service_class)
+
+
 class KardTests(KardboardTestCase):
     def setUp(self):
         super(KardTests, self).setUp()

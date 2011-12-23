@@ -25,6 +25,8 @@ CARD_TEAMS = [
     'Team 2',
 ]
 
+DEFAULT_CLASS = "Card"
+
 BROKER_TRANSPORT = "redis"
 BROKER_HOST = "localhost"  # Maps to redis host.
 BROKER_PORT = 6379         # Maps to redis port.
