@@ -452,6 +452,56 @@ def done(group="all", months=3, start=None):
     return render_template('done.html', **context)
 
 
+def report_service_class(group="all", months=3, start=None):
+    start = start or datetime.datetime.today()
+    months_ranges = month_ranges(start, months)
+    rg = ReportGroup(group, Kard.objects)
+    rg_cards = rg.queryset
+    classes = rg_cards.distinct('service_class')
+    classes.sort()
+
+    datatable = {
+        'headers': ('Month', 'Class', 'Throughput', 'Cycle Time', 'Lead Time'),
+        'rows': [],
+    }
+
+    months = []
+    for arange in months_ranges:
+        for cls in classes:
+            row = []
+            start, end = arange
+            filtered_cards = Kard.objects.filter(done_date__gte=start,
+                done_date__lte=end, _service_class=cls)
+            rg = ReportGroup(group, filtered_cards)
+            cards = rg.queryset
+
+            month_name = start.strftime("%B")
+            if month_name not in months:
+                row.append(month_name)
+                months.append(month_name)
+            else:
+                row.append('')
+            row.append(cls)
+            row.append(cards.count())
+            if cards.count() > 0:
+                row.append("%d" % cards.average('_cycle_time'))
+                row.append("%d" % cards.average('_lead_time'))
+            else:
+                row.append('N/A')
+                row.append('N/A')
+            row = tuple(row)
+            datatable['rows'].append(row)
+
+    context = {
+        'title': "By service class",
+        'updated_at': datetime.datetime.now(),
+        'datatable': datatable,
+        'version': VERSION,
+    }
+
+    return render_template('report-classes.html', **context)
+
+
 def chart_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)

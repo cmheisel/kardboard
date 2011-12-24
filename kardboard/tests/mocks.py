@@ -63,6 +63,17 @@ class MockJIRAService(Mock):
             }),
         ]
 
+    def getSubTaskIssueTypes(self):
+        return [
+            MockJIRAObject({
+                'description': '',
+                'id': '4',
+                'name': 'Feature',
+                'icon': \
+                    'http://jira.example.com/images/icons/type_feature.gif',
+            }),
+        ]
+
     def getStatuses(self):
         return [MockJIRAObject({
             'description': '',
