@@ -188,7 +188,6 @@ class JIRAHelper(TicketHelper):
         service_class = None
         if not self.card._ticket_system_data:
             self.card.ticket_system.update(sync=True)
-            self.card.reload()
         service_class = self.card._ticket_system_data.get('type', {}).get('name', '')
         return service_class
 
