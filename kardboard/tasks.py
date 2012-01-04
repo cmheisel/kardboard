@@ -29,9 +29,11 @@ def update_ticket(card_id):
         elif origin_updated:
             if local_updated < origin_updated:
                 logger.info(
-                    "%s UPDATED on origin: %s < %s" % (k.key, local_updated, origin_updated)
+                    "%s UPDATED on origin: Local: %s < Origin: %s" % (k.key, local_updated, origin_updated)
                 )
                 should_update = True
+            else:
+                pass
         else:
             # Ok well something changed with the ticket system
             # so we need fall back to the have we updated
@@ -43,6 +45,8 @@ def update_ticket(card_id):
             diff = now - local_updated
             if diff.seconds >= threshold:
                 should_update = True
+                logger.info(
+                    "%s FORCED UPDATE because no origin update date available")
 
         if should_update:
             logger.info("update_ticket running for %s" % (k.key, ))
@@ -66,16 +70,22 @@ def queue_updates():
 
     now = datetime.datetime.now()
     old_time = now - datetime.timedelta(seconds=app.config.get('TICKET_UPDATE_THRESHOLD', 60 * 60))
+    logger.info(
+        "Looking for cards that haven't been updated since %s" % (old_time, )
+    )
 
     old_cards = Kard.objects.filter(_ticket_system_updated_at__lte=old_time, done_date=None).order_by('_ticket_system_updated_at')
     old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
     [update_ticket.delay(k.id) for k in new_cards]
-    [update_ticket.delay(k.id) for k in old_cards.limit(100)]
+    [update_ticket.delay(k.id) for k in old_cards]
     [update_ticket.delay(k.id) for k in old_done_cards.limit(50)]
 
-    logger.info("Queued updates -- NEW: %s EXISTING: %s DONE: %s" %
-        (new_cards.count(), old_cards.count(), old_done_cards.count()))
+    logger.info(
+        "Queued updates -- NEW: %s EXISTING: %s DONE: %s" % (
+            len(new_cards), len(old_cards), len(old_done_cards)
+        )
+    )
 
 
 @celery.task(name="tasks.update_daily_records", ignore_result=True)
