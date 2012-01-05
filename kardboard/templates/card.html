@@ -73,6 +73,9 @@
         {% set assignee = card.ticket_system_data.get('assignee', '') %}
         {% set reporter = card.ticket_system_data.get('reporter', '') %}
         <li>Last synced: {{ card._ticket_system_updated_at|timesince }}</li>
+
+        {% set jira_update = card.ticket_system_data.get('updated', None) %}
+        <li>Last updated in JIRA: {% if jira_update %}{{ jira_update|timesince }}{% else %}Unknown{% endif %}</li>
         <li>Assigned: {% if assignee %}<a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}</li>
         <li>Reporter: {% if reporter %}<a href="{{ url_for('person', name=reporter) }}">{{ reporter }}</a>{% endif %}</li>
         <li>Developers:

@@ -33,7 +33,8 @@ def update_ticket(card_id):
                 )
                 should_update = True
             else:
-                pass
+                k._ticket_system_updated_at = datetime.datetime.now()
+                k.save()
         else:
             # Ok well something changed with the ticket system
             # so we need fall back to the have we updated
