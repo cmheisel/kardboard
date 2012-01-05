@@ -32,7 +32,8 @@
 
         {% if card.blocked %}
         <div class="blocker">
-            <p>{{ card.blockers[0].reason }}</p>
+
+            <p>{{ card.blockers[-1].reason }}</p>
         </div>
         {% endif %}
 
