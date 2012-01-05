@@ -475,6 +475,10 @@ def report_service_class(group="all", months=3, start=None):
             rg = ReportGroup(group, filtered_cards)
             cards = rg.queryset
 
+            if cards.count() == 0:
+                # We don't need to have rows for
+                # service classes we didn't do
+                continue
             month_name = start.strftime("%B")
             if month_name not in months:
                 row.append(month_name)
