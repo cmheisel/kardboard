@@ -20,7 +20,7 @@ def update_ticket(card_id):
         k = Kard.objects.with_id(card_id)
         i = k.ticket_system.get_issue(k.key)
         origin_updated = getattr(i, 'updated')
-        local_updated = k._ticket_system_updated_at
+        local_updated = k.ticket_system_data.get('updated', None)
 
         should_update = False
         if not local_updated:
@@ -79,7 +79,7 @@ def queue_updates():
     old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
     [update_ticket.delay(k.id) for k in new_cards]
-    [update_ticket.delay(k.id) for k in old_cards]
+    [update_ticket.delay(k.id) for k in old_cards.limit(150)]
     [update_ticket.delay(k.id) for k in old_done_cards.limit(50)]
 
     logger.info(
