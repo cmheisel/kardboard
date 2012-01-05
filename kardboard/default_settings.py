@@ -45,7 +45,7 @@ TICKET_HELPER = 'kardboard.tickethelpers.NullHelper'
 TICKET_AUTH = False
 
 # How old can tickets get before we refresh
-TICKET_UPDATE_THRESHOLD = 60 * 10
+TICKET_UPDATE_THRESHOLD = 60 * 5
 
 from celery.schedules import crontab
 CELERYBEAT_SCHEDULE = {
