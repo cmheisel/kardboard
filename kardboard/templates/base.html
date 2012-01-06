@@ -10,12 +10,26 @@
             {{ title }}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+
+        {% if config.get('LOGGR_KEY', None) %}
+            {% set loggr_key = config['LOGGR_KEY'] %}
+            <script src="https://api.loggr.net/1/loggr.min.js?l=kardboard&amp;a={{ loggr_key }}"></script>
+        {% else %}
+            {% set loggr_key = '' %}
+        {% endif %}
     </head>
     <body>
         {% if config.get('TICKET_AUTH', False) %}
             <p class="auth nav">
                 {% if 'username' in session %}
                     Hi {{ session['username'] }}! | <a href="{{ url_for('logout', next=request.url) }}">Logout</a>
+                    {% if loggr_key %}
+                    <script type="text/javascript">
+                        var username = "{{ session['username'] }}";
+                        var emailAddress = "";
+                        Loggr.Log.trackUser(username, emailAddress);
+                    </script>
+                    {% endif %}
                 {% else %}
                     <a href="{{ url_for('login', next=request.url) }}">Login</a>
                 {% endif %}
