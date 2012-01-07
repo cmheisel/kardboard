@@ -229,13 +229,13 @@ class DailyRecordTests(KardboardTestCase):
 
     def test_batch_update(self):
         klass = self._get_target_class()
-        from kardboard.tasks import update_daily_records
+        from kardboard.tasks import queue_daily_record_updates
 
-        update_daily_records.apply(args=[7, ], throw=True)
+        queue_daily_record_updates.apply(args=[7, ], throw=True)
         self.assertEqual(7, klass.objects.count())
 
         # update_daily_records should be idempotent
-        update_daily_records.apply(args=[7, ], throw=True)
+        queue_daily_record_updates.apply(args=[7, ], throw=True)
         self.assertEqual(7, klass.objects.count())
 
 

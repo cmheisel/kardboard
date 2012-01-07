@@ -64,14 +64,14 @@ CELERYBEAT_SCHEDULE = {
     # How often (probably nighly) should we update daily records for the past
     # 365 days
     'calc-daily-records-year': {
-        'task': 'tasks.update_daily_records',
+        'task': 'tasks.queue_daily_record_updates',
         'schedule': crontab(minute=1, hour=0),
         'args': (365, ),
     },
     # How often should we update daily records for the past
-    # 7 days
+    # 14 days
     'calc-daily-records-week': {
-        'task': 'tasks.update_daily_records',
+        'task': 'tasks.queue_daily_record_updates',
         'schedule': crontab(minute="*/5"),
         'args': (14, ),
     }

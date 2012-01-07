@@ -89,9 +89,14 @@ def queue_updates():
     )
 
 
-@celery.task(name="tasks.update_daily_records", ignore_result=True)
-def update_daily_records(days=365):
+@celery.task(name="tasks.update_daily_record", ignore_result=True)
+def update_daily_record(target_date, group):
     from kardboard.models import DailyRecord
+    DailyRecord.calculate(target_date, group=group)
+
+
+@celery.task(name="tasks.queue_daily_record_updates", ignore_result=True)
+def queue_daily_record_updates(days=365):
     from kardboard.app import app
 
     report_groups = app.config.get('REPORT_GROUPS', {})
@@ -103,7 +108,7 @@ def update_daily_records(days=365):
     for i in xrange(0, days):
         target_date = now - relativedelta.relativedelta(days=i)
         for slug in group_slugs:
-            DailyRecord.calculate(target_date, group=slug)
+            update_daily_record.delay(target_date, slug)
 
 
 def _get_person(name, cache):
