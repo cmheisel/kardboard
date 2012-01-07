@@ -1,16 +1,16 @@
 {% macro card_overview(card, request) -%}
-<a href="{{ url_for('card', key=card.key) }}" title="{{ card.key }} -- {{ card.title }}{% if card.blocked %} BLOCKED: {{ card.blockers[0].reason }}{% endif %}">
-    <span class="card_icon">
-        {% if card.blocked %}
-        <span class="blocked">&#9635;</span>
-        {% elif card.cycle_over_goal %}
-        <span class="cycle_over_goal">&#9724;</span>
-        {% elif card.cycle_in_goal %}
-        <span class="cycle_in_goal">&#9724;</span>
-        {% else %}
-        &#9724;
-        {% endif %}
-    </span>
+<a href="{{ url_for('card', key=card.key) }}" title="{{ card.key }} -- {{ card.title }}{% if card.blocked %} BLOCKED: {{ card.blockers[-1].reason }}{% endif %}">
+    {% if card.cycle_over_goal %}
+        {% set classname = "cycle_over_goal" %}
+    {% elif card.cycle_in_goal %}
+        {% set classname = "cycle_in_goal" %}
+    {% endif %}
+    {% if card.blocked %}
+        {% set symbol = "#9635;" %}
+    {% else %}
+        {% set symbol = "#9724;" %}
+    {% endif %}
+    <span class="card_icon {{ classname }}">&{{ symbol }}</span>
 </a>
 {%- endmacro %}
 
