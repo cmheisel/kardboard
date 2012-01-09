@@ -8,6 +8,12 @@ from kardboard.app import app
 
 celery = Celery(app)
 
+@celery.task(name="tasks.force_update_ticket", ignore_result=True)
+def force_update_ticket(card_id):
+    logger = force_update_ticket.get_logger()
+    k = Kard.objects.with_id(card_id)
+    k.ticket_system.actually_update()
+    logger.info("FORCED UPDATE on %s" % k.key)
 
 @celery.task(name="tasks.update_ticket", ignore_result=True)
 def update_ticket(card_id):
