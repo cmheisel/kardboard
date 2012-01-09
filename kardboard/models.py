@@ -682,10 +682,6 @@ class DailyRecord(app.db.Document):
     group = app.db.StringField(required=True, default="all", unique_with=['date', ])
     """The report group to which this daily report belongs."""
 
-    meta = {
-        'indexes': ['date', ]
-    }
-
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
         super(DailyRecord, self).save(*args, **kwargs)

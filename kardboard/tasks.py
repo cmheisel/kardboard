@@ -92,12 +92,38 @@ def queue_updates():
 @celery.task(name="tasks.update_daily_record", ignore_result=True)
 def update_daily_record(target_date, group):
     from kardboard.models import DailyRecord
-    DailyRecord.calculate(target_date, group=group)
+
+    logger = update_daily_record.get_logger()
+
+    should_recalc = False
+
+    # We need all this logic because this job can be pulled
+    # by two workers in parallel leading to a race condition
+    try:
+        dr = DailyRecord.objects.get(date=target_date, group=group)
+        one_minute_ago = datetime.datetime.now() - relativedelta.relativedelta(minutes=1)
+        if dr.updated_at <= one_minute_ago:
+            should_recalc = True
+        else:
+            logger.info("DailyRecord: %s / %s was recalulcated in the last minute" % (target_date, group))
+    except DailyRecord.DoesNotExist:
+        should_recalc = True
+
+
+    if should_recalc:
+        try:
+            DailyRecord.calculate(date=target_date, group=group)
+            logger.info("Successfully calculated DailyRecord: Date: %s / Group: %s" % (target_date, group))
+        except Exception:
+            logger.warning("Tried to save duplicate record: Date: %s / Group: %s" % (target_date, group))
+            raise
+
 
 
 @celery.task(name="tasks.queue_daily_record_updates", ignore_result=True)
 def queue_daily_record_updates(days=365):
     from kardboard.app import app
+    from kardboard.util import make_end_date
 
     report_groups = app.config.get('REPORT_GROUPS', {})
     group_slugs = report_groups.keys()
@@ -107,6 +133,7 @@ def queue_daily_record_updates(days=365):
 
     for i in xrange(0, days):
         target_date = now - relativedelta.relativedelta(days=i)
+        target_date = make_end_date(date=target_date)
         for slug in group_slugs:
             update_daily_record.delay(target_date, slug)
 
