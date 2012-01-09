@@ -39,6 +39,7 @@
 
         {% set assignee = card.ticket_system_data.get('assignee', '') %}
         <p class="assignee">
+            {{ card.ticket_system.get_version() }}<br />
             {{ card.service_class }}
             {% if assignee %}<br /><a href="{{ url_for('person', name=assignee) }}">{{ assignee }}{% endif %}</a>
         </p>

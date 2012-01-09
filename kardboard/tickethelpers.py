@@ -184,6 +184,15 @@ class JIRAHelper(TicketHelper):
         title = self.card.ticket_system_data.get('summary', '')
         return title
 
+    def get_version(self, key=None):
+        version = ''
+        if not self.card._ticket_system_data:
+            self.card.ticket_system.update(sync=True)
+        versions = self.card.ticket_system_data.get('fixVersions', [])
+        if versions:
+            version = versions[0]['name']
+        return version
+
     def get_service_class(self, key=None):
         service_class = None
         if not self.card._ticket_system_data:
@@ -194,11 +203,12 @@ class JIRAHelper(TicketHelper):
     def issue_to_dictionary(self, obj):
         idic = {}
         keys = ['summary', 'key', 'reporter', 'assignee', 'description',
-            'status', 'type', 'updated']
+            'status', 'type', 'updated', 'fixVersions']
         for key in keys:
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
         idic['type'] = self.resolve_type(idic['type'])
+        idic['fixVersions'] = self.resolve_type(idic['fixVersions'])
 
         return idic
 
