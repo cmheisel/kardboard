@@ -10,6 +10,7 @@ class MockRemoteCustomFieldValue(object):
         self.key = key
         self.values = values
 
+
 class MockFixVersion(object):
     def __init__(self, **kwargs):
         super(MockFixVersion, self).__init__()
@@ -28,12 +29,12 @@ class MockJIRAIssue(Mock):
     updated = datetime.datetime(2011, 12, 22, 12, 40, 19)
     fixVersions = [
         MockFixVersion(
-            archived = False,
-            id = "10354",
-            name = "1.2.1",
-            releaseDate = None,
-            released = False,
-            sequence = 6
+            archived=False,
+            id="10354",
+            name="1.2.1",
+            releaseDate=None,
+            released=False,
+            sequence=6,
         ),
     ]
 

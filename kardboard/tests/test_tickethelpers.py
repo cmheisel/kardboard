@@ -43,6 +43,11 @@ class JIRAHelperTests(KardboardTestCase):
         diff = now - updated_at
         self.assert_(diff.seconds <= 1)
 
+    def test_version(self):
+        k = self.card
+        actual = k.ticket_system.get_version()
+        self.assertEqual("1.2.1", actual)
+
     def test_people(self):
         k = self.card
         k.save()

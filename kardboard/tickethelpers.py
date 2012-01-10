@@ -190,7 +190,11 @@ class JIRAHelper(TicketHelper):
             self.card.ticket_system.update(sync=True)
         versions = self.card.ticket_system_data.get('fixVersions', [])
         if versions:
-            version = versions[0]['name']
+            try:
+                version = versions[0]['name']
+            except IndexError:
+                print versions
+                raise
         return version
 
     def get_service_class(self, key=None):
@@ -208,7 +212,7 @@ class JIRAHelper(TicketHelper):
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
         idic['type'] = self.resolve_type(idic['type'])
-        idic['fixVersions'] = self.resolve_type(idic['fixVersions'])
+        idic['fixVersions'] = [self.object_to_dict(v) for v in idic['fixVersions']]
 
         return idic
 
