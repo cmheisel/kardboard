@@ -369,6 +369,8 @@ class Kard(app.db.Document):
         app.db.EmbeddedDocumentField(BlockerRecord),
     )
 
+    created_at = app.db.DateTimeField(required=True)
+
     _service_class = app.db.StringField(required=True, db_field="service_class")
 
     _ticket_system_updated_at = app.db.DateTimeField()
@@ -427,6 +429,9 @@ class Kard(app.db.Document):
         self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)
         self.start_date = self._convert_dates_to_datetimes(self.start_date)
         self.done_date = self._convert_dates_to_datetimes(self.done_date)
+
+        if not self.created_at:
+            self.created_at = now()
 
         # Auto move to done
         if self.done_date:

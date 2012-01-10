@@ -297,6 +297,29 @@ class KardTests(KardboardTestCase):
     def _make_one(self, **kwargs):
         return self.make_card(**kwargs)
 
+    def test_created_at(self):
+        now = datetime.datetime.now()
+        k = self._make_one()
+        k.save()
+
+        expected = (
+            now.year,
+            now.month,
+            now.day,
+            now.hour,
+            now.minute,
+            now.second
+        )
+
+        actual = (
+            k.created_at.year,
+            k.created_at.month,
+            k.created_at.day,
+            k.created_at.hour,
+            k.created_at.minute,
+            k.created_at.second,)
+        self.assertEqual(expected, actual)
+
     def test_valid_card(self):
         k = self._make_one()
         k.save()
