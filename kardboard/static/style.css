@@ -317,7 +317,8 @@ table.board div.cycle_in_goal div.card_key {
 
 table.board div.cycle_over_goal div.card_key{
     background-color: #991111;
-    color: #000;
+    color: #fff;
+    font-weight: normal;
 }
 
 table.board p.title a {
