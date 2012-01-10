@@ -327,3 +327,8 @@ table.board p.title a {
 table.board p.title a:hover {
     color: #367000;
 }
+
+.card_type_bug {
+    background: url("ant.png") bottom left no-repeat;
+    background-size: 25px;
+}
