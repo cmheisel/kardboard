@@ -9,7 +9,7 @@
         <title>
             {{ title }}
         </title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?{{ version|slugify }}" type="text/css">
 
         {% if config.get('LOGGR_KEY', None) %}
             {% set loggr_key = config['LOGGR_KEY'] %}
