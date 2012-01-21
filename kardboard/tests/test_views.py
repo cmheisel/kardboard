@@ -120,6 +120,26 @@ class QuickJumpTests(DashboardTestCase):
         expected = "/card/%s/" % (key, )
         self.assertIn(expected, res.headers['Location'])
 
+    def test_quick_stripping(self):
+        """The value passed to the quick
+        view should be stripped of leading and
+        trailing white space."""
+        key = self.Kard.objects.first().key
+        key = "  %s  " % (key, )
+
+        res = self.app.get(self._get_target_url(key))
+        self.assertEqual(302, res.status_code)
+
+        expected = "/card/%s/" % (key.strip(), )
+        self.assertIn(expected, res.headers['Location'])
+
+        key = "CMSCMSCMS-127  "
+        res = self.app.get(self._get_target_url(key))
+        self.assertEqual(302, res.status_code)
+        stripped_key = key.strip()
+        expected = "/card/add/?key=%s" % (stripped_key, )
+        self.assertIn(expected, res.headers['Location'])
+
     def test_quick_case_insenitive(self):
         key = self.Kard.objects.first().key
         lower_key = key.lower()

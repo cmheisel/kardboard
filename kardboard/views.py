@@ -357,6 +357,7 @@ def card_block(key):
 
 def quick():
     key = request.args.get('key', None)
+    key = key.strip()
     if not key:
         url = url_for('dashboard')
         return redirect(url)
@@ -680,7 +681,7 @@ def login():
         result = helper.login(f.username.data, f.password.data)
         if result:
             session['username'] = f.username.data
-            return True #redirect
+            return True  # redirect
 
     context = {
         'title': "Login",
