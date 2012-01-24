@@ -130,7 +130,7 @@ def team(team_slug=None):
         {'Done this month':
             Kard.objects.filter(team=target_team).done_in_month(
                 year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': Kard.objects.filter(team=target_team).count()},
+        {'On the board': len(board.cards)},
     ]
 
     done_cards = Kard.objects.done().filter(team=target_team).order_by('-done_date')

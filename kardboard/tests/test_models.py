@@ -102,6 +102,18 @@ class DisplayBoardTests(KardboardTestCase):
         self.assertEqual(self.teams[0], rows[0][0]['label'])
         self.assertEqual(4, len(rows[0][1]['cards']))
 
+    def test_column_counts(self):
+        board = self._make_one()
+
+        expected = (
+            ('Team', None),
+            ('Todo', 6),
+            ('Doing', 6),
+            ('Done', 6),
+        )
+        actual = board.headers
+        self.assertEqual(actual, expected)
+
 
 class StatesTests(KardboardTestCase):
     def setUp(self):

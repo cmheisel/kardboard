@@ -28,13 +28,25 @@ class DisplayBoard(object):
             teams = [t for t in app.config['CARD_TEAMS'] if t]  # Remove blanks
         self.teams = teams
 
-        self.headers = [s for s in self.states]
-        if len(teams) > 1:
-            self.headers.insert(0, 'Team')
-
     def __iter__(self):
         for row in self.rows:
             yield row
+
+    @property
+    def headers(self):
+        headers = [s for s in self.states]
+        if len(self.teams) > 1:
+            headers.insert(0, 'Team')
+
+        header_counts = [0 for h in headers]
+        for row in self.rows:
+            for cell in row:
+                index = row.index(cell)
+                if cell.get('cards', None) != None:
+                    header_counts[index] += len(cell['cards'])
+                else:
+                    header_counts[index] = None
+        return tuple(zip(headers, header_counts))
 
     @property
     def rows(self):

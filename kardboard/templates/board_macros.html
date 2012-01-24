@@ -53,7 +53,7 @@
 <table class="board">
 <tr>
   {% for header in board.headers %}
-    <th>{{ header }}</th>
+    <th>{{ header[0] }}{% if header[1] != None %}{% if board.teams|length > 1 %}<br />{% else %}&nbsp;{% endif %}({{ header[1] }}){% endif %}</th>
   {% endfor %}
 </tr>
 
