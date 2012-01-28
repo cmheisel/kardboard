@@ -194,9 +194,6 @@ def _init_card_form(*args, **kwargs):
         del kwargs['new']
     klass = get_card_form(new=new)
     f = klass(*args, **kwargs)
-    choices = app.config.get('CARD_CATEGORIES')
-    if choices:
-        f.category.choices = _make_choice_field_ready(choices)
 
     if states:
         f.state.choices = states.for_forms

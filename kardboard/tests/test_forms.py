@@ -35,14 +35,23 @@ class BlockFormTest(FormTests):
 class CardFormTest(FormTests):
     def setUp(self):
         from werkzeug.datastructures import MultiDict
-
         super(CardFormTest, self).setUp()
+
+        self.config['CARD_STATES'] = [
+            'Todo',
+            'Doing',
+            'Done',
+        ]
+
+        self.config['CARD_TEAMS'] = [
+            'Team 1',
+            'Team 2',
+        ]
         self.Form = self._get_target_class()
         self.required_data = {
             'key': u'CMSIF-199',
             'title': u'You gotta lock that down',
             'backlog_date': u"06/11/2011",
-            'category': u'Bug',
             'state': u'Doing',
             'team': u'Team 1',
         }
@@ -55,6 +64,8 @@ class CardFormTest(FormTests):
     def _test_form(self, post_data):
         f = self.Form(post_data)
         f.validate()
+        import pprint
+        pprint.pprint(f.errors)
         self.assertEquals(0, len(f.errors))
 
         card = self._get_card_class()()

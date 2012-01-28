@@ -361,8 +361,6 @@ class Kard(app.db.Document):
 
     _cycle_time = app.db.IntField(db_field="cycle_time")
     _lead_time = app.db.IntField(db_field="lead_time")
-    category = app.db.StringField(required=True, default="Uncategorized")
-    """A user-supplied taxonomy for cards. See :ref:`CARD_CATEGORIES`"""
     team = app.db.StringField(required=True, default="")
     """A selection from a user supplied list of teams/assignees. See :ref:`CARD_TEAMS`"""
 
@@ -400,7 +398,6 @@ class Kard(app.db.Document):
         'backlog_date',
         'start_date',
         'done_date',
-        'category',
         'state',
     )
 

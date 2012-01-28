@@ -8,12 +8,6 @@ CACHE_TYPE = 'simple'
 CACHE_DEFAULT_TIMEOUT = 3600
 
 
-CARD_CATEGORIES = [
-    'Bug',
-    'Feature',
-    'Improvement',
-]
-
 CARD_STATES = [
     'Todo',
     'Doing',

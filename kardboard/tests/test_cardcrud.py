@@ -116,7 +116,6 @@ class CardCRUDTests(KardboardTestCase):
             'key': u'CMSIF-199',
             'title': u'You gotta lock that down',
             'backlog_date': u"06/11/1911",
-            'category': u'Bug',
             'state': u'Todo',
             'team': u'Team 1',
         }

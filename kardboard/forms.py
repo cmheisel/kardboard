@@ -26,12 +26,6 @@ class Unique(object):
         if check:
             raise ValidationError(self.message)
 
-CATEGORY_CHOICES = (
-    ('Bug', 'Bug'),
-    ('Feature', 'Feature'),
-    ('Improvement', 'Improvement'),
-)
-
 STATE_CHOICES = (
     ('Todo', 'Todo'),
     ('Doing', 'Doing'),
@@ -48,8 +42,6 @@ class CardForm(Form):
     key = TextField(u'JIRA Key',
         validators=[validators.required()])
     title = TextField(u'Card title',
-        validators=[validators.required()])
-    category = SelectField(u'Category', choices=CATEGORY_CHOICES,
         validators=[validators.required()])
     team = SelectField(u'Team', choices=TEAM_CHOICES,
         validators=[validators.required()])
