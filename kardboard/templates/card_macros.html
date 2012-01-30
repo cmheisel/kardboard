@@ -3,8 +3,9 @@
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Ticket</th>
-        <th class="controls">&nbsp;</th>
+        <th>Class</th>
         <th>Title</th>
+
 
 
         {% if show_assigned %}
@@ -47,13 +48,7 @@
             </a>
         </td>
 
-        <td>
-            {% set next_url = request.path + "#card_" + card.key %}
-            <a href="{{ url_for('card_edit', key=card.key, next=next_url) }}">Edit</a>
-            {% if not card.done_date and card.start_date %}
-                / <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a>
-            {% endif %}
-        </td>
+        <td>{{ card.service_class }}</td>
 
         <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
