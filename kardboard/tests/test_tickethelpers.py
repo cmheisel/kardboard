@@ -47,6 +47,8 @@ class JIRAHelperTests(KardboardTestCase):
         k = self.card
         actual = k.ticket_system.get_version()
         self.assertEqual("1.2.1", actual)
+        k.save()
+        self.assertEqual(k._version, "1.2.1")
 
     def test_people(self):
         k = self.card

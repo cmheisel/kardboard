@@ -59,6 +59,12 @@ class TicketHelper(object):
         """
         pass
 
+    def get_version(self):
+        """
+        Method called to extract, if any, the version from the upstream ticket system.
+        """
+        pass
+
 
 class NullHelper(TicketHelper):
     def get_title(self, key=None):

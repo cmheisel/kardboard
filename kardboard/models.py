@@ -382,6 +382,7 @@ class Kard(app.db.Document):
     created_at = app.db.DateTimeField(required=True)
 
     _service_class = app.db.StringField(required=True, db_field="service_class")
+    _version = app.db.StringField(required=False, db_field="version")
 
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
@@ -466,6 +467,7 @@ class Kard(app.db.Document):
                 pass
 
         self._service_class = self.service_class
+        self._version = self.ticket_system.get_version()
         self.key = self.key.upper()
 
         super(Kard, self).save(*args, **kwargs)
