@@ -2,8 +2,6 @@ import urlparse
 import datetime
 import cPickle as pickle
 
-
-from kardboard.models import Kard
 from kardboard.app import cache
 from kardboard.app import app
 from kardboard.util import ImproperlyConfigured, log_exception
@@ -368,7 +366,7 @@ class JIRAHelper(TicketHelper):
         now = datetime.datetime.now()
         self.card._ticket_system_data = issue_dict
         self.card._ticket_system_updated_at = now
-        self.update_state(self.card)
+        self.card = self.update_state(self.card)
         if self.card.id:
             self.card.save()
 
