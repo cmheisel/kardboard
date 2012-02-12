@@ -275,15 +275,15 @@ class JIRAHelper(TicketHelper):
                 (type_id, type_help))
             return {}
 
-    def update(self, sync=False):
+    def update(self, issue=None, sync=False):
         if self.card._ticket_system_data and self.card.id:
             if sync:
-                self.actually_update()
+                self.actually_update(issue)
             else:
                 update_ticket.apply_async((self.card.id,))
         else:
             # first fetch
-            self.actually_update()
+            self.actually_update(issue)
 
     def _get_custom_field_values(self, field_id, fields):
         for field in fields:
@@ -340,14 +340,17 @@ class JIRAHelper(TicketHelper):
 
         return card
 
-    def actually_update(self):
+    def actually_update(self, issue=None):
         super(JIRAHelper, self).update()
-        self.logger.info("Fetching JIRA data for %s" % self.card.key)
-        try:
-            issue = self.get_issue(self.card.key)
-        except Exception:
-            issue = None
-            log_exception("Couldn't fetch JIRA issue %s" % self.card.key)
+
+        if not issue:
+            self.logger.info("Fetching JIRA data for %s" % self.card.key)
+            try:
+                issue = self.get_issue(self.card.key)
+            except Exception:
+                issue = None
+                log_exception("Couldn't fetch JIRA issue %s" % self.card.key)
+
         if issue:
             issue_dict = self.issue_to_dictionary(issue)
 

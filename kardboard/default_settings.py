@@ -48,6 +48,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'tasks.queue_updates',
         'schedule': crontab(minute="*/2"),
     },
+    'jira_queue_team_cards': {
+        'task': 'tasks.jira_queue_team_cards',
+        'schedule': crontab(minute="*/3"),
+    },
     # How often should we update all the Person
     # objects to make sure they reflect reality, due to deleted cards
     # or people being removed from a card

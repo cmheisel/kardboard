@@ -8,12 +8,14 @@ from kardboard.app import app
 
 celery = Celery(app)
 
+
 @celery.task(name="tasks.force_update_ticket", ignore_result=True)
 def force_update_ticket(card_id):
     logger = force_update_ticket.get_logger()
     k = Kard.objects.with_id(card_id)
     k.ticket_system.actually_update()
     logger.info("FORCED UPDATE on %s" % k.key)
+
 
 @celery.task(name="tasks.update_ticket", ignore_result=True)
 def update_ticket(card_id):
@@ -188,3 +190,38 @@ def normalize_people():
 
     for name, person in people_cache.items():
         person.save()
+
+
+@celery.task(name="tasks.jira_add_team_cards", ignore_result=True)
+def jira_add_team_cards(team, filter_id):
+    from kardboard.tickethelpers import JIRAHelper
+    from kardboard.models import States
+
+    logger = jira_add_team_cards.get_logger()
+    logger.info("JIRA BACKLOG SYNC %s: %s" % (team, filter_id))
+    states = States()
+    helper = JIRAHelper(app.config, None)
+    issues = helper.service.getIssuesFromFilter(helper.auth, filter_id)
+    for issue in issues:
+        if Kard.objects.filter(key=issue.key):
+            # Card exists, pass
+            pass
+        else:
+            logger.info("JIRA BACKLOGGING %s: %s" % (team, issue.key))
+            defaults = {
+                'key': issue.key,
+                'title': issue.summary,
+                'backlog_date': datetime.datetime.now(),
+                'team': team,
+                'state': states.backlog,
+            }
+            c = Kard(**defaults)
+            c.ticket_system.actually_update(issue)
+            c.save()
+
+
+@celery.task(name="tasks.jira_queue_team_cards", ignore_result=True)
+def jira_queue_team_cards():
+    team_filters = app.config.get('JIRA_TEAM_FILTERS', ())
+    for team, filter_id in team_filters:
+        jira_add_team_cards.delay(team, filter_id)
