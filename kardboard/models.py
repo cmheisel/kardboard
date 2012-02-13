@@ -15,6 +15,7 @@ from kardboard.util import (
     munge_date,
     week_range,
     now,
+    log_exception,
 )
 
 
@@ -67,7 +68,13 @@ class DisplayBoard(object):
                     cards = sorted(cards, key=lambda c: c.current_cycle_time())
                     cards.reverse()
                 else:
-                    cards = sorted(cards, key=lambda c: c.done_date)
+                    try:
+                        cards = sorted(cards, key=lambda c: c.done_date)
+                    except TypeError, e:
+                        bad_cards = [ c for c in cards if not c.done_date ]
+                        message = "The following cards have no done date: %s" % (bad_cards)
+                        log_exception(e, message)
+                        raise
                 cell = {'cards': cards}
                 row.append(cell)
             rows.append(row)
