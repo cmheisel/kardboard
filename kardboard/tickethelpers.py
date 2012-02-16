@@ -315,7 +315,7 @@ class JIRAHelper(TicketHelper):
     def update_state(self, card):
         mappings = app.config.get('TICKET_STATE_MAPPING', {})
         if not mappings:
-            return None  # Short circuit
+            return card  # Short circuit
 
         current_ticket_status = \
             card._ticket_system_data.get(u'status', {}).get(u'name', '')
