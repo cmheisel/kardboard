@@ -61,9 +61,10 @@ class DisplayBoard(object):
                 if state in self.states.pre_start:
                     pri_cards = [c for c in cards if c.priority != None]
                     pri_cards = sorted(pri_cards, key=lambda c: c.priority)
-                    non_pri = [c for c in cards if c.priority == None]
-                    non_pri.sort()
-                    cards = pri_cards + non_pri
+                    versioned = [c for c in cards if c.priority == None and c._version != None]
+                    non_versioned = [c for c in cards if c.priority == None and c._version == None]
+
+                    cards = pri_cards + versioned + non_versioned
                 elif state in self.states.in_progress:
                     cards = sorted(cards, key=lambda c: c.current_cycle_time())
                     cards.reverse()
@@ -71,7 +72,7 @@ class DisplayBoard(object):
                     try:
                         cards = sorted(cards, key=lambda c: c.done_date)
                     except TypeError, e:
-                        bad_cards = [ c for c in cards if not c.done_date ]
+                        bad_cards = [c for c in cards if not c.done_date]
                         message = "The following cards have no done date: %s" % (bad_cards)
                         log_exception(e, message)
                         raise

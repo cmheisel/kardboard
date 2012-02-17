@@ -9,6 +9,8 @@ from kardboard.tests.core import KardboardTestCase
 class DisplayBoardTests(KardboardTestCase):
     def setUp(self):
         super(DisplayBoardTests, self).setUp()
+        self.config['TICKET_HELPER'] = 'kardboard.tickethelpers.TestTicketHelper'
+
         self.Kard = self._get_card_class()
 
         self.start_date = self._date('start', )
@@ -113,6 +115,31 @@ class DisplayBoardTests(KardboardTestCase):
         )
         actual = board.headers
         self.assertEqual(actual, expected)
+
+    def test_backlog_sorting(self):
+        self.delete_all_cards()
+        team1 = self.teams[0]
+        backlog_date = self._date('start', days=-10)
+        versions = [None, "1.2.1", "1.2.1-c"]
+        for v in versions:
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team1,
+                state=self.states.backlog,
+                _version=v,
+            )
+            assert c._version == v
+            c.save()
+            assert c._version == v
+
+        board = self._make_one()
+        rows = list(board.rows)
+        backlog = rows[0][1]['cards']
+
+        expected = ['1.2.1', '1.2.1-c', None]
+        actual = [c._version for c in backlog]
+        self.assertEqual(expected, actual)
+
 
 
 class StatesTests(KardboardTestCase):
