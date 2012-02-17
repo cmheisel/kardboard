@@ -113,7 +113,7 @@ def update_daily_record(target_date, group):
         if dr.updated_at <= one_minute_ago:
             should_recalc = True
         else:
-            logger.info("DailyRecord: %s / %s was recalulcated in the last minute" % (target_date, group))
+            logger.debug("DailyRecord: %s / %s was recalulcated in the last minute" % (target_date, group))
     except DailyRecord.DoesNotExist:
         should_recalc = True
 
