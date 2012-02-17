@@ -121,9 +121,15 @@ class CardCRUDTests(KardboardTestCase):
         }
         self.config['TICKET_HELPER'] = \
             'kardboard.tickethelpers.TestTicketHelper'
+        self.flask_app.config['TICKET_AUTH'] = True
+        self.login()
+
 
     def tearDown(self):
         super(CardCRUDTests, self).tearDown()
+        self.flask_app.config['TICKET_AUTH'] = False
+        self.logout()
+
 
     def _get_target_url(self):
         return '/card/add/'
@@ -233,26 +239,9 @@ class CardCRUDTests(KardboardTestCase):
         res = self.app.post(target_url, data={'delete': 'Delete'})
         self.assertEqual(302, res.status_code)
 
-
-class CardCRUDAuthTests(CardCRUDTests):
-    """
-        Run the same tests with auth enabled.
-        Adds tests that check the interaction
-        between being logged in/out and auth
-        protected views.
-    """
     def login(self):
         login_data = {'username': 'username', 'password': 'password'}
         self.app.post('/login/', data=login_data)
 
     def logout(self):
         self.app.get('/logout/')
-
-    def setUp(self):
-        super(CardCRUDAuthTests, self).setUp()
-        self.flask_app.config['TICKET_AUTH'] = True
-        self.login()
-
-    def tearDown(self):
-        self.flask_app.config['TICKET_AUTH'] = False
-        self.logout()
