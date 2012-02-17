@@ -105,6 +105,12 @@ class TestTicketHelper(TicketHelper):
     def login(self, username, password):
         return True
 
+    def get_version(self):
+        if self.card:
+            return self.card._version
+        else:
+            return None
+
 
 class JIRAHelper(TicketHelper):
     clients = {}

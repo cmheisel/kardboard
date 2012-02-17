@@ -100,6 +100,9 @@ class KardboardTestCase(unittest2.TestCase):
         k = self._get_card_class()(**fields)
         return k
 
+    def delete_all_cards(self):
+        self._get_card_class().objects.all().delete()
+
     def make_record(self, date, **kwargs):
         fields = {
             'date': date,
