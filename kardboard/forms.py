@@ -55,6 +55,11 @@ class CardForm(Form):
         validators=[validators.optional()])
     priority = IntegerField(u'Ordering', validators=[validators.optional()])
 
+    def populate_obj(self, obj):
+        super(CardForm, self).populate_obj(obj)
+        if self.data['priority'] == u"":
+            obj.priority = None
+
 
 class CardBlockForm(Form):
     reason = TextField(u'Reason',

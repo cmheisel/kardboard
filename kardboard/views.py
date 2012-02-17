@@ -244,13 +244,16 @@ def card_edit(key):
     except Kard.DoesNotExist:
         abort(404)
 
-    f = _init_card_form(request.form, card)
+    if request.method == "GET":
+        f = _init_card_form(request.form, card)
 
-    if request.method == "POST" and f.validate():
-        f.populate_obj(card)
-        card.save()
-        flash("Card %s successfully edited" % card.key)
-        return True   # Redirect
+    if request.method == "POST":
+        f = _init_card_form(request.form)
+        if f.validate():
+            f.populate_obj(card)
+            card.save()
+            flash("Card %s successfully edited" % card.key)
+            return True   # Redirect
 
     context = {
         'title': "Edit a card",

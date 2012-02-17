@@ -194,6 +194,25 @@ class CardCRUDTests(KardboardTestCase):
 
         self.assertEqual(200, res.status_code)
 
+    def test_card_with_and_without_priority(self):
+        klass = self._get_target_class()
+
+        card = klass(**self.required_data)
+        card.backlog_date = datetime.datetime.now()
+        card.priority = 2
+        card.save()
+
+        self.required_data['priority'] = u""
+
+        target_url = "/card/%s/edit/" % (card.key, )
+        res = self.app.post(target_url,
+            data=self.required_data)
+
+        k = klass.objects.get(key=self.required_data['key'])
+        self.assert_(k.id)
+        self.assertEqual(k.priority, None)
+
+
     def test_edit_card(self):
         klass = self._get_target_class()
 

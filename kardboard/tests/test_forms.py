@@ -57,15 +57,13 @@ class CardFormTest(FormTests):
         }
         self.post_data = MultiDict(self.required_data)
 
-    def _get_target_class(self):
+    def _get_target_class(self, new=True):
         from kardboard.forms import get_card_form
-        return get_card_form(new=True)
+        return get_card_form(new=new)
 
-    def _test_form(self, post_data):
-        f = self.Form(post_data)
+    def _test_form(self, post_data, new=True):
+        f = self._get_target_class(new)(post_data)
         f.validate()
-        import pprint
-        pprint.pprint(f.errors)
         self.assertEquals(0, len(f.errors))
 
         card = self._get_card_class()()
@@ -76,6 +74,7 @@ class CardFormTest(FormTests):
             self.assertNotEqual(
                 None,
                 getattr(card, key, None))
+        return card
 
     def test_fields(self):
         self.optional_data = {
@@ -85,6 +84,29 @@ class CardFormTest(FormTests):
         }
         self.post_data.update(self.optional_data)
         self._test_form(self.post_data)
+
+    def test_no_priority(self):
+        self.optional_data = {
+            'start_date': u'06/11/2011',
+            'done_date': u'06/12/2011',
+            'priority': u'2',
+        }
+        self.post_data.update(self.optional_data)
+
+        f = self._get_target_class()(self.post_data)
+        f.validate()
+        self.assertEquals(0, len(f.errors))
+        card = self._get_card_class()()
+        f.populate_obj(card)
+        card.save()
+        self.assertEqual(2, card.priority)
+
+        self.post_data['priority'] = u''
+        f = self._get_target_class(new=False)(self.post_data)
+        f.validate()
+        f.populate_obj(card)
+        card.save()
+        self.assertEqual(None, card.priority)
 
     def test_datetime_coercing(self):
         f = self.Form(self.post_data)
