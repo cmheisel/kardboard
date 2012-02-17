@@ -26,7 +26,7 @@ BROKER_HOST = "localhost"  # Maps to redis host.
 BROKER_PORT = 6379         # Maps to redis port.
 BROKER_VHOST = "0"         # Maps to database number.
 
-CELERYD_LOG_LEVEL = 'INFO'
+CELERYD_LOG_LEVEL = 'WARNING'
 CELERYBEAT_LOG_LEVEL = CELERYD_LOG_LEVEL
 CELERY_RESULT_BACKEND = "redis"
 CELERY_REDIS_HOST = "localhost"
