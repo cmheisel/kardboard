@@ -156,7 +156,7 @@ def state():
 
     board = DisplayBoard()  # defaults to all teams, 7 days of done
 
-    title = "All teams"
+    title = app.config.get('SITE_NAME')
 
     wip_cards = Kard.in_progress(date)
     backlog_cards = Kard.backlogged(date)

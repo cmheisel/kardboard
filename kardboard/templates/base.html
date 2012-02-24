@@ -7,7 +7,8 @@
         <meta charset=utf-8 />
         <meta name="robots" content="noindex" />
         <title>
-            {{ title }}
+
+            {{ title }}{% if title != config.get('SITE_NAME') %} | {{ config.get('SITE_NAME') }}{% endif %}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?{{ version|slugify }}" type="text/css">
 
