@@ -4,7 +4,7 @@
 from wtforms import Form, TextField, SelectField, IntegerField, PasswordField, validators, ValidationError
 from wtforms.ext.dateutil.fields import DateField
 
-from kardboard.models import Kard
+from kardboard.models import Kard, States
 
 
 def _make_choice_field_ready(choice_list):
@@ -25,6 +25,25 @@ class Unique(object):
         check = field.data.strip() in self.klass.objects.distinct(self.field)
         if check:
             raise ValidationError(self.message)
+
+
+def done_date_validator(form, field):
+        states = States()
+        if form.state.data == states.done:
+            if field.data == None:
+                raise ValidationError("Done date required since the card's state is %s" % form.state.data)
+        else:
+            field.errors = []
+
+
+def start_date_validator(form, field):
+        states = States()
+        if states.index(form.state.data) >= states.index(states.start):
+            if field.data == None:
+                raise ValidationError("Start date required since the card's state is %s" % form.state.data)
+        else:
+            field.errors = []
+
 
 STATE_CHOICES = (
     ('Todo', 'Todo'),
@@ -50,9 +69,9 @@ class CardForm(Form):
     backlog_date = DateField(u'Backlog date', display_format="%m/%d/%Y",
         validators=[validators.required()])
     start_date = DateField(u'Start date', display_format="%m/%d/%Y",
-        validators=[validators.optional()])
+        validators=[start_date_validator, ])
     done_date = DateField(u'Done date', display_format="%m/%d/%Y",
-        validators=[validators.optional()])
+        validators=[done_date_validator, ])
     priority = IntegerField(u'Ordering', validators=[validators.optional()])
 
     def populate_obj(self, obj):

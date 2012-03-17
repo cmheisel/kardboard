@@ -34,7 +34,6 @@ class BlockFormTest(FormTests):
 
 class CardFormTest(FormTests):
     def setUp(self):
-        from werkzeug.datastructures import MultiDict
         super(CardFormTest, self).setUp()
 
         self.config['CARD_STATES'] = [
@@ -52,17 +51,25 @@ class CardFormTest(FormTests):
             'key': u'CMSIF-199',
             'title': u'You gotta lock that down',
             'backlog_date': u"06/11/2011",
-            'state': u'Doing',
+            'state': u'Todo',
             'team': u'Team 1',
+            'start_date': u'',
+            'done_date': u'',
+            'priority': u'',
         }
-        self.post_data = MultiDict(self.required_data)
+
+    def _post_data(self, thedict=None):
+        from werkzeug.datastructures import MultiDict
+        if thedict == None:
+            thedict = self.required_data
+        return MultiDict(thedict)
 
     def _get_target_class(self, new=True):
         from kardboard.forms import get_card_form
         return get_card_form(new=new)
 
     def _test_form(self, post_data, new=True):
-        f = self._get_target_class(new)(post_data)
+        f = self._get_target_class(new)(self._post_data(post_data))
         f.validate()
         self.assertEquals(0, len(f.errors))
 
@@ -70,7 +77,7 @@ class CardFormTest(FormTests):
         f.populate_obj(card)
         card.save()
 
-        for key, value in self.post_data.items():
+        for key, value in self._post_data().items():
             self.assertNotEqual(
                 None,
                 getattr(card, key, None))
@@ -82,8 +89,8 @@ class CardFormTest(FormTests):
             'done_date': u'06/12/2011',
             'priority': u'2',
         }
-        self.post_data.update(self.optional_data)
-        self._test_form(self.post_data)
+        self.required_data.update(self.optional_data)
+        self._test_form(self.required_data)
 
     def test_no_priority(self):
         self.optional_data = {
@@ -91,9 +98,9 @@ class CardFormTest(FormTests):
             'done_date': u'06/12/2011',
             'priority': u'2',
         }
-        self.post_data.update(self.optional_data)
+        self.required_data.update(self.optional_data)
 
-        f = self._get_target_class()(self.post_data)
+        f = self._get_target_class()(self._post_data())
         f.validate()
         self.assertEquals(0, len(f.errors))
         card = self._get_card_class()()
@@ -101,24 +108,75 @@ class CardFormTest(FormTests):
         card.save()
         self.assertEqual(2, card.priority)
 
-        self.post_data['priority'] = u''
-        f = self._get_target_class(new=False)(self.post_data)
+        self.required_data['priority'] = u''
+        f = self._get_target_class(new=False)(self._post_data())
         f.validate()
         f.populate_obj(card)
         card.save()
         self.assertEqual(None, card.priority)
 
     def test_datetime_coercing(self):
-        f = self.Form(self.post_data)
+        f = self.Form(self._post_data())
         data = f.backlog_date.data
         self.assertEqual(6, data.month)
 
     def test_key_uniqueness(self):
         klass = self._get_card_class()
+        del self.required_data['priority']
         c = klass(**self.required_data)
         c.backlog_date = datetime.datetime.now()
         c.save()
 
-        f = self.Form(self.post_data)
+        f = self.Form(self._post_data())
         f.validate()
         self.assertIn('key', f.errors.keys())
+
+    def test_start_date_requiredness(self):
+        """
+        If the state is set to >= START_STATE then
+        a start_state is required.
+        """
+        from kardboard.models import States
+        states = States()
+
+        self.required_data['state'] = unicode(states.start)
+
+        f = self.Form(self._post_data())
+        f.validate()
+        self.assertEqual(2, len(f.start_date.errors))
+
+    def test_start_date_unrequiredness(self):
+        """
+        If the state is not set to DONE_STATE then
+        a done_date is optional.
+        """
+        f = self.Form(self._post_data())
+        f.validate()
+        self.assertEqual(0, len(f.start_date.errors))
+
+    def test_done_date_requiredness(self):
+        """
+        If the state is set to DONE_STATE then
+        a done_date is required.
+        """
+        from kardboard.models import States
+        states = States()
+
+        self.required_data['state'] = unicode(states.done)
+
+        f = self.Form(self._post_data())
+        f.validate()
+        self.assertEqual(2, len(f.done_date.errors))
+
+    def test_done_date_unrequiredness(self):
+        """
+        If the state is not set to DONE_STATE then
+        a done_date is optional.
+        """
+        f = self.Form(self._post_data())
+        f.validate()
+        self.assertEqual(0, len(f.done_date.errors))
+
+if __name__ == "__main__":
+    import unittest
+    unittest.main()

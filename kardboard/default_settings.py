@@ -14,6 +14,10 @@ CARD_STATES = [
     'Done',
 ]
 
+BACKLOG_STATE = 0
+START_STATE = 1
+DONE_STATE = -1
+
 CARD_TEAMS = [
     'Team 1',
     'Team 2',
