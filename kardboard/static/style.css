@@ -269,12 +269,20 @@ table.board div.card_on_board p.assignee {
 }
 
 .team_page_board table.board td {
-    min-width: 250px;
+    width: 16.6%;
+}
+
+
+.team_page_board {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
 }
 
 .team_page_board table.board {
-    margin-right: 2%;
-    margin-left: 2%;
+    width: 96%;
+    margin: 0 2% 0 2%;
 }
 
 table.board div.card_on_board div.card_key {

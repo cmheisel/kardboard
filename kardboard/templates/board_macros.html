@@ -53,7 +53,19 @@
 <table class="board">
 <tr>
   {% for header in board.headers %}
-    <th>{{ header[0] }}{% if header[1] != None %}{% if board.teams|length > 1 %}<br />{% else %}&nbsp;{% endif %}({{ header[1] }}){% endif %}</th>
+    {% if 'OTIS Verify' not in header.get('state', '') %}
+    <th>
+        {% if header.get('label') %}
+            {{ header.label }}
+        {% elif 'Build to OTIS' in header.get('state', '') %}
+            {{ header.state }} ({{ header.count }})<br />
+            {{ board.headers[loop.index0+1].state }} ({{ board.headers[loop.index0+1].count }})
+        {% else %}
+            {{ header.state }} ({{ header.count }})
+        {% endif %}
+
+    </th>
+    {% endif %}
   {% endfor %}
 </tr>
 
@@ -62,7 +74,7 @@
 {% for cell in row %}
     {% if cell.get('label') %}
         <td class="team">{{ cell['label'] }}</td>
-    {% else %}
+    {% elif 'OTIS Verify' not in cell.get('state', '') %}
         <td class="cards">
         {% for card in cell['cards'] %}
             {% if board.teams|length > 1 %}
@@ -71,7 +83,17 @@
                 {{ card_detail(card, request) }}
             {% endif %}
         {% endfor %}
-    </td>
+        {% if 'Build to OTIS' in cell.get('state', '') %}
+        {% if cell['cards']|length > 0 %}<hr />{% endif %}
+            {% for card in row[loop.index0+1]['cards'] %}
+                {% if board.teams|length > 1 %}
+                    {{ card_overview(card, request) }}
+                {% else %}
+                    {{ card_detail(card, request) }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        </td>
     {% endif %}
 {% endfor %}
 

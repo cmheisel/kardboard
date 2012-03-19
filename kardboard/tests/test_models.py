@@ -108,12 +108,14 @@ class DisplayBoardTests(KardboardTestCase):
         board = self._make_one()
 
         expected = (
-            ('Team', None),
-            ('Todo', 6),
-            ('Doing', 6),
-            ('Done', 6),
+            {'label': 'Team', 'count': None},
+            {'state': 'Todo', 'count': 6},
+            {'state': 'Doing', 'count': 6},
+            {'state': 'Done', 'count': 6},
         )
         actual = board.headers
+        import pprint
+        pprint.pprint(actual)
         self.assertEqual(actual, expected)
 
     def test_backlog_sorting(self):

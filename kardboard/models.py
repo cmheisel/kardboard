@@ -35,9 +35,9 @@ class DisplayBoard(object):
 
     @property
     def headers(self):
-        headers = [s for s in self.states]
+        headers = [dict(state=s) for s in self.states]
         if len(self.teams) > 1:
-            headers.insert(0, 'Team')
+            headers.insert(0, dict(label='Team'))
 
         header_counts = [0 for h in headers]
         for row in self.rows:
@@ -47,7 +47,12 @@ class DisplayBoard(object):
                     header_counts[index] += len(cell['cards'])
                 else:
                     header_counts[index] = None
-        return tuple(zip(headers, header_counts))
+
+        for i in xrange(0,len(header_counts)):
+            count = header_counts[i]
+            headers[i]['count'] = count
+
+        return tuple(headers)
 
     @property
     def rows(self):
@@ -77,7 +82,7 @@ class DisplayBoard(object):
                         message = "The following cards have no done date: %s" % (bad_cards)
                         log_exception(e, message)
                         raise
-                cell = {'cards': cards}
+                cell = {'cards': cards, 'state': state}
                 row.append(cell)
             rows.append(row)
         return rows
