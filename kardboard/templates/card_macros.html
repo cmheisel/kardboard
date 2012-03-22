@@ -4,6 +4,7 @@
     <tr>
         <th class="key_col">Ticket</th>
         <th>Class</th>
+        <th>Version</th>
         <th>Title</th>
 
 
@@ -49,6 +50,8 @@
         </td>
 
         <td>{{ card.service_class }}</td>
+
+        <td>{{ card.ticket_system.get_version() }}</td>
 
         <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
