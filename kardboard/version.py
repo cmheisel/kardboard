@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+version = "1.2.8"
+
 
 def get_git_version():
     p = subprocess.Popen(['which git'], shell=True, stdout=subprocess.PIPE)
@@ -17,13 +19,6 @@ def get_git_version():
         return ''
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
-
-try:
-    version = file(os.path.join(this_folder, 'VERSION.txt'), 'r').read()
-except IOError:
-    print this_folder
-    os.system('ls -l %s' % this_folder)
-    raise
 
 __git_version__ = get_git_version()
 __version__ = version

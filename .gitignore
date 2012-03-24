@@ -11,3 +11,4 @@ bin/githubissues.py
 celerybeat-schedule
 mockups/overview.bmml
 TODO
+.tox

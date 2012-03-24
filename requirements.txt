@@ -12,8 +12,8 @@ suds==0.4
 translitcodec==0.2 #Used by util.slugify
 Flask-Cache==0.3.3
 celery==2.4.3
-Flask-Script-fix==0.3
-Flask-Celery==2.4.1
+Flask-Script==0.3.3
+Flask-Celery==2.4.2
 Flask-Exceptional==0.4.7
 
 markdown2==1.0.1.19
@@ -30,10 +30,7 @@ Fabric==1.2.0
 mock==0.7.2
 unittest2==0.5.1
 nose==1.1.2
-nosegrowl2==0.2
-tdaemon==0.1.1
-
-#git+git://github.com/continuous/nose-continuous.git#egg=nose-continuous
+tox==1.3
 
 #Needed for docs
 Pygments==1.4
