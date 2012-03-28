@@ -3,7 +3,7 @@
 
 <div id="wip_data">
 
-
+{% if people %}
 <table>
     <caption>Last {{ months }} months</caption>
     <tr>
@@ -16,12 +16,20 @@
     <tr>
         <td>{{ p.count }}</td>
 
-        <td>{{ p.name }}</td>
+        <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name) }}">{{ p.name }}</a></td>
 
         <td>{{ p.cycle_time }}</td>
     </tr>
     {% endfor %}
 </table>
+{% endif %}
+
+{% if person %}
+
+{% import "card_macros.html" as card_macros %}
+{% set caption = "Last %s months: %s" % (months, person.name) %}
+{{ card_macros.card_table(person.sorted_cards, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
+{% endif %}
 
 
 </div>

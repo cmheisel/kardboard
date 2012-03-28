@@ -452,7 +452,7 @@ def done(group="all", months=3, start=None):
 
     return render_template('done.html', **context)
 
-def report_leaderboard(group="all", months=3):
+def report_leaderboard(group="all", months=3, person=None):
     start = datetime.datetime.today()
     months_ranges = month_ranges(start, months)
 
@@ -473,18 +473,20 @@ def report_leaderboard(group="all", months=3):
             p.add_card(card)
             people[d] = p
 
-    if 'development' in people.keys():
-        del people['development']
-    if 'ui-development' in people.keys():
-        del people['ui-development']
-
-    people = people.values()
-    people.sort()
-    people.reverse()
+    if person:
+        person = people.get(person, None)
+        people = []
+        if not person:
+            abort(404)
+    else:
+        people = people.values()
+        people.sort(reverse=True)
 
     context = {
         'people': people,
+        'person': person,
         'months': months,
+        'group': group,
         'title': "Developer Leaderboard",
         'updated_at': datetime.datetime.now(),
         'version': VERSION,

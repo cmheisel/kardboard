@@ -71,6 +71,8 @@ url('/reports/<group>/classes/', 'report_service_class')
 url('/reports/<group>/classes/<int:months>/', 'report_service_class')
 url('/reports/<group>/leaderboard/', 'report_leaderboard')
 url('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard')
+url('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_leaderboard')
+
 url('/login/', 'login', methods=["GET", "POST"])
 url('/logout/', 'logout')
 url('/overview/', 'dashboard')

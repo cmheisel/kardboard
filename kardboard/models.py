@@ -33,6 +33,11 @@ class PersonCardSet(object):
         return len(self.cards)
 
     @property
+    def sorted_cards(self):
+        self.cards.sort(key=lambda c: c.done_date, reverse=True)
+        return self.cards
+
+    @property
     def cycle_time(self):
         times = [ c.cycle_time for c in self.cards ]
         return int(round(float(sum(times)) / len(times)))
