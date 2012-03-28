@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="wip_data">
+
+
+<table>
+    <caption>Last {{ months }} months</caption>
+    <tr>
+        <th>Cards</th>
+        <th>Person</th>
+        <th>Ave. cycle time</th>
+    </tr>
+
+    {% for p in people %}
+    <tr>
+        <td>{{ p.count }}</td>
+
+        <td>{{ p.name }}</td>
+
+        <td>{{ p.cycle_time }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+</div>
+
+{% endblock content %}

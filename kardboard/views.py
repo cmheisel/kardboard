@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -451,6 +451,46 @@ def done(group="all", months=3, start=None):
     }
 
     return render_template('done.html', **context)
+
+def report_leaderboard(group="all", months=3):
+    start = datetime.datetime.today()
+    months_ranges = month_ranges(start, months)
+
+    start = months_ranges[0][0]
+    end = months_ranges[-1][-1]
+
+    rg = ReportGroup(group, Kard.objects.done())
+    done = rg.queryset
+
+    cards = done.filter(done_date__gte=start,
+        done_date__lte=end)
+
+    people = {}
+    for card in cards:
+        devs = card.ticket_system_data['developers']
+        for d in devs:
+            p = people.get(d, PersonCardSet(d))
+            p.add_card(card)
+            people[d] = p
+
+    if 'development' in people.keys():
+        del people['development']
+    if 'ui-development' in people.keys():
+        del people['ui-development']
+
+    people = people.values()
+    people.sort()
+    people.reverse()
+
+    context = {
+        'people': people,
+        'months': months,
+        'title': "Developer Leaderboard",
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    return render_template('leaderboard.html', **context)
 
 
 def report_service_class(group="all", months=3, start=None):

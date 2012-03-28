@@ -18,6 +18,28 @@ from kardboard.util import (
     log_exception,
 )
 
+class PersonCardSet(object):
+    def __init__(self, name):
+        super(PersonCardSet, self).__init__()
+        self.name = name
+        self.cards = []
+
+    def add_card(self, card):
+        if card not in self.cards:
+            self.cards.append(card)
+
+    @property
+    def count(self):
+        return len(self.cards)
+
+    @property
+    def cycle_time(self):
+        times = [ c.cycle_time for c in self.cards ]
+        return int(round(float(sum(times)) / len(times)))
+
+    def __cmp__(self, other):
+        return cmp(self.count, other.count)
+
 
 class DisplayBoard(object):
     def __init__(self, teams=None, done_days=7):
