@@ -491,6 +491,8 @@ def report_leaderboard(group="all", months=3, person=None):
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
+    if person:
+        context['title'] = "%s: %s" % (person.name, context['title'])
 
     return render_template('leaderboard.html', **context)
 
