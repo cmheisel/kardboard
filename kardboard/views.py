@@ -467,11 +467,14 @@ def report_leaderboard(group="all", months=3, person=None):
 
     people = {}
     for card in cards:
-        devs = card.ticket_system_data['developers']
-        for d in devs:
-            p = people.get(d, PersonCardSet(d))
-            p.add_card(card)
-            people[d] = p
+        try:
+            devs = card.ticket_system_data['developers']
+            for d in devs:
+                p = people.get(d, PersonCardSet(d))
+                p.add_card(card)
+                people[d] = p
+        except KeyError:
+            pass
 
     if person:
         person = people.get(person, None)

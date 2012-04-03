@@ -22,13 +22,15 @@
     </tr>
     {% endfor %}
 </table>
-{% endif %}
 
-{% if person %}
+{% elif person %}
 
 {% import "card_macros.html" as card_macros %}
 {% set caption = "Last %s months: %s" % (months, person.name) %}
 {{ card_macros.card_table(person.sorted_cards, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
+
+{% else %}
+    No data available.
 {% endif %}
 
 
