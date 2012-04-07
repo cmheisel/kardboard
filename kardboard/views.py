@@ -225,7 +225,7 @@ def card_add():
             f.populate_obj(card)
             card.save()
             flash("Card %s successfully added" % card.key)
-            return redirect(url_for("card_edit", key=card.key))
+            return redirect(url_for("card", key=card.key))
 
     context = {
         'title': "Add a card",
