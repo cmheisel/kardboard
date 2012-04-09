@@ -5,6 +5,7 @@ from dateutil import relativedelta
 from kardboard.models import Kard, Person
 from flask.ext.celery import Celery
 from kardboard.app import app
+from kardboard.util import log_exception
 
 celery = Celery(app)
 
@@ -68,6 +69,9 @@ def update_ticket(card_id):
     except Kard.DoesNotExist:
         logger.error(
             "update_ticket: Kard with id %s does not exist" % (card_id, ))
+    except Exception, e:
+        message = "update_ticket: Couldn't update ticket %s from ticket system" % (card_id, )
+        log_exception(e, message)
 
 
 @celery.task(name="tasks.queue_updates", ignore_result=True)
