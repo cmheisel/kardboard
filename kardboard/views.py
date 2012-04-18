@@ -452,8 +452,10 @@ def done(group="all", months=3, start=None):
 
     return render_template('done.html', **context)
 
-def report_leaderboard(group="all", months=3, person=None):
+def report_leaderboard(group="all", months=3, person=None, start_month=None, start_year=None):
     start = datetime.datetime.today()
+    if start_month and start_year:
+        start = start.replace(month=start_month, year=start_year)
     months_ranges = month_ranges(start, months)
 
     start = months_ranges[0][0]
@@ -490,6 +492,10 @@ def report_leaderboard(group="all", months=3, person=None):
         'person': person,
         'months': months,
         'group': group,
+        'start': start,
+        'end': end,
+        'start_month': start_month,
+        'start_year': start_year,
         'title': "Developer Leaderboard",
         'updated_at': datetime.datetime.now(),
         'version': VERSION,

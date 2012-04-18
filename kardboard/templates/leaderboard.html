@@ -5,7 +5,7 @@
 
 {% if people %}
 <table>
-    <caption>Last {{ months }} months</caption>
+    <caption>{{ start }} through {{ end }}</caption>
     <tr>
         <th>Cards done</th>
         <th>Defects fixed</th>
@@ -19,7 +19,7 @@
 
         <td>{{ p.defects|length }}</td>
 
-        <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name) }}">{{ p.name }}</a></td>
+        <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name, start_month=start_month, start_year=start_year,) }}">{{ p.name }}</a></td>
 
         <td>{{ p.cycle_time }}</td>
     </tr>
@@ -29,10 +29,10 @@
 {% elif person %}
 
 {% import "card_macros.html" as card_macros %}
-{% set caption = "Last %s months: %s cards completed" % (months, person.name) %}
+{% set caption = "%s: Cards completed from %s through %s" % (person.name, start, end) %}
 {{ card_macros.card_table(person.sorted_cards, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
 
-{% set caption = "Last %s months: %s defects fixed" % (months, person.name) %}
+{% set caption = "%s: Defects fixed from %s through %s" % (person.name, start, end) %}
 {{ card_macros.card_table(person.sorted_defects, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
 
 
