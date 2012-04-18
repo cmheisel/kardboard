@@ -7,14 +7,17 @@
 <table>
     <caption>Last {{ months }} months</caption>
     <tr>
-        <th>Cards</th>
+        <th>Cards done</th>
+        <th>Defects fixed</th>
         <th>Person</th>
         <th>Ave. cycle time</th>
     </tr>
 
     {% for p in people %}
     <tr>
-        <td>{{ p.count }}</td>
+        <td>{{ p.cards|length }}</td>
+
+        <td>{{ p.defects|length }}</td>
 
         <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name) }}">{{ p.name }}</a></td>
 
@@ -26,8 +29,12 @@
 {% elif person %}
 
 {% import "card_macros.html" as card_macros %}
-{% set caption = "Last %s months: %s" % (months, person.name) %}
+{% set caption = "Last %s months: %s cards completed" % (months, person.name) %}
 {{ card_macros.card_table(person.sorted_cards, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
+
+{% set caption = "Last %s months: %s defects fixed" % (months, person.name) %}
+{{ card_macros.card_table(person.sorted_defects, request, caption=caption, show_done=True, show_assigned=False, show_state=False, show_in_goal=True) }}
+
 
 {% else %}
     No data available.

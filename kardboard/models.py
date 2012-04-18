@@ -22,11 +22,19 @@ class PersonCardSet(object):
     def __init__(self, name):
         super(PersonCardSet, self).__init__()
         self.name = name
-        self.cards = []
+        self.cards = set()
+        self.defects = set()
+
+    @property
+    def all_cards(self):
+        return self.cards.union(self.defects)
 
     def add_card(self, card):
-        if card not in self.cards:
-            self.cards.append(card)
+        defect_classes = app.config.get('DEFECT_CLASSES', ())
+        if card.service_class in defect_classes:
+            self.defects.add(card)
+        else:
+            self.cards.add(card)
 
     @property
     def count(self):
@@ -34,12 +42,20 @@ class PersonCardSet(object):
 
     @property
     def sorted_cards(self):
-        self.cards.sort(key=lambda c: c.done_date, reverse=True)
-        return self.cards
+        cards = list(self.cards)
+        cards.sort(key=lambda c: c.done_date, reverse=True)
+        return cards
+
+    @property
+    def sorted_defects(self):
+        defects = list(self.defects)
+        defects.sort(key=lambda c: c.done_date, reverse=True)
+        return defects
+
 
     @property
     def cycle_time(self):
-        times = [ c.cycle_time for c in self.cards ]
+        times = [ c.cycle_time for c in self.all_cards ]
         return int(round(float(sum(times)) / len(times)))
 
     def __cmp__(self, other):
@@ -521,7 +537,7 @@ class Kard(app.db.Document):
             service_class = self.ticket_system.service_class
         else:
             service_class = app.config['DEFAULT_CLASS']
-        return service_class
+        return service_class.strip()
 
     @classmethod
     def in_progress(klass, date=None):
