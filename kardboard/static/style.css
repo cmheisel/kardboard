@@ -340,3 +340,7 @@ table.board p.title a:hover {
     background: url("ant.png") bottom left no-repeat;
     background-size: 25px;
 }
+
+table.leaderboard td {
+    width: 25%;
+}

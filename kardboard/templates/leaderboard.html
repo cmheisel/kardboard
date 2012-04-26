@@ -4,22 +4,22 @@
 <div id="wip_data">
 
 {% if people %}
-<table>
+<table class="leaderboard">
     <caption>{{ start }} through {{ end }}</caption>
     <tr>
-        <th>Cards done</th>
-        <th>Defects fixed</th>
         <th>Person</th>
+        <th>Cards done</th>
+        <th>Cards/month</th>
         <th>Ave. cycle time</th>
     </tr>
 
     {% for p in people %}
     <tr>
+        <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name, start_month=start_month, start_year=start_year,) }}">{{ p.name }}</a></td>
+
         <td>{{ p.cards|length }}</td>
 
-        <td>{{ p.defects|length }}</td>
-
-        <td><a href="{{ url_for('report_leaderboard', group=group, months=months, person=p.name, start_month=start_month, start_year=start_year,) }}">{{ p.name }}</a></td>
+        <td>{{ "%.1f"|format(p.cards|length/months) }}</td>
 
         <td>{{ p.cycle_time }}</td>
     </tr>
