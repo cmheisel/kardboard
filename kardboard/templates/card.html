@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ card.key }}{% endblock %}
+{% block title %}{{ card.key }}{% endblock title %}
 
 {% macro none_or_date(field) %}
     {% if field %}
@@ -128,4 +128,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock content %}

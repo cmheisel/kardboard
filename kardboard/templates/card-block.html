@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock title %}
 
 {% macro with_errors(field) %}
     {% if field.errors %}
@@ -61,4 +61,4 @@
       </form>
 
 </div>
-{% endblock %}
+{% endblock content %}
