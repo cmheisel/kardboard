@@ -7,7 +7,6 @@
         <meta charset=utf-8 />
         <meta name="robots" content="noindex" />
         <title>
-
             {{ title }}{% if title != config.get('SITE_NAME') %} | {{ config.get('SITE_NAME') }}{% endif %}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?{{ version|slugify }}" type="text/css">
@@ -37,13 +36,12 @@
             </p>
         {% endif %}
 
-        <h1>{% block title %}{{ title }}{% endblock %}</h1>
+        <h1>{% block title %}{{ title }}{% endblock title %}</h1>
 
         <p class="nav">
             <a href="/">Dashboard</a>&nbsp;/&nbsp;
             <a href="/reports/">Reports</a>&nbsp;/&nbsp;
             <a href="/card/add/">Add a card</a>
-
         </p>
         <p class="nav">
             <form action="/quick/" method="GET">
