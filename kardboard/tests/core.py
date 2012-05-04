@@ -88,6 +88,21 @@ class KardboardTestCase(unittest2.TestCase):
             return key
         return self._make_unique_key()
 
+    def _date(self, dtype, date=None, days=0):
+        from kardboard.util import make_end_date, make_start_date
+        from kardboard.util import now
+
+        if not date:
+            date = now()
+
+        if dtype == 'start':
+            date = make_start_date(date=date)
+        elif dtype == 'end':
+            date = make_end_date(date=date)
+
+        date = date + relativedelta(days=days)
+        return date
+
     def make_card(self, **kwargs):
         from kardboard.util import now
         key = self._make_unique_key()

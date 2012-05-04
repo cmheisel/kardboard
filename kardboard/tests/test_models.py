@@ -20,21 +20,6 @@ class DisplayBoardTests(KardboardTestCase):
         self.teams = self.config.get('CARD_TEAMS')
         self._set_up_cards()
 
-    def _date(self, dtype, date=None, days=0):
-        from kardboard.util import make_end_date, make_start_date
-        from kardboard.util import now
-
-        if not date:
-            date = now()
-
-        if dtype == 'start':
-            date = make_start_date(date=date)
-        elif dtype == 'end':
-            date = make_end_date(date=date)
-
-        date = date + relativedelta(days=days)
-        return date
-
     def _set_up_cards(self):
         team1 = self.teams[0]
         team2 = self.teams[1]
