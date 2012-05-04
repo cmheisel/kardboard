@@ -150,6 +150,20 @@ def queue_daily_record_updates(days=365):
             update_daily_record.delay(target_date, slug)
 
 
+@celery.task(name="tasks.update_flow_reports", ignore_result=True)
+def update_flow_reports():
+    from kardboard.app import app
+    from kardboard.models import FlowReport
+
+    report_groups = app.config.get('REPORT_GROUPS', {})
+    group_slugs = report_groups.keys()
+    group_slugs.append('all')
+
+    for slug in group_slugs:
+        FlowReport.capture(slug)
+
+
+
 def _get_person(name, cache):
     p = cache.get(name, None)
     if not p:

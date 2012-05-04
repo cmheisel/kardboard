@@ -83,5 +83,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'tasks.queue_daily_record_updates',
         'schedule': crontab(minute="*/5"),
         'args': (14, ),
+    },
+    # Capture/update the day's flow data
+    'update_flow_reports': {
+        'task': 'tasks.update_flow_reports',
+        'schedule': crontab(minute="*/5"),
     }
 }
+
