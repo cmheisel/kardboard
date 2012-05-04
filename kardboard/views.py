@@ -18,7 +18,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -689,7 +689,7 @@ def robots():
     return response
 
 
-def chart_flow(group="all", months=3):
+def report_flow(group="all", months=3):
     end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
 
@@ -718,6 +718,35 @@ def chart_flow(group="all", months=3):
 
     return render_template('chart-flow.html', **context)
 
+def report_detailed_flow(group="all", months=3):
+    end = kardboard.util.now()
+    months_ranges = month_ranges(end, months)
+
+    start_day = make_start_date(date=months_ranges[0][0])
+    end_day = make_end_date(date=end)
+
+    reports = FlowReport.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day,
+        group=group)
+
+    #chart = CumulativeFlowChart(900, 300)
+    #chart.add_data([r.backlog_cum for r in records])
+    #chart.add_data([r.in_progress_cum for r in records])
+    #chart.add_data([r.done for r in records])
+    #chart.setup_grid(records)
+
+    reports.order_by('-date')
+    context = {
+        'title': "Detailed Cumulative Flow",
+        'updated_at': reports[0].updated_at,
+        #'chart': chart,
+        'reports': reports,
+        'states': States(),
+        'version': VERSION,
+    }
+
+    return render_template('report-detailed-flow.html', **context)
 
 @kardboard.util.redirect_to_next_url
 def login():

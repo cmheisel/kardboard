@@ -95,3 +95,14 @@ class FlowReportTestCase(KardboardTestCase):
                 }
             ]
         assert expected == r.data
+
+    def test_snapshot(self):
+        Report = self._get_target_class()
+        r = Report.capture()
+        r.save()
+
+        assert r.snapshot[self.states.done] == {
+            'name': self.states.done,
+            'count': 4,
+        }
+

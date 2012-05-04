@@ -733,7 +733,7 @@ class FlowReport(app.db.Document):
     group = app.db.StringField(required=True, default="all", unique_with=['date', ])
     """The report group to which this daily report belongs."""
 
-    data = app.db.ListField(app.db.DictField())
+    data = app.db.ListField(app.db.DictField(),)
     """The snapshot of data provided for that team on the date."""
 
     updated_at = app.db.DateTimeField(required=True)
@@ -742,6 +742,18 @@ class FlowReport(app.db.Document):
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
         super(FlowReport, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "<FlowReport: %s -- %s>" % (self.group, self.date)
+
+    @property
+    def snapshot(self):
+        from collections import OrderedDict
+        snapshot = OrderedDict()
+        for state in self.data:
+            snapshot[state['name']] = state
+        return snapshot
+
 
     @classmethod
     def capture(klass, group='all'):

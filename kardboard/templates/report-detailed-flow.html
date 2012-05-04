@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div id="wip_data">
+<table>
+    <tr>
+        <th>Date</th>
+        {% for state in states %}
+        <th>{{ state }}</th>
+        {% endfor %}
+    </tr>
+
+    {% for report in reports %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td>{{ report.date.strftime("%m/%d/%Y") }}</td>
+        {% for state in states %}
+        <td>{{ report.snapshot.get(state, {}).get('count', "--") }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock content %}
