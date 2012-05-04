@@ -722,6 +722,50 @@ class Kard(app.db.Document):
         else:
             return self._ticket_system_data
 
+class FlowReport(app.db.Document):
+    """
+    Represents a daily snapshot of cards by state, per team.
+    """
+
+    date = app.db.DateTimeField(required=True, unique=False, unique_with=['group', ])
+    """The date for the records"""
+
+    group = app.db.StringField(required=True, default="all", unique_with=['date', ])
+    """The report group to which this daily report belongs."""
+
+    data = app.db.ListField(app.db.DictField())
+    """The snapshot of data provided for that team on the date."""
+
+    updated_at = app.db.DateTimeField(required=True)
+    """The datetime the record was last updated at."""
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.datetime.now()
+        super(FlowReport, self).save(*args, **kwargs)
+
+    @classmethod
+    def capture(klass, group='all'):
+        date = datetime.datetime.now()
+        date = make_end_date(date=date)
+        try:
+            r = klass.objects.get(date=date, group=group)
+        except klass.DoesNotExist:
+            r = klass()
+            r.date = date
+            r.group = group
+
+        states = States()
+
+        for state in states:
+            group_cards = ReportGroup(group, Kard.objects.filter(state=state)).queryset
+            state_data = {
+                'name': state,
+                'count': group_cards.count()
+            }
+            r.data.append(state_data)
+
+        r.save()
+        return r
 
 class DailyRecord(app.db.Document):
     """

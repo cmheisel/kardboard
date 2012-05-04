@@ -23,6 +23,13 @@ CARD_TEAMS = [
     'Team 2',
 ]
 
+REPORT_GROUPS = {
+    # key is slug
+    # value is two item tuple, first item is tuple of team strings, second item is display name for report group
+    'team-1': (('Team 1',), 'Team 1'),
+    'team-2': (('Team 2',), 'Team 2'),
+}
+
 DEFAULT_CLASS = "Card"
 
 BROKER_TRANSPORT = "redis"
