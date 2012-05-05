@@ -16,6 +16,7 @@ celery==2.4.3
 Flask-Script==0.3.3
 Flask-Celery==2.4.2
 Flask-Exceptional==0.4.7
+ordereddict==1.1
 
 markdown2==1.0.1.19
 requests==0.6.1

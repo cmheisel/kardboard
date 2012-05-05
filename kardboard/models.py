@@ -748,7 +748,10 @@ class FlowReport(app.db.Document):
 
     @property
     def snapshot(self):
-        from collections import OrderedDict
+        try:
+            from collections import OrderedDict
+        except ImportError:
+            from ordereddict import OrderedDict
         snapshot = OrderedDict()
         for state in self.data:
             snapshot[state['name']] = state
