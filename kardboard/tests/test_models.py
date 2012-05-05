@@ -258,11 +258,11 @@ class DailyRecordTests(KardboardTestCase):
         from kardboard.tasks import queue_daily_record_updates
 
         queue_daily_record_updates.apply(args=[7, ], throw=True)
-        self.assertEqual(7, klass.objects.count())
+        self.assertEqual(21, klass.objects.count())
 
         # update_daily_records should be idempotent
         queue_daily_record_updates.apply(args=[7, ], throw=True)
-        self.assertEqual(7, klass.objects.count())
+        self.assertEqual(21, klass.objects.count())
 
 
 class KardClassTests(KardboardTestCase):
@@ -702,6 +702,7 @@ class PersonTests(KardboardTestCase):
         self.person.reload()
         self.person.cleanup()
         self.person.save()
+        self.person.reload()
 
         self.assertEqual(1, len(self.person.reported))
         self.assertEqual(1, len(self.person.developed))
