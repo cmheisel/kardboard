@@ -79,3 +79,10 @@ class JIRAHelperTests(KardboardTestCase):
             self.card.key)
         actual = h.get_ticket_url()
         self.assertEqual(actual, expected)
+
+    def test_limited_people(self):
+        from kardboard.tests.mocks import MockJIRAIssueWithOnlyUIDevs
+
+        k = self.card
+        devs = k.ticket_system.id_devs(MockJIRAIssueWithOnlyUIDevs())
+        assert len(devs) > 0

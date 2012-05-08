@@ -57,6 +57,16 @@ class MockJIRAIssue(Mock):
     ]
 
 
+class MockJIRAIssueWithOnlyUIDevs(MockJIRAIssue):
+    customFieldValues = [
+        MockRemoteCustomFieldValue(
+            customfieldId='customfield_10211',
+            key=None,
+            values=['cheisel', ]
+        ),
+    ]
+
+
 class MockJIRAObject(object):
     def __init__(self, dic):
         self.__dict__ = dic
