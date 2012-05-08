@@ -18,6 +18,7 @@ from kardboard.util import (
     log_exception,
 )
 
+
 class PersonCardSet(object):
     def __init__(self, name):
         super(PersonCardSet, self).__init__()
@@ -52,10 +53,9 @@ class PersonCardSet(object):
         defects.sort(key=lambda c: c.done_date, reverse=True)
         return defects
 
-
     @property
     def cycle_time(self):
-        times = [ c.cycle_time for c in self.all_cards ]
+        times = [c.cycle_time for c in self.all_cards]
         return int(round(float(sum(times)) / len(times)))
 
     def __cmp__(self, other):
@@ -91,7 +91,7 @@ class DisplayBoard(object):
                 else:
                     header_counts[index] = None
 
-        for i in xrange(0,len(header_counts)):
+        for i in xrange(0, len(header_counts)):
             count = header_counts[i]
             headers[i]['count'] = count
 
@@ -721,6 +721,7 @@ class Kard(app.db.Document):
             return {}
         else:
             return self._ticket_system_data
+
 
 class FlowReport(app.db.Document):
     """
