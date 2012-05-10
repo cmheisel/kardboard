@@ -545,13 +545,37 @@ class KardTests(KardTestCase):
 class KardWarningTests(KardTestCase):
     def setUp(self):
         super(KardWarningTests, self).setUp()
-        lower = self.wip_card.current_cycle_time() - 1
-        upper = self.wip_card.current_cycle_time() + 5
+        lower = 5
+        upper = 15
         self.config['CYCLE_TIME_GOAL'] = (lower, upper)
+        self.wip_card.backlog_date = datetime.datetime(
+            year=2011, month=5, day=2)
+        self.wip_card.start_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.wip_card.save()
 
-    def test_warning(self):
-        self.assertEqual(True, self.wip_card.cycle_in_goal)
-        self.assertEqual(False, self.wip_card.cycle_over_goal)
+    def test_cycle_vs_goal_below(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.assertEqual(-1, self.wip_card.cycle_vs_goal)
+
+    def test_cycle_vs_goal_even(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=20)
+        self.wip_card.save()
+        self.assertEqual(0, self.wip_card.cycle_vs_goal)
+
+    def test_cycle_vs_goal_above(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=22)
+        self.wip_card.save()
+        self.assertEqual(1, self.wip_card.cycle_vs_goal)
+
+    def test_cycle_vs_goal_above(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=6, day=30)
+        self.wip_card.save()
+        self.assertEqual(2, self.wip_card.cycle_vs_goal)
 
 class KardBlockingTests(KardTestCase):
     def setUp(self):

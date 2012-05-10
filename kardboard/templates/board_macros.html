@@ -1,8 +1,11 @@
 {% macro card_overview(card, request) -%}
 <a href="{{ url_for('card', key=card.key) }}" title="{{ card.key }} -- {{ card.title }}{% if card.blocked %} BLOCKED: {{ card.blockers[-1].reason }}{% endif %}">
-    {% if card.cycle_over_goal %}
+    {% set vs_goal = card.cycle_vs_goal %}
+    {% if vs_goal == 2 %}
+        {% set classname = "cycle_double_over_goal" %}
+    {% elif vs_goal == 1 %}
         {% set classname = "cycle_over_goal" %}
-    {% elif card.cycle_in_goal %}
+    {% elif vs_goal == 0 %}
         {% set classname = "cycle_in_goal" %}
     {% endif %}
     {% if card.blocked %}
@@ -15,7 +18,8 @@
 {%- endmacro %}
 
 {% macro card_detail(card, request) -%}
-    <div class="card_on_board {% if card.cycle_over_goal %}cycle_over_goal{% elif card.cycle_in_goal %}cycle_in_goal{% endif %} card_type_{{ card.service_class|slugify }}" id="card_{{ card.key }}">
+    {% set vs_goal = card.cycle_vs_goal %}
+    <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.service_class|slugify }}" id="card_{{ card.key }}">
         <div class="card_key"><span>{{ card.key }}</span>
             {% if card.done_date %}
                 - {{ card.cycle_time }}d

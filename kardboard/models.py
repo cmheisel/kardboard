@@ -653,27 +653,36 @@ class Kard(app.db.Document):
 
     @property
     def cycle_in_goal(self):
-        if self.cycle_goal:
-            lower, upper = self.cycle_goal
-            if self.done_date:
-                current = self.cycle_time
-            else:
-                current = self.current_cycle_time()
-            if current >= lower and current <= upper:
-                return True
+        if self.cycle_vs_goal == 0:
+            return True
         return False
 
     @property
     def cycle_over_goal(self):
-        if self.cycle_goal:
-            lower, upper = self.cycle_goal
-            if self.done_date:
-                current = self.cycle_time
-            else:
-                current = self.current_cycle_time()
-            if current > upper:
-                return True
+        if self.cycle_vs_goal > 0:
+            return True
         return False
+
+    @property
+    def cycle_vs_goal(self):
+        if not self.cycle_goal:
+            return 0
+
+        lower, upper = self.cycle_goal
+        super_upper = upper * 2
+        if self.done_date:
+            current = self.cycle_time
+        else:
+            current = self.current_cycle_time()
+
+        if current < lower:
+            return -1
+        elif current >= lower and current <= upper:
+            return 0
+        elif current >= super_upper:
+            return 2
+        elif current >= upper:
+            return 1
 
     def __unicode__(self):
         backlog, start, done = self.backlog_date, self.start_date, \

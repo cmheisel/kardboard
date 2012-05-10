@@ -149,6 +149,9 @@ table td.cycle_in_goal {
 table td.cycle_over_goal {
     background-color: #FCB59D;
 }
+table td.cycle_double_over_goal {
+    color: #ff0000;
+}
 
 table tr.blocked {
     background-color: #A60000;
@@ -240,6 +243,9 @@ table.board a span.cycle_in_goal {
 table.board span.cycle_over_goal {
     color: #69072E;
 }
+table.board span.cycle_double_over_goal {
+    color: #ff0000;
+}
 table.board td.cards {
     text-align: center;
     vertical-align: top;
@@ -325,6 +331,12 @@ table.board div.cycle_in_goal div.card_key {
 
 table.board div.cycle_over_goal div.card_key{
     background-color: #991111;
+    color: #fff;
+    font-weight: normal;
+}
+
+table.board div.cycle_double_over_goal div.card_key{
+    background-color: #ff0000;
     color: #fff;
     font-weight: normal;
 }
