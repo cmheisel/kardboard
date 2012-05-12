@@ -2,6 +2,8 @@ import datetime
 import math
 import importlib
 
+from ordereddict import OrderedDict
+
 from dateutil.relativedelta import relativedelta
 
 from mongoengine.queryset import QuerySet, Q
@@ -755,7 +757,7 @@ class FlowReport(app.db.Document):
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
-        self._snapshot = None
+        self.cached_snapshot = self.make_snapshot()
         super(FlowReport, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -763,18 +765,17 @@ class FlowReport(app.db.Document):
 
     @property
     def snapshot(self):
-        if hasattr(self, '_snapshot'):
-            return self._snapshot
+        if hasattr(self, 'cached_snapshot'):
+            return self.cached_snapshot
         else:
-            try:
-                from collections import OrderedDict
-            except ImportError:
-                from ordereddict import OrderedDict
-            snapshot = OrderedDict()
-            for state in self.data:
-                snapshot[state['name']] = state
-            self._snapshot = snapshot
-        return snapshot
+            self.cached_snapshot = self.make_snapshot()
+            return self.cached_snapshot
+
+    def make_snapshot(self):
+        snap = OrderedDict()
+        for state in self.data:
+            snap[state['name']] = state
+        return snap
 
     @classmethod
     def capture(klass, group='all'):
