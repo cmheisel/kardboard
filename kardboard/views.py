@@ -17,7 +17,7 @@ from flask import (
 
 import kardboard.auth
 from kardboard.version import VERSION
-from kardboard.app import app
+from kardboard.app import app, cache
 from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
@@ -718,6 +718,10 @@ def report_flow(group="all", months=3):
 
     return render_template('chart-flow.html', **context)
 
+# FlowReport objects are only refreshed every 5 minutes by default but there is
+# a job, see details below, that deletes and refreshes this
+# from cache. So we set a long expiry.
+@cache.memoize(timeout=24 * 60 * 60)
 def report_detailed_flow(group="all", months=3):
     end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
@@ -733,7 +737,10 @@ def report_detailed_flow(group="all", months=3):
     chart = {}
     chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
 
-    app.logger.warning("%s - DETAIL SERIES START" % datetime.datetime.now())
+    # TODO: This is a really slow operation, 8 seconds on my laptop for 5 days with 8 states/day
+    # For now tasks.update_flow_reports not only captures the data for the day, but it also
+    # calls cache.delete_memoize for the most likely combinations of groups and months
+    # and then calls report_detailed_flow again to re-prime the cache.
     series = []
     for state in States():
         seri = {'name': state}
@@ -741,7 +748,6 @@ def report_detailed_flow(group="all", months=3):
         seri['data'] = data
         series.append(seri)
     chart['series'] = series
-    app.logger.warning("%s - DETAIL SERIES STOP" % datetime.datetime.now())
 
     import json
     for key, value in chart.items():
