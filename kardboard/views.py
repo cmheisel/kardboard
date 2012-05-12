@@ -730,22 +730,33 @@ def report_detailed_flow(group="all", months=3):
         date__lte=end_day,
         group=group)
 
-    #chart = CumulativeFlowChart(900, 300)
-    #chart.add_data([r.backlog_cum for r in records])
-    #chart.add_data([r.in_progress_cum for r in records])
-    #chart.add_data([r.done for r in records])
-    #chart.setup_grid(records)
+    chart = {}
+    chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
+
+    app.logger.warning("%s - DETAIL SERIES START" % datetime.datetime.now())
+    series = []
+    for state in States():
+        seri = {'name': state}
+        data = [report.snapshot.get(state, {}).get('count', 0) for report in reports]
+        seri['data'] = data
+        series.append(seri)
+    chart['series'] = series
+    app.logger.warning("%s - DETAIL SERIES STOP" % datetime.datetime.now())
+
+    import json
+    for key, value in chart.items():
+        chart[key] = json.dumps(value)
 
     reports.order_by('-date')
     context = {
         'title': "Detailed Cumulative Flow",
+        'months': months,
         'updated_at': reports[0].updated_at,
-        #'chart': chart,
+        'chart': chart,
         'reports': reports,
         'states': States(),
         'version': VERSION,
     }
-
     return render_template('report-detailed-flow.html', **context)
 
 @kardboard.util.redirect_to_next_url

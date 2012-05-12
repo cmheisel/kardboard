@@ -17,6 +17,9 @@
         {% else %}
             {% set loggr_key = '' %}
         {% endif %}
+
+        {% block extrajs %}
+        {% endblock %}
     </head>
     <body>
         {% if config.get('TICKET_AUTH', False) %}

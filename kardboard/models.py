@@ -749,8 +749,13 @@ class FlowReport(app.db.Document):
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
 
+    meta = {
+        'indexes': ['date', ('date', 'group')],
+    }
+
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
+        self._snapshot = None
         super(FlowReport, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -758,13 +763,17 @@ class FlowReport(app.db.Document):
 
     @property
     def snapshot(self):
-        try:
-            from collections import OrderedDict
-        except ImportError:
-            from ordereddict import OrderedDict  # pyflakes.ignore
-        snapshot = OrderedDict()
-        for state in self.data:
-            snapshot[state['name']] = state
+        if hasattr(self, '_snapshot'):
+            return self._snapshot
+        else:
+            try:
+                from collections import OrderedDict
+            except ImportError:
+                from ordereddict import OrderedDict
+            snapshot = OrderedDict()
+            for state in self.data:
+                snapshot[state['name']] = state
+            self._snapshot = snapshot
         return snapshot
 
     @classmethod
