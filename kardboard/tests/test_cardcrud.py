@@ -124,12 +124,10 @@ class CardCRUDTests(KardboardTestCase):
         self.flask_app.config['TICKET_AUTH'] = True
         self.login()
 
-
     def tearDown(self):
         super(CardCRUDTests, self).tearDown()
         self.flask_app.config['TICKET_AUTH'] = False
         self.logout()
-
 
     def _get_target_url(self):
         return '/card/add/'
@@ -205,13 +203,12 @@ class CardCRUDTests(KardboardTestCase):
         self.required_data['priority'] = u""
 
         target_url = "/card/%s/edit/" % (card.key, )
-        res = self.app.post(target_url,
+        self.app.post(target_url,
             data=self.required_data)
 
         k = klass.objects.get(key=self.required_data['key'])
         self.assert_(k.id)
         self.assertEqual(k.priority, None)
-
 
     def test_edit_card(self):
         klass = self._get_target_class()

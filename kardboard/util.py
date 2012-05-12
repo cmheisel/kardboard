@@ -22,6 +22,7 @@ from dateutil.relativedelta import relativedelta
 class ImproperlyConfigured(Exception):
     pass
 
+
 def redirect_to_next_url(fn):
     """
     Views wrapped in this decorator will
@@ -45,10 +46,11 @@ def redirect_to_next_url(fn):
             if 'next_url' in session:
                 del session['next_url']
             return redirect(next_url)
-        
+
         # Must not need the redirect, return the original return value
         return retval
     return _wrapped_view_fn
+
 
 def redis_cache(app, args, kwargs):
     timeout = app.config.get('CACHE_DEFAULT_TIMEOUT', 300)
@@ -252,8 +254,6 @@ def configure_logging(app):
         new_handler.setFormatter(logging.Formatter(log_format))
 
         app.logger.addHandler(new_handler)
-
-
 
 
 class Markdown2Extension(jinja2.ext.Extension):

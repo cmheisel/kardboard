@@ -1,5 +1,3 @@
-import sys
-
 import logging
 
 from kardboard.tasks import queue_updates

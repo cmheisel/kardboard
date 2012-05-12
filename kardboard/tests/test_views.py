@@ -1,8 +1,5 @@
 import datetime
 
-from mock import patch
-from dateutil.relativedelta import relativedelta
-
 from kardboard.util import slugify
 from kardboard.tests.core import KardboardTestCase, DashboardTestCase
 

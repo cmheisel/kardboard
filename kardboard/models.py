@@ -761,12 +761,11 @@ class FlowReport(app.db.Document):
         try:
             from collections import OrderedDict
         except ImportError:
-            from ordereddict import OrderedDict
+            from ordereddict import OrderedDict  # pyflakes.ignore
         snapshot = OrderedDict()
         for state in self.data:
             snapshot[state['name']] = state
         return snapshot
-
 
     @classmethod
     def capture(klass, group='all'):

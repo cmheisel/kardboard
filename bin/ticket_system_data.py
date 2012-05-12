@@ -1,4 +1,6 @@
-import sys, pprint
+import pprint
+import sys
+
 from kardboard.models import Kard
 
 k = Kard.objects.get(key=sys.argv[1])

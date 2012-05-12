@@ -105,4 +105,3 @@ class FlowReportTestCase(KardboardTestCase):
             'name': self.states.done,
             'count': 4,
         }
-

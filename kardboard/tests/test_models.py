@@ -128,7 +128,6 @@ class DisplayBoardTests(KardboardTestCase):
         self.assertEqual(expected, actual)
 
 
-
 class StatesTests(KardboardTestCase):
     def setUp(self):
         super(StatesTests, self).setUp()
@@ -322,6 +321,7 @@ class KardTestCase(KardboardTestCase):
 
     def _make_one(self, **kwargs):
         return self.make_card(**kwargs)
+
 
 class KardTests(KardTestCase):
     def test_created_at(self):
@@ -542,6 +542,7 @@ class KardTests(KardTestCase):
 
         self.assertEqual("CMSCMH-1", k.key)
 
+
 class KardWarningTests(KardTestCase):
     def setUp(self):
         super(KardWarningTests, self).setUp()
@@ -567,15 +568,16 @@ class KardWarningTests(KardTestCase):
 
     def test_cycle_vs_goal_above(self):
         self.wip_card.done_date = datetime.datetime(
-            year=2011, month=5, day=22)
+            year=2011, month=6, day=5)
         self.wip_card.save()
         self.assertEqual(1, self.wip_card.cycle_vs_goal)
 
-    def test_cycle_vs_goal_above(self):
+    def test_cycle_vs_goal_double(self):
         self.wip_card.done_date = datetime.datetime(
             year=2011, month=6, day=30)
         self.wip_card.save()
         self.assertEqual(2, self.wip_card.cycle_vs_goal)
+
 
 class KardBlockingTests(KardTestCase):
     def setUp(self):
