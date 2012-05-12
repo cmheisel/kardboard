@@ -152,9 +152,8 @@ def queue_daily_record_updates(days=365):
 
 @celery.task(name="tasks.update_flow_reports", ignore_result=True)
 def update_flow_reports():
-    from kardboard.app import app, cache
+    from kardboard.app import app
     from kardboard.models import FlowReport
-    from kardboard.views import report_detailed_flow
 
     report_groups = app.config.get('REPORT_GROUPS', {})
     group_slugs = report_groups.keys()
@@ -163,11 +162,22 @@ def update_flow_reports():
     for slug in group_slugs:
         FlowReport.capture(slug)
         for i in xrange(0, 12):
-            # Clear the cache
-            cache.delete_memoize('report_detailed_flow', group=slug, months=i)
+            refresh_flow_cache.delay(slug, i)
 
-            # Prime the cache
-            report_detailed_flow(group=slug, months=i)
+
+@celery.task(name="tasks.refresh_flow_cache", ignore_result=True)
+def refresh_flow_cache(slug, months):
+    from werkzeug.exceptions import NotFound
+    from kardboard.app import cache
+    from kardboard.views import report_detailed_flow
+
+    cache.delete_memoized('report_detailed_flow', group=slug, months=months)
+
+    # Prime the cache
+    try:
+        report_detailed_flow(group=slug, months=months)
+    except NotFound:
+        pass
 
 
 def _get_person(name, cache):

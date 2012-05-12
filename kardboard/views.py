@@ -733,6 +733,8 @@ def report_detailed_flow(group="all", months=3):
         date__gte=start_day,
         date__lte=end_day,
         group=group)
+    if not reports:
+        abort(404)
 
     chart = {}
     chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
