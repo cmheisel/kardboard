@@ -161,23 +161,34 @@ def update_flow_reports():
 
     for slug in group_slugs:
         FlowReport.capture(slug)
-        for i in xrange(0, 12):
+        for i in xrange(1, 13):
             refresh_flow_cache.delay(slug, i)
 
 
 @celery.task(name="tasks.refresh_flow_cache", ignore_result=True)
-def refresh_flow_cache(slug, months):
-    from werkzeug.exceptions import NotFound
+def refresh_flow_cache(group, months):
     from kardboard.app import cache
-    from kardboard.views import report_detailed_flow
+    from kardboard.views import _detailed_flow_chart
+    from kardboard.models import FlowReport
+    from kardboard.util import now, month_ranges, make_start_date, make_end_date
 
-    cache.delete_memoized('report_detailed_flow', group=slug, months=months)
+    end = now()
+    months_ranges = month_ranges(end, months)
 
-    # Prime the cache
-    try:
-        report_detailed_flow(group=slug, months=months)
-    except NotFound:
-        pass
+    start_day = make_start_date(date=months_ranges[0][0])
+    end_day = make_end_date(date=end)
+
+    reports = FlowReport.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day,
+        group=group)
+    if not reports:
+        return None
+
+    cache_key = 'cumflowchart-%s-%s' % (group, months)
+    chart = _detailed_flow_chart(reports)
+    cache.set(cache_key, chart, 24 * 60 * 60)
+    return cache_key
 
 
 def _get_person(name, cache):

@@ -718,24 +718,7 @@ def report_flow(group="all", months=3):
 
     return render_template('chart-flow.html', **context)
 
-# FlowReport objects are only refreshed every 5 minutes by default but there is
-# a job, see details below, that deletes and refreshes this
-# from cache. So we set a long expiry.
-@cache.memoize(timeout=24 * 60 * 60)
-def report_detailed_flow(group="all", months=3):
-    end = kardboard.util.now()
-    months_ranges = month_ranges(end, months)
-
-    start_day = make_start_date(date=months_ranges[0][0])
-    end_day = make_end_date(date=end)
-
-    reports = FlowReport.objects.filter(
-        date__gte=start_day,
-        date__lte=end_day,
-        group=group)
-    if not reports:
-        abort(404)
-
+def _detailed_flow_chart(reports):
     chart = {}
     chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
 
@@ -755,13 +738,38 @@ def report_detailed_flow(group="all", months=3):
     for key, value in chart.items():
         chart[key] = json.dumps(value)
 
+    return chart
+
+def report_detailed_flow(group="all", months=3):
+    end = kardboard.util.now()
+    months_ranges = month_ranges(end, months)
+
+    start_day = make_start_date(date=months_ranges[0][0])
+    end_day = make_end_date(date=end)
+
+    reports = FlowReport.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day,
+        group=group)
+    if not reports:
+        abort(404)
+
+    cache_key = 'cumflowchart-%s-%s' % (group, months)
+    chart = cache.get(cache_key)
+    if not chart:
+        chart = _detailed_flow_chart(reports)
+        # FlowReport objects are only refreshed every 5 minutes by default but there is
+        # a job, see details below, that deletes and refreshes this
+        # from cache. So we set a long expiry.
+        cache.set(cache_key, chart, 24 * 60 * 60)
+
     reports.order_by('-date')
     context = {
         'title': "Detailed Cumulative Flow",
-        'months': months,
-        'updated_at': reports[0].updated_at,
-        'chart': chart,
         'reports': reports,
+        'months': months,
+        'chart': chart,
+        'updated_at': reports[0].updated_at,
         'states': States(),
         'version': VERSION,
     }
