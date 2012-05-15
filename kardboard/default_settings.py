@@ -37,7 +37,7 @@ BROKER_HOST = "localhost"  # Maps to redis host.
 BROKER_PORT = 6379         # Maps to redis port.
 BROKER_VHOST = "0"         # Maps to database number.
 
-CELERYD_LOG_LEVEL = 'WARNING'
+CELERYD_LOG_LEVEL = 'INFO'
 CELERYBEAT_LOG_LEVEL = CELERYD_LOG_LEVEL
 CELERY_RESULT_BACKEND = "redis"
 CELERY_REDIS_HOST = "localhost"
@@ -87,7 +87,6 @@ CELERYBEAT_SCHEDULE = {
     # Capture/update the day's flow data
     'update_flow_reports': {
         'task': 'tasks.update_flow_reports',
-        'schedule': crontab(minute="*/5"),
+        'schedule': crontab(minute="*/15"),
     }
 }
-
