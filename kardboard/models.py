@@ -513,23 +513,16 @@ class Kard(app.db.Document):
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
-        if self.blocked or app.config.get('UPDATE_FLOW_ON_SAVE', False):
+        if self.blocked:
             # Do we have a state change?
             try:
                 k = Kard.objects.only('state').get(key=self.key, )
                 if k.state != self.state:
                     # Houston we have a state change
-
-                    # Time to regen the cum flow
-                    Kard.update_flow_records()
-
                     # Card is blocked and it's state is about to change
                     self.unblock()
             except Kard.DoesNotExist:
                 #Card isn't saved can't find its previous state
-
-                # Time to regen the cum flow, because it's new
-                Kard.update_flow_records()
                 pass
 
         self._service_class = self.service_class
