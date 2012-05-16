@@ -18,6 +18,8 @@
             {% set loggr_key = '' %}
         {% endif %}
 
+        <script src="{{ url_for('static', filename='jquery.min.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='highcharts.js') }}" type="text/javascript"></script>
         {% block extrajs %}
         {% endblock %}
     </head>
