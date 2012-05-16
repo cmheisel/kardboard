@@ -210,6 +210,11 @@ def timesince(dt, default="just now"):
     return default
 
 
+def jsonencode(data):
+    import json
+    return json.dumps(data)
+
+
 class PortAwareMongoEngine(MongoEngine):
     def init_app(self, app):
         db = app.config['MONGODB_DB']

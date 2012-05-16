@@ -701,21 +701,35 @@ def report_flow(group="all", months=3):
         date__lte=end_day,
         group=group)
 
-    chart = CumulativeFlowChart(900, 300)
-    chart.add_data([r.backlog_cum for r in records])
-    chart.add_data([r.in_progress_cum for r in records])
-    chart.add_data([r.done for r in records])
-    chart.setup_grid(records)
+    #chart = CumulativeFlowChart(900, 300)
+    #chart.add_data([r.backlog_cum for r in records])
+    #chart.add_data([r.in_progress_cum for r in records])
+    #chart.add_data([r.done for r in records])
+    #chart.setup_grid(records)
 
+    chart = {}
+    chart['categories'] = [report.date.strftime("%m/%d") for report in records]
+    series = [
+        {'name': "Planning", 'data': []},
+        {'name': "Todo", 'data': []},
+        {'name': "Done", 'data': []},
+    ]
+    for row in records:
+        series[0]['data'].append(row.backlog)
+        series[1]['data'].append(row.in_progress)
+        series[2]['data'].append(row.done)
+    chart['series'] = series
+
+    start_date = records.order_by('date').first().date
     records.order_by('-date')
     context = {
         'title': "Cumulative Flow",
         'updated_at': datetime.datetime.now(),
         'chart': chart,
+        'start_date': start_date,
         'flowdata': records,
         'version': VERSION,
     }
-
     return render_template('chart-flow.html', **context)
 
 def _detailed_flow_chart(reports):

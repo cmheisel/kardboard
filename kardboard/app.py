@@ -7,6 +7,7 @@ from kardboard.util import (
     PortAwareMongoEngine,
     slugify,
     timesince,
+    jsonencode,
     configure_logging,
     LazyView,
 )
@@ -25,6 +26,7 @@ def get_app():
     app.jinja_env.add_extension('kardboard.util.Markdown2Extension')
     app.jinja_env.filters['slugify'] = slugify
     app.jinja_env.filters['timesince'] = timesince
+    app.jinja_env.filters['jsonencode'] = jsonencode
 
     configure_logging(app)
 
