@@ -87,6 +87,6 @@ CELERYBEAT_SCHEDULE = {
     # Capture/update the day's flow data
     'update_flow_reports': {
         'task': 'tasks.update_flow_reports',
-        'schedule': crontab(minute="*/15"),
+        'schedule': crontab(hour="*/4"),
     }
 }
