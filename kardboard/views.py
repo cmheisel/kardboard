@@ -732,27 +732,6 @@ def report_flow(group="all", months=3):
     }
     return render_template('chart-flow.html', **context)
 
-def _detailed_flow_chart(reports):
-    chart = {}
-    chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
-
-    # TODO: This is a really slow operation, 8 seconds on my laptop for 5 days with 8 states/day
-    # For now tasks.update_flow_reports not only captures the data for the day, but it also
-    # calls cache.delete_memoize for the most likely combinations of groups and months
-    # and then calls report_detailed_flow again to re-prime the cache.
-    series = []
-    for state in States():
-        seri = {'name': state}
-        data = [report.snapshot.get(state, {}).get('count', 0) for report in reports]
-        seri['data'] = data
-        series.append(seri)
-    chart['series'] = series
-
-    import json
-    for key, value in chart.items():
-        chart[key] = json.dumps(value)
-
-    return chart
 
 def report_detailed_flow(group="all", months=3):
     end = kardboard.util.now()
@@ -768,14 +747,20 @@ def report_detailed_flow(group="all", months=3):
     if not reports:
         abort(404)
 
-    cache_key = 'cumflowchart-%s-%s' % (group, months)
-    chart = cache.get(cache_key)
-    if not chart:
-        chart = _detailed_flow_chart(reports)
-        # FlowReport objects are only refreshed every 5 minutes by default but there is
-        # a job, see details below, that deletes and refreshes this
-        # from cache. So we set a long expiry.
-        cache.set(cache_key, chart, 24 * 60 * 60)
+    chart = {}
+    chart['categories'] = []
+
+    series = []
+    for state in States():
+        seri = {'name': state, 'data': []}
+        series.append(seri)
+
+    for report in reports:
+        chart['categories'].append(report.date.strftime("%m/%d"))
+        for seri in series:
+            daily_seri_data = report.snapshot.get(seri['name'], {}).get('count', 0)
+            seri['data'].append(daily_seri_data)
+    chart['series'] = series
 
     reports.order_by('-date')
     context = {
