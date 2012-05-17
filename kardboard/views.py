@@ -588,7 +588,7 @@ def report_throughput(group="all", months=3, start=None):
         'version': VERSION,
     }
 
-    return render_template('chart-throughput.html', **context)
+    return render_template('report-throughput.html', **context)
 
 
 def chart_cycle(group="all", months=3, year=None, month=None, day=None):
