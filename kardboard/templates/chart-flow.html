@@ -45,7 +45,7 @@ $(function () {
             tooltip: {
                 formatter: function() {
                     var d = new Date(this.x);
-                    var ds =  d.getMonth() + '/' + d.getDate();
+                    var ds =  d.getUTCMonth()+1 + '/' + d.getUTCDate();
                     return ''+
                         ds + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
                 }
@@ -61,7 +61,10 @@ $(function () {
                         enabled: false,
                         lineWidth: 1,
                         lineColor: '#666666'
-                    }
+                    },
+
+                    pointStart: Date.UTC({{ start_date.year }}, {{ start_date.month }}-1, {{ start_date.day }}),
+                    pointInterval: 24 * 3600 * 1000 // one day
                 }
             },
 
@@ -70,8 +73,6 @@ $(function () {
                 {
                     name: {{ seri['name']|jsonencode }},
                     data: {{ seri['data']|jsonencode }},
-                    pointStart: Date.UTC({{ start_date.year }}, {{ start_date.month }}-1, {{ start_date.day }}),
-                    pointInterval: 24 * 3600 * 1000 // one day
                 }{% if not loop.last %},{% endif %}
                 {% endfor %}
             ]
