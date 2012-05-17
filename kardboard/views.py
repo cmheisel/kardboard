@@ -642,9 +642,9 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
     return render_template('report-cycle.html', **context)
 
 
-def chart_cycle_distribution(group="all", months=3):
+def report_cycle_distribution(group="all", months=3):
     ranges = (
-        (0, 4, "< 5 days"),
+        (0, 4, "Less than 5 days"),
         (5, 10, "5-10 days"),
         (11, 15, "11-15 days"),
         (16, 20, "16-20 days"),
@@ -671,7 +671,7 @@ def chart_cycle_distribution(group="all", months=3):
         context = {
             'error': "Zero cards were completed in the past %s months" % months
         }
-        return render_template('chart-cycle-distro.html', **context)
+        return render_template('report-cycle-distro.html', **context)
 
     distro = []
     for row in ranges:
@@ -679,20 +679,20 @@ def chart_cycle_distribution(group="all", months=3):
         query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
             Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
+        pct = round(pct, 2)
         distro.append((label, pct))
 
-    chart = CycleDistributionChart(700, 400)
-    chart.add_data([r[1] for r in distro])
-    chart.set_pie_labels([r[0] for r in distro])
+    chart = {}
+    chart['data'] = distro
+
     context = {
         'data': distro,
         'chart': chart,
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
-        'distro': distro,
         'version': VERSION,
     }
-    return render_template('chart-cycle-distro.html', **context)
+    return render_template('report-cycle-distro.html', **context)
 
 
 def robots():
