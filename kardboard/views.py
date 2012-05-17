@@ -591,7 +591,7 @@ def report_throughput(group="all", months=3, start=None):
     return render_template('report-throughput.html', **context)
 
 
-def chart_cycle(group="all", months=3, year=None, month=None, day=None):
+def report_cycle(group="all", months=3, year=None, month=None, day=None):
     today = datetime.datetime.today()
     if day:
         end_day = datetime.datetime(year=year, month=month, day=day)
@@ -612,10 +612,19 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
     daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
 
-    chart = MovingCycleTimeChart(900, 300)
-    chart.add_first_line(daily_moving_lead)
-    chart.add_line(daily_moving_averages)
-    chart.set_legend(('Lead time', 'Cycle time'))
+    start_date = daily_moving_averages[0][0]
+    chart = {}
+    chart['series'] = [
+        {
+            'name': 'Lead time',
+            'data': [ r[1] for r in daily_moving_lead ],
+        },
+        {
+            'name': 'Cycle time',
+            'data': [ r[1] for r in daily_moving_averages ],
+        }
+    ]
+    chart['goal'] = app.config.get('CYCLE_TIME_GOAL', ())
 
     daily_moving_averages.reverse()  # reverse order for display
     daily_moving_lead.reverse()
@@ -623,12 +632,14 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
         'chart': chart,
+        'months': months,
+        'start_date': start_date,
         'daily_averages': daily_moving_averages,
         'daily_lead': daily_moving_lead,
         'version': VERSION,
     }
 
-    return render_template('chart-cycle.html', **context)
+    return render_template('report-cycle.html', **context)
 
 
 def chart_cycle_distribution(group="all", months=3):
