@@ -30,9 +30,7 @@ from kardboard.util import (
     log_exception,
 )
 from kardboard.charts import (
-    ThroughputChart,
     MovingCycleTimeChart,
-    CumulativeFlowChart,
     CycleDistributionChart
 )
 
@@ -560,7 +558,7 @@ def report_service_class(group="all", months=3, start=None):
     return render_template('report-classes.html', **context)
 
 
-def chart_throughput(group="all", months=3, start=None):
+def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
 
@@ -575,8 +573,12 @@ def chart_throughput(group="all", months=3, start=None):
         num = cards.count()
         month_counts.append((start.strftime("%B"), num))
 
-    chart = ThroughputChart(900, 300)
-    chart.add_bars(month_counts)
+    chart = {}
+    chart['categories'] = [ c[0] for c in month_counts ]
+    chart['series'] = [{
+        'data': [ c[1] for c in month_counts ],
+        'name': 'Cards',
+    }]
 
     context = {
         'title': "How much have we done?",
