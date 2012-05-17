@@ -17,7 +17,7 @@ from flask import (
 
 import kardboard.auth
 from kardboard.version import VERSION
-from kardboard.app import app, cache
+from kardboard.app import app
 from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
@@ -28,10 +28,6 @@ from kardboard.util import (
     make_end_date,
     month_ranges,
     log_exception,
-)
-from kardboard.charts import (
-    MovingCycleTimeChart,
-    CycleDistributionChart
 )
 
 states = States()
@@ -713,12 +709,6 @@ def report_flow(group="all", months=3):
         date__gte=start_day,
         date__lte=end_day,
         group=group)
-
-    #chart = CumulativeFlowChart(900, 300)
-    #chart.add_data([r.backlog_cum for r in records])
-    #chart.add_data([r.in_progress_cum for r in records])
-    #chart.add_data([r.done for r in records])
-    #chart.setup_grid(records)
 
     chart = {}
     chart['categories'] = [report.date.strftime("%m/%d") for report in records]
