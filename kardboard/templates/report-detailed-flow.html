@@ -2,6 +2,7 @@
 
 {% block extrajs %}
 {{ super() }}
+{% autoescape false %}
 <script type="text/javascript">
 $(function () {
     var chart;
@@ -22,7 +23,6 @@ $(function () {
             },
 
             xAxis: {
-                //categories: {{ chart['categories']|jsonencode|safe }},
                 tickmarkPlacement: 'between',
                 title: {
                     enabled: true
@@ -71,14 +71,16 @@ $(function () {
             series: [
                 {% for seri in chart['series'] %}
                 {
-                    name: {{ seri['name']|jsonencode|safe }},
-                    data: {{ seri['data']|jsonencode|safe }},
+                    name: {{ seri['name']|jsonencode }},
+                    data: {{ seri['data']|jsonencode }},
                 }{% if not loop.last %},{% endif %}
                 {% endfor %}
             ]
         });
     });
-});</script>{% endblock %}
+});</script>
+{% endautoescape %}
+{% endblock extrajs %}
 
 {% block content %}
 
