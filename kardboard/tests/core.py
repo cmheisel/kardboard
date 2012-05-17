@@ -33,9 +33,6 @@ class KardboardTestCase(unittest2.TestCase):
         self.used_keys = []
         self._setup_logging()
 
-        from kardboard.charts import KardboardChartMixer
-        KardboardChartMixer.b64_image_src = Mock()
-
         super(KardboardTestCase, self).setUp()
 
     def tearDown(self):
