@@ -762,12 +762,14 @@ def report_detailed_flow(group="all", months=3):
             seri['data'].append(daily_seri_data)
     chart['series'] = series
 
+    start_date = reports.order_by('date').first().date
     reports.order_by('-date')
     context = {
         'title': "Detailed Cumulative Flow",
         'reports': reports,
         'months': months,
         'chart': chart,
+        'start_date': start_date,
         'updated_at': reports[0].updated_at,
         'states': States(),
         'version': VERSION,
