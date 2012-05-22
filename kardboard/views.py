@@ -131,17 +131,26 @@ def team(team_slug=None):
 
     title = "%s cards" % target_team
 
+    report_config = (
+        {'slug': 'cycle', 'name': 'Cycle time'},
+        {'slug': 'classes', 'name': 'Throughput'},
+        {'slug': 'leaderboard', 'name': 'Leaderboard'},
+    )
+
     context = {
         'title': title,
+        'team_slug': team_slug,
+        'target_team': target_team,
         'done_cards': done_cards,
         'metrics': metrics,
+        'report_config': report_config,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
 
-    return render_template('state.html', **context)
+    return render_template('team.html', **context)
 
 
 def state():
@@ -175,7 +184,7 @@ def state():
         'version': VERSION,
     }
 
-    return render_template('state.html', **context)
+    return render_template('team.html', **context)
 
 
 def _init_new_card_form(*args, **kwargs):
@@ -446,6 +455,7 @@ def done(group="all", months=3, start=None):
 
     return render_template('done.html', **context)
 
+
 def report_leaderboard(group="all", months=3, person=None, start_month=None, start_year=None):
     start = datetime.datetime.today()
     if start_month and start_year:
@@ -570,9 +580,9 @@ def report_throughput(group="all", months=3, start=None):
         month_counts.append((start.strftime("%B"), num))
 
     chart = {}
-    chart['categories'] = [ c[0] for c in month_counts ]
+    chart['categories'] = [c[0] for c in month_counts]
     chart['series'] = [{
-        'data': [ c[1] for c in month_counts ],
+        'data': [c[1] for c in month_counts],
         'name': 'Cards',
     }]
 
@@ -613,11 +623,11 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
     chart['series'] = [
         {
             'name': 'Lead time',
-            'data': [ r[1] for r in daily_moving_lead ],
+            'data': [r[1] for r in daily_moving_lead],
         },
         {
             'name': 'Cycle time',
-            'data': [ r[1] for r in daily_moving_averages ],
+            'data': [r[1] for r in daily_moving_averages],
         }
     ]
     chart['goal'] = app.config.get('CYCLE_TIME_GOAL', ())
@@ -778,6 +788,7 @@ def report_detailed_flow(group="all", months=3):
         'version': VERSION,
     }
     return render_template('report-detailed-flow.html', **context)
+
 
 @kardboard.util.redirect_to_next_url
 def login():
