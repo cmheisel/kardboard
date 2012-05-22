@@ -43,18 +43,17 @@
 
         <h1>{% block title %}{{ title }}{% endblock title %}</h1>
 
-        <p class="nav">
+        <div class="nav">
             <a href="/">Dashboard</a>&nbsp;/&nbsp;
             <a href="/reports/">Reports</a>&nbsp;/&nbsp;
-            <a href="/card/add/">Add a card</a>
-        </p>
-        <p class="nav">
+            <a href="/card/add/">Add a card</a>&nbsp;&nbsp;|&nbsp;
+
             <form action="/quick/" method="GET">
                 <label for="search">Search:</label>
                 <input type="text" name="key" id="search" />
                 <input type="submit" value="Go" name="go" />
             </form>
-        </p>
+        </div>
 
         {% block content %}{% endblock content %}
 

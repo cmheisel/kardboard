@@ -85,13 +85,19 @@ p.auth {
     font-size: .8em;
 }
 
-p.nav a {
+.nav a {
     color: #92CC47;
     text-decoration: none;
     font-weight: bold;
 }
 
-p.nav a:hover {
+.nav form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.nav a:hover {
     text-decoration: underline;
 }
 
