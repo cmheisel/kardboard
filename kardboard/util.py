@@ -103,6 +103,8 @@ def business_days_between(date1, date2):
 
 
 def month_ranges(date, num_months):
+    if num_months == 1:
+        return [month_range(date), ]
     end_start, end_end = month_range(date)
     months_ago = end_start - relativedelta(months=num_months - 1)
 

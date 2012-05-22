@@ -533,26 +533,21 @@ def report_service_class(group="all", months=3, start=None):
             rg = ReportGroup(group, filtered_cards)
             cards = rg.queryset
 
-            if cards.count() == 0:
-                # We don't need to have rows for
-                # service classes we didn't do
-                continue
-            month_name = start.strftime("%B")
-            if month_name not in months:
-                row.append(month_name)
-                months.append(month_name)
-            else:
-                row.append('')
-            row.append(cls)
-            row.append(cards.count())
             if cards.count() > 0:
+                month_name = start.strftime("%B")
+                if month_name not in months:
+                    row.append(month_name)
+                    months.append(month_name)
+                else:
+                    row.append('')
+
+                row.append(cls)
+                row.append(cards.count())
                 row.append("%d" % cards.average('_cycle_time'))
                 row.append("%d" % cards.average('_lead_time'))
-            else:
-                row.append('N/A')
-                row.append('N/A')
-            row = tuple(row)
-            datatable['rows'].append(row)
+            if row:
+                row = tuple(row)
+                datatable['rows'].append(row)
 
     context = {
         'title': "By service class",
