@@ -67,7 +67,7 @@ class LazyView(object):
         agent = get_newrelic_agent()
         fn = import_string(self.import_name)
         if agent:
-            fn = agent.FunctionTraceWrapper(fn, name=fn.__name__)
+            fn = agent.FunctionTraceWrapper(fn, name=self.import_name, group='Python/Views')
         return fn
 
     def __call__(self, *args, **kwargs):
