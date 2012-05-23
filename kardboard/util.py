@@ -64,7 +64,11 @@ class LazyView(object):
 
     @cached_property
     def view(self):
-        return import_string(self.import_name)
+        agent = get_newrelic_agent()
+        fn = import_string(self.import_name)
+        if agent:
+            fn = agent.FunctionTraceWrapper(fn)
+        return fn
 
     def __call__(self, *args, **kwargs):
         return self.view(*args, **kwargs)
