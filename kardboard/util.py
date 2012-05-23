@@ -236,15 +236,22 @@ def get_newrelic_agent():
 def newrelic_head():
     agent = get_newrelic_agent()
     if agent:
+        content = [
+            '<!-- New Relic tracking -->'
+        ]
         header = agent.get_browser_timing_header()
-        return header
-
+        content.append(header)
+        return '\n'.join(content)
 
 def newrelic_foot():
     agent = get_newrelic_agent()
     if agent:
+        content = [
+            '<!-- New Relic tracking -->'
+        ]
         footer = agent.get_browser_timing_footer()
-        return footer
+        content.append(footer)
+        return '\n'.join(content)
 
 
 class PortAwareMongoEngine(MongoEngine):
