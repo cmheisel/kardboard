@@ -10,6 +10,8 @@ from kardboard.util import (
     jsonencode,
     configure_logging,
     LazyView,
+    newrelic_head,
+    newrelic_foot,
 )
 
 
@@ -27,6 +29,9 @@ def get_app():
     app.jinja_env.filters['slugify'] = slugify
     app.jinja_env.filters['timesince'] = timesince
     app.jinja_env.filters['jsonencode'] = jsonencode
+    app.jinja_env.globals['newrelic_head'] = newrelic_head
+    app.jinja_env.globals['newrelic_foot'] = newrelic_foot
+
 
     configure_logging(app)
 

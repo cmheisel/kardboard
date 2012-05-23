@@ -217,6 +217,36 @@ def jsonencode(data):
     return json.dumps(data)
 
 
+def get_newrelic():
+    try:
+        import newrelic
+        return newrelic
+    except ImportError:
+        return None
+
+
+def get_newrelic_agent():
+    try:
+        import newrelic.agent
+        return newrelic.agent
+    except ImportError:
+        return None
+
+
+def newrelic_head():
+    agent = get_newrelic_agent()
+    if agent:
+        header = agent.get_browser_timing_header()
+        return header
+
+
+def newrelic_foot():
+    agent = get_newrelic_agent()
+    if agent:
+        footer = agent.get_browser_timing_footer()
+        return footer
+
+
 class PortAwareMongoEngine(MongoEngine):
     def init_app(self, app):
         db = app.config['MONGODB_DB']

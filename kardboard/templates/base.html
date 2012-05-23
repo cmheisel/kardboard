@@ -6,6 +6,7 @@
         {% endif %}
         <meta charset=utf-8 />
         <meta name="robots" content="noindex" />
+        {{ newrelic_head() }}
         <title>
             {{ title }}{% if title != config.get('SITE_NAME') %} | {{ config.get('SITE_NAME') }}{% endif %}
         </title>
@@ -76,6 +77,6 @@
         } catch(err) {}
         </script>
         {% endif %}
-
+        {{ newrelic_foot() }}
     </body>
 </html>
