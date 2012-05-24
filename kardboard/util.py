@@ -331,3 +331,12 @@ class Markdown2Extension(jinja2.ext.Extension):
 
     def _markdown_support(self, caller):
         return self.environment.markdowner.convert(caller()).strip()
+
+
+class FixGunicorn(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        environ['SERVER_PORT'] = int(environ['SERVER_PORT'])
+        return self.app(environ, start_response)
