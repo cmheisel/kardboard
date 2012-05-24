@@ -246,6 +246,8 @@ def newrelic_head():
         header = agent.get_browser_timing_header()
         content.append(header)
         return '\n'.join(content)
+    return ''
+
 
 def newrelic_foot():
     agent = get_newrelic_agent()
@@ -256,6 +258,7 @@ def newrelic_foot():
         footer = agent.get_browser_timing_footer()
         content.append(footer)
         return '\n'.join(content)
+    return ''
 
 
 class PortAwareMongoEngine(MongoEngine):
