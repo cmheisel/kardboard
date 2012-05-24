@@ -807,6 +807,7 @@ class FlowReport(app.db.Document):
         r.save()
         return r
 
+
 class DailyRecord(app.db.Document):
     """
     Represents a daily record of kard activity.

@@ -6,7 +6,6 @@ import os
 import logging
 
 import unittest2
-from mock import Mock
 from dateutil.relativedelta import relativedelta
 
 

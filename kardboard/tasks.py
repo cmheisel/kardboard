@@ -121,7 +121,6 @@ def update_daily_record(target_date, group):
     except DailyRecord.DoesNotExist:
         should_recalc = True
 
-
     if should_recalc:
         try:
             DailyRecord.calculate(date=target_date, group=group)
@@ -129,7 +128,6 @@ def update_daily_record(target_date, group):
         except Exception:
             logger.warning("Tried to save duplicate record: Date: %s / Group: %s" % (target_date, group))
             raise
-
 
 
 @celery.task(name="tasks.queue_daily_record_updates", ignore_result=True)
