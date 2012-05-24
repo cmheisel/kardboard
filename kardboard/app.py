@@ -1,5 +1,6 @@
 import os
 
+from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask
 from flaskext.cache import Cache
 
@@ -32,7 +33,6 @@ def get_app():
     app.jinja_env.globals['newrelic_head'] = newrelic_head
     app.jinja_env.globals['newrelic_foot'] = newrelic_foot
 
-
     configure_logging(app)
 
     try:
@@ -43,6 +43,8 @@ def get_app():
     if exceptional_key:
         exceptional = Exceptional(app)
         app._exceptional = exceptional
+
+    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     return app
 
