@@ -45,7 +45,6 @@ def get_app():
         exceptional = Exceptional(app)
         app._exceptional = exceptional
 
-    app.wsgi_app = ProxyFix(app.wsgi_app)
     app.wsgi_app = FixGunicorn(app.wsgi_app)
 
     return app
