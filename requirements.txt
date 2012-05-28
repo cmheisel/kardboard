@@ -25,7 +25,8 @@ python-memcached==1.48
 
 
 #Needed for deployment
-gunicorn==0.12.2
+gunicorn==0.14.3
+setproctitle==1.1.6
 Fabric==1.2.0
 
 
