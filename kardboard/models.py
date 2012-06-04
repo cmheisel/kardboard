@@ -274,9 +274,13 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date,
             )
 
-        average = qs.average('_cycle_time')
+        try:
+            average = qs.average('_cycle_time')
+        except TypeError:
+            average = float('nan')
+
         if math.isnan(average):
-            average = 0
+            return average
 
         return int(round(average))
 
