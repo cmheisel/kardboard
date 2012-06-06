@@ -3,11 +3,11 @@ import multiprocessing
 bind = "127.0.0.1:4000"
 logfile = "/home/kardboard/logs/kardboard-gunicorn.log"
 loglevel = "info"
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 3
 debug = False
 daemon = False
 pidfile = '/tmp/gunicorn.pid'
-worker_class = "gevent"
+worker_class = "sync"
 
 backlog = 2048
 timeout = 30
