@@ -280,7 +280,7 @@ class KardQuerySet(QuerySet):
             average = float('nan')
 
         if math.isnan(average):
-            return average
+            return 0
 
         return int(round(average))
 
