@@ -75,11 +75,11 @@ class FlowReportTestCase(KardboardTestCase):
 
     def test_flow_report(self, group=None, expected=None):
         Report = self._get_target_class()
-        if group == None:
+        if group is None:
             group == all
         r = Report.capture(group)
 
-        if expected == None:
+        if expected is None:
             expected = [
                 {
                     'name': self.states.backlog,

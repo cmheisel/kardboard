@@ -96,7 +96,7 @@ class MockJIRAService(Mock):
                 'description': '',
                 'id': '4',
                 'name': 'Feature',
-                'icon': \
+                'icon':
                     'http://jira.example.com/images/icons/type_feature.gif',
             }),
         ]

@@ -60,7 +60,7 @@ class CardFormTest(FormTests):
 
     def _post_data(self, thedict=None):
         from werkzeug.datastructures import MultiDict
-        if thedict == None:
+        if thedict is None:
             thedict = self.required_data
         return MultiDict(thedict)
 
