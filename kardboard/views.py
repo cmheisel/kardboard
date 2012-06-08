@@ -2,6 +2,7 @@ import csv
 import cStringIO
 import datetime
 import importlib
+import os
 
 from dateutil import relativedelta
 from flask import (
@@ -13,6 +14,7 @@ from flask import (
     url_for,
     flash,
     abort,
+    send_from_directory,
 )
 
 import kardboard.auth
@@ -837,3 +839,8 @@ def person(name):
         'version': VERSION,
     }
     return render_template('person.html', **context)
+
+
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
