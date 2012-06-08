@@ -1,6 +1,5 @@
 import os
 
-from werkzeug.contrib.fixers import ProxyFix
 from flask import Flask
 from flaskext.cache import Cache
 
@@ -10,7 +9,6 @@ from kardboard.util import (
     timesince,
     jsonencode,
     configure_logging,
-    LazyView,
     newrelic_head,
     newrelic_foot,
     FixGunicorn
@@ -53,48 +51,68 @@ app = get_app()
 cache = Cache(app)
 
 
-def url(url_rule, import_name, **options):
-    view = LazyView('kardboard.views.' + import_name)
-    app.add_url_rule(url_rule, view_func=view, **options)
+from kardboard.views import (
+    card,
+    card_add,
+    card_edit,
+    card_delete,
+    card_block,
+    card_export,
+    reports_index,
+    report_throughput,
+    report_cycle,
+    report_cycle_distribution,
+    report_flow,
+    report_detailed_flow,
+    done,
+    report_service_class,
+    report_leaderboard,
+    login,
+    logout,
+    dashboard,
+    person,
+    quick,
+    robots,
+    favicon,
+    state,
+    team,
+)
 
-from kardboard.views import report_detailed_flow
-
-url('/', 'state')
-url('/card/<key>/', 'card', methods=["GET", "POST"])
-url('/card/add/', 'card_add', methods=["GET", "POST"])
-url('/card/<key>/edit/', 'card_edit', methods=["GET", "POST"])
-url('/card/<key>/delete/', 'card_delete', methods=["GET", "POST"])
-url('/card/<key>/block/', 'card_block', methods=["GET", "POST"])
-url('/card/export/', 'card_export')
-url('/reports/', 'reports_index')
-url('/reports/<group>/throughput/', 'report_throughput')
-url('/reports/<group>/throughput/<int:months>/', 'report_throughput')
-url('/reports/<group>/cycle/', 'report_cycle')
-url('/reports/<group>/cycle/<int:months>/', 'report_cycle')
-url('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle')
-url('/reports/<group>/cycle/distribution/', 'report_cycle_distribution')
-url('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution')
-url('/reports/<group>/flow/', 'report_flow')
-url('/reports/<group>/flow/<int:months>/', 'report_flow')
+app.add_url_rule('/', 'state', state)
+app.add_url_rule('/card/<key>/', 'card', card, methods=["GET", "POST"])
+app.add_url_rule('/card/add/', 'card_add', card_add, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/edit/', 'card_edit', card_edit, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/delete/', 'card_delete', card_delete, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/block/', 'card_block', card_block, methods=["GET", "POST"])
+app.add_url_rule('/card/export/', 'card_export', card_export)
+app.add_url_rule('/reports/', 'reports_index', reports_index)
+app.add_url_rule('/reports/<group>/throughput/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/throughput/<int:months>/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/cycle/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/<int:months>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
+app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
 app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
-
-url('/reports/<group>/done/', 'done')
-url('/reports/<group>/done/<int:months>/', 'done')
-url('/reports/<group>/classes/', 'report_service_class')
-url('/reports/<group>/classes/<int:months>/', 'report_service_class')
-url('/reports/<group>/leaderboard/', 'report_leaderboard')
-url('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard')
-url('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/', 'report_leaderboard')
-url('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_leaderboard')
-url('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/<person>', 'report_leaderboard')
-url('/login/', 'login', methods=["GET", "POST"])
-url('/logout/', 'logout')
-url('/overview/', 'dashboard')
-url('/overview/<int:year>/<int:month>/', 'dashboard')
-url('/overview/<int:year>/<int:month>/<int:day>/', 'dashboard')
-url('/person/<name>/', 'person')
-url('/quick/', 'quick', methods=["GET"])
-url('/robots.txt', 'robots')
-url('/team/<team_slug>/', 'team')
-url('/favicon.ico', 'favicon')
+app.add_url_rule('/reports/<group>/done/', 'done', done)
+app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/classes/<int:months>/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/<person>', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/login/', 'login', login, methods=["GET", "POST"])
+app.add_url_rule('/logout/', 'logout', logout)
+app.add_url_rule('/overview/', 'dashboard', dashboard)
+app.add_url_rule('/overview/<int:year>/<int:month>/', 'dashboard', dashboard)
+app.add_url_rule('/overview/<int:year>/<int:month>/<int:day>/', 'dashboard', dashboard)
+app.add_url_rule('/person/<name>/', 'person', person)
+app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
+app.add_url_rule('/robots.txt', 'robots', robots,)
+app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/favicon.ico', 'favicon', favicon)

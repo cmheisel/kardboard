@@ -10,7 +10,6 @@ import jinja2.ext
 import markdown2
 
 from flaskext.mongoengine import MongoEngine
-from werkzeug import import_string, cached_property
 from werkzeug.contrib.cache import RedisCache
 import mongoengine
 
@@ -55,23 +54,6 @@ def redirect_to_next_url(fn):
 def redis_cache(app, args, kwargs):
     timeout = app.config.get('CACHE_DEFAULT_TIMEOUT', 300)
     return RedisCache(default_timeout=timeout)
-
-
-class LazyView(object):
-    def __init__(self, import_name):
-        self.__module__, self.__name__ = import_name.rsplit('.', 1)
-        self.import_name = import_name
-
-    @cached_property
-    def view(self):
-        agent = get_newrelic_agent()
-        fn = import_string(self.import_name)
-        if agent:
-            fn = agent.FunctionTraceWrapper(fn, name=self.import_name, group='Python/Views')
-        return fn
-
-    def __call__(self, *args, **kwargs):
-        return self.view(*args, **kwargs)
 
 
 def now():
