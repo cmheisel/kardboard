@@ -4,8 +4,8 @@ Flask-WTF==0.5.2
 Jinja2==2.5.5
 WTForms==1.0.1
 Werkzeug==0.7
-mongoengine==0.6.10
-pymongo==2.2
+mongoengine==0.5.2
+pymongo==2.0.1
 git+git://github.com/sbook/flask-mongoengine.git@d907e36e8055#egg=Flask-MongoEngine
 python-dateutil==1.5.0
 pygooglechart==0.3.0
@@ -15,8 +15,6 @@ Flask-Cache==0.3.3
 celery==2.4.3
 Flask-Script==0.3.3
 Flask-Celery==2.4.2
-Flask-Exceptional==0.4.7
-ordereddict==1.1
 
 markdown2==1.0.1.19
 requests==0.6.1
