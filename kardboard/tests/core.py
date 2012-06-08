@@ -13,7 +13,7 @@ class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         if os.environ.get('KARDBOARD_SETTINGS'):
             os.environ['KARDBOARD_SETTINGS'] = ''
-        from kardboard.app import app
+        from kardboard.views import app
         from flaskext.mongoengine import MongoEngine
 
         app.config.from_object('kardboard.default_settings')

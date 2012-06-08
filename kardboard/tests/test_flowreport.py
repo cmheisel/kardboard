@@ -57,20 +57,11 @@ class FlowReportTestCase(KardboardTestCase):
         return FlowReport
 
     def test_group_flow_report(self):
-        expected = [
-            {
-                'name': self.states.backlog,
-                'count': 1,
-            },
-            {
-                'name': self.states.start,
-                'count': 1,
-            },
-            {
-                'name': self.states.done,
-                'count': 2,
-            }
-        ]
+        expected = {
+            self.states.backlog: 1,
+            self.states.start: 1,
+            self.states.done: 2,
+        }
         self.test_flow_report("team-1", expected)
 
     def test_flow_report(self, group=None, expected=None):
@@ -80,28 +71,10 @@ class FlowReportTestCase(KardboardTestCase):
         r = Report.capture(group)
 
         if expected is None:
-            expected = [
-                {
-                    'name': self.states.backlog,
-                    'count': 2,
-                },
-                {
-                    'name': self.states.start,
-                    'count': 2,
-                },
-                {
-                    'name': self.states.done,
-                    'count': 4,
-                }
-            ]
-        assert expected == r.data
+            expected = {
+                self.states.backlog: 2,
+                self.states.start: 2,
+                self.states.done: 4,
+            }
 
-    def test_snapshot(self):
-        Report = self._get_target_class()
-        r = Report.capture()
-        r.save()
-
-        assert r.snapshot[self.states.done] == {
-            'name': self.states.done,
-            'count': 4,
-        }
+        assert expected == r.state_counts

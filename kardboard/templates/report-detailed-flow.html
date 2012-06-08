@@ -101,7 +101,7 @@ $(function () {
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ report.date.strftime("%m/%d/%Y") }}</td>
         {% for state in states %}
-        <td>{{ report.snapshot.get(state, {}).get('count', "--") }}</td>
+        <td>{{ report.state_counts.get(state, '--') }}</td>
         {% endfor %}
     </tr>
     {% endfor %}

@@ -2,8 +2,6 @@ import datetime
 import math
 import importlib
 
-from ordereddict import OrderedDict
-
 from dateutil.relativedelta import relativedelta
 
 from mongoengine.queryset import QuerySet, Q
@@ -755,8 +753,8 @@ class FlowReport(app.db.Document):
     group = app.db.StringField(required=True, default="all", unique_with=['date', ])
     """The report group to which this daily report belongs."""
 
-    data = app.db.ListField(app.db.DictField(),)
-    """The snapshot of data provided for that team on the date."""
+    state_counts = app.db.DictField()
+    """Kanban state as the key and the count of cards in that state, on this date, for this group."""
 
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
@@ -767,25 +765,10 @@ class FlowReport(app.db.Document):
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
-        self.cached_snapshot = self.make_snapshot()
         super(FlowReport, self).save(*args, **kwargs)
 
     def __str__(self):
         return "<FlowReport: %s -- %s>" % (self.group, self.date)
-
-    @property
-    def snapshot(self):
-        if hasattr(self, 'cached_snapshot'):
-            return self.cached_snapshot
-        else:
-            self.cached_snapshot = self.make_snapshot()
-            return self.cached_snapshot
-
-    def make_snapshot(self):
-        snap = OrderedDict()
-        for state in self.data:
-            snap[state['name']] = state
-        return snap
 
     @classmethod
     def capture(klass, group='all'):
@@ -802,11 +785,7 @@ class FlowReport(app.db.Document):
 
         for state in states:
             group_cards = ReportGroup(group, Kard.objects.filter(state=state)).queryset
-            state_data = {
-                'name': state,
-                'count': group_cards.count()
-            }
-            r.data.append(state_data)
+            r.state_counts[state] = group_cards.count()
 
         r.save()
         return r

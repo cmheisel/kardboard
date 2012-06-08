@@ -753,7 +753,7 @@ def report_detailed_flow(group="all", months=3):
     reports = FlowReport.objects.filter(
         date__gte=start_day,
         date__lte=end_day,
-        group=group)
+        group=group).only('state_counts', 'date')
     if not reports:
         abort(404)
 
@@ -768,7 +768,7 @@ def report_detailed_flow(group="all", months=3):
     for report in reports:
         chart['categories'].append(report.date.strftime("%m/%d"))
         for seri in series:
-            daily_seri_data = report.snapshot.get(seri['name'], {}).get('count', 0)
+            daily_seri_data = report.state_counts.get(seri['name'], 0)
             seri['data'].append(daily_seri_data)
     chart['series'] = series
 
@@ -844,3 +844,43 @@ def person(name):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+app.add_url_rule('/', 'state', state)
+app.add_url_rule('/card/<key>/', 'card', card, methods=["GET", "POST"])
+app.add_url_rule('/card/add/', 'card_add', card_add, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/edit/', 'card_edit', card_edit, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/delete/', 'card_delete', card_delete, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/block/', 'card_block', card_block, methods=["GET", "POST"])
+app.add_url_rule('/card/export/', 'card_export', card_export)
+app.add_url_rule('/reports/', 'reports_index', reports_index)
+app.add_url_rule('/reports/<group>/throughput/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/throughput/<int:months>/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/cycle/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/<int:months>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
+app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
+app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/done/', 'done', done)
+app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/classes/<int:months>/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/<person>', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/login/', 'login', login, methods=["GET", "POST"])
+app.add_url_rule('/logout/', 'logout', logout)
+app.add_url_rule('/overview/', 'dashboard', dashboard)
+app.add_url_rule('/overview/<int:year>/<int:month>/', 'dashboard', dashboard)
+app.add_url_rule('/overview/<int:year>/<int:month>/<int:day>/', 'dashboard', dashboard)
+app.add_url_rule('/person/<name>/', 'person', person)
+app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
+app.add_url_rule('/robots.txt', 'robots', robots,)
+app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/favicon.ico', 'favicon', favicon)
