@@ -37,6 +37,10 @@ To get a local version of kardboard up and running suitable for developing again
     # Start redis (only if you're running celery)
     redis-server /usr/local/etc/redis.conf
 
+    # Ensure the module is on sys.path
+    # Failed to import module kardboard errors occur otherwise.
+    python setup.py develop
+
     # Start the celery process
     python kardboard/manage.py celeryd -B
 
