@@ -10,7 +10,7 @@ To get a local version of kardboard up and running suitable for developing again
 
 
     # Install python, virtualenv and mongodb using your favorite system package manager here.
-    # aptitude install gcc python2.6 python2.6-dev python-virtualenv redis-server mongodb
+    # aptitude install gcc python2.6 python2.6-dev python-virtualenv redis-server>=2.4 mongodb>=2.0
     # These may differ on your local environment. In particular, a different python version
     # may be present locally. Use of the python and python-dev metapackages on debian is encouraged.
     # If using OSX, you should at least install mongo and redis. We recommend using Homebrew_.
