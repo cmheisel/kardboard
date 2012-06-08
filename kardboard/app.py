@@ -57,6 +57,7 @@ def url(url_rule, import_name, **options):
     view = LazyView('kardboard.views.' + import_name)
     app.add_url_rule(url_rule, view_func=view, **options)
 
+from kardboard.views import report_detailed_flow
 
 url('/', 'state')
 url('/card/<key>/', 'card', methods=["GET", "POST"])
@@ -75,8 +76,9 @@ url('/reports/<group>/cycle/distribution/', 'report_cycle_distribution')
 url('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution')
 url('/reports/<group>/flow/', 'report_flow')
 url('/reports/<group>/flow/<int:months>/', 'report_flow')
-url('/reports/<group>/flow/detail/', 'report_detailed_flow')
-url('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow')
+app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
+
 url('/reports/<group>/done/', 'done')
 url('/reports/<group>/done/<int:months>/', 'done')
 url('/reports/<group>/classes/', 'report_service_class')
