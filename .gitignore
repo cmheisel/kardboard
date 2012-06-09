@@ -12,3 +12,4 @@ celerybeat-schedule
 mockups/overview.bmml
 TODO
 .tox
+.kve

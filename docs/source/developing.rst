@@ -8,12 +8,13 @@ To get a local version of kardboard up and running suitable for developing again
 
 .. code-block:: bash
 
-    # Install python, virtualenv, mongodb and redis using your favorite system package manager here.
-    # aptitude install gcc python2.6 python2.6-dev python-virtualenv redis mongodb-10gen
-    #
-    # OR
-    #
-    # OS X using Homebrew (https://github.com/mxcl/homebrew)
+
+    # Install python, virtualenv and mongodb using your favorite system package manager here.
+    # aptitude install gcc python2.6 python2.6-dev python-virtualenv redis-server>=2.4 mongodb>=2.0
+    # These may differ on your local environment. In particular, a different python version
+    # may be present locally. Use of the python and python-dev metapackages on debian is encouraged.
+    # If using OSX, you should at least install mongo and redis. We recommend using Homebrew_.
+.. _Homebrew: https://github.com/mxcl/homebrew
     # brew install mongodb redis
 
     # Get the source, using your own fork most likely
@@ -35,6 +36,10 @@ To get a local version of kardboard up and running suitable for developing again
 
     # Start redis (only if you're running celery)
     redis-server /usr/local/etc/redis.conf
+
+    # Ensure the module is on sys.path
+    # Failed to import module kardboard errors occur otherwise.
+    python setup.py develop
 
     # Start the celery process
     python kardboard/manage.py celeryd -B
