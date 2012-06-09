@@ -24,7 +24,6 @@ from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, 
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
-    month_range,
     slugify,
     make_start_date,
     make_end_date,
@@ -33,72 +32,6 @@ from kardboard.util import (
 )
 
 states = States()
-
-
-def dashboard(year=None, month=None, day=None):
-    date = kardboard.util.now()
-    now = kardboard.util.now()
-    scope = 'current'
-
-    if year:
-        date = date.replace(year=year)
-        scope = 'year'
-    if month:
-        date = date.replace(month=month)
-        scope = 'month'
-        start, end = month_range(date)
-        date = end
-    if day:
-        date = date.replace(day=day)
-        scope = 'day'
-
-    date = make_end_date(date=date)
-
-    wip_cards = list(Kard.in_progress(date))
-    wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time(date))
-    wip_cards.reverse()
-
-    backlog_cards = Kard.backlogged(date).order_by('key')
-
-    metrics = [
-        {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
-            year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': len(wip_cards) + backlog_cards.count()},
-    ]
-
-    title = "Dashboard"
-    if scope == 'year':
-        title += " for %s"
-    if scope == 'month':
-        title += " for %s/%s" % (date.month, date.year)
-    if scope == 'day' or scope == 'current':
-        title += " for %s/%s/%s" % (date.month, date.day, date.year)
-
-    forward_date = date + relativedelta.relativedelta(days=1)
-    back_date = date - relativedelta.relativedelta(days=1)
-
-    if forward_date > now:
-        forward_date = None
-
-    context = {
-        'forward_date': forward_date,
-        'back_date': back_date,
-        'scope': scope,
-        'date': date,
-        'title': title,
-        'metrics': metrics,
-        'wip_cards': wip_cards,
-        'backlog_cards': backlog_cards,
-        'updated_at': now,
-        'version': VERSION,
-    }
-
-    return render_template('dashboard.html', **context)
 
 
 def team(team_slug=None):
@@ -875,9 +808,6 @@ app.add_url_rule('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_
 app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/<person>', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/login/', 'login', login, methods=["GET", "POST"])
 app.add_url_rule('/logout/', 'logout', logout)
-app.add_url_rule('/overview/', 'dashboard', dashboard)
-app.add_url_rule('/overview/<int:year>/<int:month>/', 'dashboard', dashboard)
-app.add_url_rule('/overview/<int:year>/<int:month>/<int:day>/', 'dashboard', dashboard)
 app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
