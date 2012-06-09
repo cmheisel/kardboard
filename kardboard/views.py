@@ -158,22 +158,22 @@ def team(team_slug=None):
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
+    states = States()
 
     board = DisplayBoard()  # defaults to all teams, 7 days of done
+    board.cards  # force the card calculation
+    board.rows
 
     title = app.config.get('SITE_NAME')
 
-    wip_cards = Kard.in_progress(date)
-    backlog_cards = Kard.backlogged(date)
+    wip_cards = [k for k in board.cards if k.state in states.in_progress]
+    done_this_week = [k for k in board.cards if k.state == states.done]
+
     metrics = [
+        {'WIP': len(wip_cards)},
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': wip_cards.count() + backlog_cards.count()},
+        {'Done this week': len(done_this_week)},
     ]
 
     context = {
@@ -185,7 +185,6 @@ def state():
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-
     return render_template('team.html', **context)
 
 

@@ -67,6 +67,7 @@ class DisplayBoard(object):
         self.states = States()
         self.done_days = done_days
         self._cards = None
+        self._rows = []
 
         if teams == None:
             teams = [t for t in app.config['CARD_TEAMS'] if t]  # Remove blanks
@@ -99,6 +100,8 @@ class DisplayBoard(object):
 
     @property
     def rows(self):
+        if self._rows:
+            return self._rows
         rows = []
         for team in self.teams:
             row = []
@@ -128,18 +131,19 @@ class DisplayBoard(object):
                 cell = {'cards': cards, 'state': state}
                 row.append(cell)
             rows.append(row)
-        return rows
+        self._rows = rows
+        return self._rows
 
     @property
     def cards(self):
         if self._cards:
             return self._cards
 
-        in_progress_q = Q(done_date=None,
-            start_date__exists=True,
+        in_progress_q = Q(
+            state__in=self.states.in_progress,
             team__in=self.teams)
-        backlog_q = Q(backlog_date__exists=True,
-            start_date=None,
+        backlog_q = Q(
+            state__in=self.states.pre_start,
             team__in=self.teams)
         done_q = Q(done_date__gte=now() - relativedelta(days=self.done_days),
             team__in=self.teams)
