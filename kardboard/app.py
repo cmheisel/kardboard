@@ -1,7 +1,10 @@
 import os
 
+import path
+
 from flask import Flask
 from flaskext.cache import Cache
+from jinja2 import ModuleLoader
 
 from kardboard.util import (
     PortAwareMongoEngine,
@@ -31,6 +34,14 @@ def get_app():
     app.jinja_env.filters['jsonencode'] = jsonencode
     app.jinja_env.globals['newrelic_head'] = newrelic_head
     app.jinja_env.globals['newrelic_foot'] = newrelic_foot
+
+    compiled_templates = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'compiled_templates')
+    compiled_files = path.path(compiled_templates).files()
+    if len(compiled_files) <= 1:
+        app.jinja_env.compile_templates(compiled_templates, zip=None)
+
+    if not app.config.get('TEMPLATE_DEBUG', False):
+        app.jinja_env.loader = ModuleLoader(compiled_templates)
 
     configure_logging(app)
 

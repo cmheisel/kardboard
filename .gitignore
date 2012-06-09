@@ -13,3 +13,5 @@ mockups/overview.bmml
 TODO
 .tox
 .kve
+kardboard/compiled_templates/tmpl*.py
+kardboard/compiled_templates/*.pyc

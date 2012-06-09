@@ -20,6 +20,7 @@ markdown2==1.0.1.19
 requests==0.6.1
 redis==2.4.9
 python-memcached==1.48
+path.py==2.2.2
 
 
 #Needed for deployment
