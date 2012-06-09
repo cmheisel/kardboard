@@ -149,7 +149,9 @@ class DisplayBoard(object):
             team__in=self.teams)
         cards_query = backlog_q | in_progress_q | done_q
 
-        self._cards = list(Kard.objects.filter(cards_query))
+        self._cards = list(
+            Kard.objects.filter(cards_query).exclude('_ticket_system_data')
+        )
         return self._cards
 
 
@@ -249,8 +251,10 @@ class KardQuerySet(QuerySet):
             date = make_end_date(date=date)
         start_date, end_date = week_range(date)
 
-        results = self.done().filter(done_date__lte=date,
-            done_date__gte=start_date)
+        results = self.done().filter(
+            done_date__lte=date,
+            done_date__gte=start_date
+        )
         return results
 
     def average(self, field_str):
@@ -447,6 +451,7 @@ class Kard(app.db.Document):
     created_at = app.db.DateTimeField(required=True)
 
     _service_class = app.db.StringField(required=True, db_field="service_class")
+    _assignee = app.db.StringField(db_field="assignee")
     _version = app.db.StringField(required=False, db_field="version")
 
     _ticket_system_updated_at = app.db.DateTimeField()
@@ -533,6 +538,8 @@ class Kard(app.db.Document):
 
         self._service_class = self.service_class
         self._version = self.ticket_system.get_version()
+        self._assignee = self.ticket_system_data.get('assignee', '')
+        self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
 
         super(Kard, self).save(*args, **kwargs)

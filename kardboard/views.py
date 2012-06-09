@@ -102,8 +102,12 @@ def state():
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
+    days = [k.current_cycle_time(date) for k in wip_cards]
+    days = sum(days)
+
     metrics = [
         {'WIP': len(wip_cards)},
+        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
         {'Done this week': len(done_this_week)},
