@@ -76,7 +76,6 @@ def team(team_slug=None):
         'title': title,
         'team_slug': team_slug,
         'target_team': target_team,
-        'done_cards': done_cards,
         'metrics': metrics,
         'report_config': report_config,
         'board': board,
