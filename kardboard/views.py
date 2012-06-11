@@ -70,6 +70,7 @@ def team(team_slug=None):
         {'slug': 'cycle', 'name': 'Cycle time'},
         {'slug': 'classes', 'name': 'Throughput'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
+        {'slug': 'done', 'name': 'Done'}
     )
 
     context = {
