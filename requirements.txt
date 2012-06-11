@@ -27,8 +27,6 @@ path.py==2.2.2
 gunicorn==0.14.3
 setproctitle==1.1.6
 Fabric==1.2.0
-gevent==0.13.7
-greenlet==0.3.4
 
 
 #Needed for testing
