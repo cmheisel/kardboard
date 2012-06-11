@@ -102,7 +102,7 @@ def state():
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
-    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time is not None]
+    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
     days = sum(days)
 
     metrics = [
