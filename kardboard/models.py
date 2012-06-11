@@ -536,7 +536,7 @@ class Kard(app.db.Document):
                 #Card isn't saved can't find its previous state
                 pass
 
-        self._service_class = self.service_class
+        self._service_class = self.ticket_system.service_class or app.config.get('DEFAULT_CLASS', '')
         self._version = self.ticket_system.get_version()
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
@@ -554,11 +554,7 @@ class Kard(app.db.Document):
     def service_class(self):
         # Fill in the service_class from the ticket helper if
         # there is one, and if not the config'd default
-        if self.ticket_system.service_class:
-            service_class = self.ticket_system.service_class
-        else:
-            service_class = app.config['DEFAULT_CLASS']
-        return service_class.strip()
+        return self._service_class or app.config.get('DEFAULT_CLASS', '')
 
     @classmethod
     def in_progress(klass, date=None):
@@ -726,7 +722,6 @@ class Kard(app.db.Document):
         """
         Instance of :ref:`TICKET_HELPER`
         """
-
         if self._ticket_system:
             return self._ticket_system
 

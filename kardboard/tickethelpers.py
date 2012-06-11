@@ -212,6 +212,7 @@ class JIRAHelper(TicketHelper):
         if not self.card._ticket_system_data:
             self.card.ticket_system.update(sync=True)
         service_class = self.card._ticket_system_data.get('type', {}).get('name', '')
+        service_class.strip()
         return service_class
 
     def issue_to_dictionary(self, obj):
