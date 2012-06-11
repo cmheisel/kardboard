@@ -38,7 +38,7 @@ def get_app():
     compiled_templates = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'compiled_templates')
     compiled_files = path.path(compiled_templates).files()
     if len(compiled_files) <= 1:
-        app.jinja_env.compile_templates(compiled_templates, zip=None)
+        app.jinja_env.compile_templates(compiled_templates, zip=None, py_compile=True)
 
     if not app.config.get('TEMPLATE_DEBUG', False):
         app.jinja_env.loader = ModuleLoader(compiled_templates)
