@@ -38,6 +38,7 @@ def team(team_slug=None):
     date = datetime.datetime.now()
     date = make_end_date(date=date)
     teams = app.config.get('CARD_TEAMS', [])
+    states = States()
 
     team_mapping = {}
     for team in teams:
@@ -51,15 +52,18 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[target_team, ])
 
+    wip_cards = [k for k in board.cards if k.state in states.in_progress]
+    done_this_week = [k for k in board.cards if k.state == states.done]
+
+    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
+    days = sum(days)
+
     metrics = [
+        {'WIP': len(wip_cards)},
+        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.filter(team=target_team).done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.filter(team=target_team).done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': len(board.cards)},
+        {'Done this week': len(done_this_week)},
     ]
 
     done_cards = Kard.objects.done().filter(team=target_team).order_by('-done_date')

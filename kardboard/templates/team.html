@@ -35,11 +35,11 @@
 </p>
 
 
-{% if board %}
+{% if team_slug %}
 <div class="team_page_board">
 {% endif %}
 {{ board_macros.board(board, request) }}
-{% if done_cards %}
+{% if board %}
 </div>
 {% endif %}
 
