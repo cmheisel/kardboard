@@ -37,7 +37,7 @@
         {% if 'auth_failure' in form.errors %}
         <tr>
             <td>&nbsp;</td>
-            <td class="error"><b>Username/Password Incorrect</b></td>
+            <td class="error"><b>{{ form.errors['auth_failure'] }}</b></td>
         </tr>
         {% endif %}
         {% for field in form %}
