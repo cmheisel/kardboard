@@ -32,7 +32,7 @@
             {% endif %}
         </div>
 
-        <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a></p>
+        <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a></p>
 
         {% if card.blocked %}
         <div class="blocker">
@@ -41,9 +41,9 @@
         </div>
         {% endif %}
 
-        {% set assignee = card.ticket_system_data.get('assignee', '') %}
+        {% set assignee = card.assignee %}
         <p class="assignee">
-            {% set version = card.ticket_system.get_version() %}
+            {% set version = card.version %}
             {% if version %}{{ version }} &ndash; {% endif %}
             {{ card.service_class }}
             {% if assignee %}<br /><a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}

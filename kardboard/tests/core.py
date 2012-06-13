@@ -6,7 +6,6 @@ import os
 import logging
 
 import unittest2
-from mock import Mock
 from dateutil.relativedelta import relativedelta
 
 
@@ -14,12 +13,13 @@ class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         if os.environ.get('KARDBOARD_SETTINGS'):
             os.environ['KARDBOARD_SETTINGS'] = ''
-        from kardboard.app import app
+        from kardboard.views import app
         from flaskext.mongoengine import MongoEngine
 
         app.config.from_object('kardboard.default_settings')
         app.config['MONGODB_DB'] = 'kardboard-unittest'
         app.config['DEBUG'] = True
+        app.config['TEMPLATE_DEBUG'] = True
         app.config['TESTING'] = True
         app.config['CELERY_ALWAYS_EAGER'] = True
         app.db = MongoEngine(app)
@@ -32,9 +32,6 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.used_keys = []
         self._setup_logging()
-
-        from kardboard.charts import KardboardChartMixer
-        KardboardChartMixer.b64_image_src = Mock()
 
         super(KardboardTestCase, self).setUp()
 

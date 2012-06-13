@@ -121,7 +121,6 @@ def update_daily_record(target_date, group):
     except DailyRecord.DoesNotExist:
         should_recalc = True
 
-
     if should_recalc:
         try:
             DailyRecord.calculate(date=target_date, group=group)
@@ -129,7 +128,6 @@ def update_daily_record(target_date, group):
         except Exception:
             logger.warning("Tried to save duplicate record: Date: %s / Group: %s" % (target_date, group))
             raise
-
 
 
 @celery.task(name="tasks.queue_daily_record_updates", ignore_result=True)
@@ -161,34 +159,6 @@ def update_flow_reports():
 
     for slug in group_slugs:
         FlowReport.capture(slug)
-        for i in xrange(1, 13):
-            refresh_flow_cache.delay(slug, i)
-
-
-@celery.task(name="tasks.refresh_flow_cache", ignore_result=True)
-def refresh_flow_cache(group, months):
-    from kardboard.app import cache
-    from kardboard.views import _detailed_flow_chart
-    from kardboard.models import FlowReport
-    from kardboard.util import now, month_ranges, make_start_date, make_end_date
-
-    end = now()
-    months_ranges = month_ranges(end, months)
-
-    start_day = make_start_date(date=months_ranges[0][0])
-    end_day = make_end_date(date=end)
-
-    reports = FlowReport.objects.filter(
-        date__gte=start_day,
-        date__lte=end_day,
-        group=group)
-    if not reports:
-        return None
-
-    cache_key = 'cumflowchart-%s-%s' % (group, months)
-    chart = _detailed_flow_chart(reports)
-    cache.set(cache_key, chart, 24 * 60 * 60)
-    return cache_key
 
 
 def _get_person(name, cache):

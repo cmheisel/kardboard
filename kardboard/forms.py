@@ -30,7 +30,7 @@ class Unique(object):
 def done_date_validator(form, field):
         states = States()
         if form.state.data == states.done:
-            if field.data == None:
+            if field.data is None:
                 raise ValidationError("Done date required since the card's state is %s" % form.state.data)
         else:
             field.errors = []
@@ -39,7 +39,7 @@ def done_date_validator(form, field):
 def start_date_validator(form, field):
         states = States()
         if states.index(form.state.data) >= states.index(states.start):
-            if field.data == None:
+            if field.data is None:
                 raise ValidationError("Start date required since the card's state is %s" % form.state.data)
         else:
             field.errors = []

@@ -2,8 +2,7 @@
 
 {% block extrajs %}
 {{ super() }}
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-<script src="{{ url_for('static', filename='highcharts.js') }}" type="text/javascript"></script>
+{% autoescape false %}
 <script type="text/javascript">
 $(function () {
     var chart;
@@ -24,11 +23,11 @@ $(function () {
             },
 
             xAxis: {
-                categories: {{ chart['categories']|safe }},
-                tickmarkPlacement: 'on',
+                tickmarkPlacement: 'between',
                 title: {
                     enabled: true
-                }
+                },
+                type: "datetime"
             },
 
             yAxis: {
@@ -45,8 +44,10 @@ $(function () {
 
             tooltip: {
                 formatter: function() {
+                    var d = new Date(this.x);
+                    var ds =  d.getUTCMonth()+1 + '/' + d.getUTCDate();
                     return ''+
-                        this.x + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
+                        ds + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
                 }
             },
 
@@ -57,16 +58,29 @@ $(function () {
                     lineWidth: 1,
 
                     marker: {
+                        enabled: false,
                         lineWidth: 1,
                         lineColor: '#666666'
-                    }
+                    },
+
+                    pointStart: Date.UTC({{ start_date.year }}, {{ start_date.month }}-1, {{ start_date.day }}),
+                    pointInterval: 24 * 3600 * 1000 // one day
                 }
             },
 
-            series: {{ chart['series']|safe }}
+            series: [
+                {% for seri in chart['series'] %}
+                {
+                    name: {{ seri['name']|jsonencode }},
+                    data: {{ seri['data']|jsonencode }},
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ]
         });
     });
-});</script>{% endblock %}
+});</script>
+{% endautoescape %}
+{% endblock extrajs %}
 
 {% block content %}
 
@@ -87,7 +101,7 @@ $(function () {
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ report.date.strftime("%m/%d/%Y") }}</td>
         {% for state in states %}
-        <td>{{ report.snapshot.get(state, {}).get('count', "--") }}</td>
+        <td>{{ report.state_counts.get(state, '--') }}</td>
         {% endfor %}
     </tr>
     {% endfor %}

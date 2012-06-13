@@ -1,6 +1,10 @@
 define add_user($email) {
     $username = $title
 
+    group { "admin":
+        ensure => "present",
+    }
+
     user { $username:
             comment => "$email",
             home    => "/home/$username",

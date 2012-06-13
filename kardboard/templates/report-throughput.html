@@ -11,7 +11,7 @@ $(function () {
 
             chart: {
                 renderTo: 'container',
-                type: 'area'
+                type: 'column'
             },
 
             title: {
@@ -23,11 +23,7 @@ $(function () {
             },
 
             xAxis: {
-                tickmarkPlacement: 'on',
-                title: {
-                    enabled: true
-                },
-                type: "datetime"
+                categories: {{ chart['categories']|jsonencode }}
             },
 
             yAxis: {
@@ -44,28 +40,12 @@ $(function () {
 
             tooltip: {
                 formatter: function() {
-                    var d = new Date(this.x);
-                    var ds =  d.getUTCMonth()+1 + '/' + d.getUTCDate();
                     return ''+
-                        ds + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
+                        this.x + ': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
                 }
             },
 
             plotOptions: {
-                area: {
-                    stacking: 'normal',
-                    lineColor: '#666666',
-                    lineWidth: 1,
-
-                    marker: {
-                        enabled: false,
-                        lineWidth: 1,
-                        lineColor: '#666666'
-                    },
-
-                    pointStart: Date.UTC({{ start_date.year }}, {{ start_date.month }}-1, {{ start_date.day }}),
-                    pointInterval: 24 * 3600 * 1000 // one day
-                }
             },
 
             series: [
@@ -80,27 +60,24 @@ $(function () {
     });
 });</script>
 {% endautoescape %}
-{% endblock %}
+{% endblock extrajs %}
 
 {% block content %}
 
 <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
 
+
 <div id="wip_data">
 <table>
     <tr>
-        <th>Day</th>
-        <th>Planning</th>
-        <th>Doing</th>
-        <th>Done</th>
+    	<th>Month</th>
+    	<th>Cards done</th>
     </tr>
 
-    {% for row in flowdata %}
+    {% for row in month_counts %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td>{{ row.date.strftime("%m/%d/%Y") }}</td>
-        <td>{{ row.backlog }}</td>
-        <td>{{ row.in_progress }}</td>
-        <td>{{ row.done }}</td>
+    	<td>{{ row[0] }}</td>
+    	<td>{{ row[1] }}</td>
     </tr>
     {% endfor %}
 </table>

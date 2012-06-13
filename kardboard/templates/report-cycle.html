@@ -11,7 +11,7 @@ $(function () {
 
             chart: {
                 renderTo: 'container',
-                type: 'area'
+                type: 'line'
             },
 
             title: {
@@ -39,7 +39,17 @@ $(function () {
                     formatter: function() {
                         return this.value;
                     }
-                }
+                },
+
+                plotBands: [
+                    {
+                        color: '#e5ecf9',
+                        {% if chart['goal'] %}
+                        from: {{ chart['goal'][0] }},
+                        to: {{ chart['goal'][1] }}
+                        {% endif %}
+                    }
+                ]
             },
 
             tooltip: {
@@ -47,16 +57,12 @@ $(function () {
                     var d = new Date(this.x);
                     var ds =  d.getUTCMonth()+1 + '/' + d.getUTCDate();
                     return ''+
-                        ds + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
+                        ds + ' ' + this.series.name +': '+ Highcharts.numberFormat(this.y, 0, ',') +' days';
                 }
             },
 
             plotOptions: {
-                area: {
-                    stacking: 'normal',
-                    lineColor: '#666666',
-                    lineWidth: 1,
-
+                line: {
                     marker: {
                         enabled: false,
                         lineWidth: 1,
@@ -80,7 +86,7 @@ $(function () {
     });
 });</script>
 {% endautoescape %}
-{% endblock %}
+{% endblock extrajs %}
 
 {% block content %}
 
@@ -89,18 +95,16 @@ $(function () {
 <div id="wip_data">
 <table>
     <tr>
-        <th>Day</th>
-        <th>Planning</th>
-        <th>Doing</th>
-        <th>Done</th>
+    	<th>Day</th>
+    	<th>Cycle Time</th>
+        <th>Lead Time</th>
     </tr>
 
-    {% for row in flowdata %}
+    {% for row in daily_averages %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td>{{ row.date.strftime("%m/%d/%Y") }}</td>
-        <td>{{ row.backlog }}</td>
-        <td>{{ row.in_progress }}</td>
-        <td>{{ row.done }}</td>
+    	<td>{{ row[0].strftime("%m/%d/%Y") }}</td>
+    	<td>{{ row[1] }}</td>
+        <td>{{ daily_lead[loop.index0][1] }}</td>
     </tr>
     {% endfor %}
 </table>

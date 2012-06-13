@@ -1,6 +1,6 @@
 import sys
 from kardboard.app import app
-from kardboard import auth, charts, forms, models, tasks, tickethelpers, util, version, views
+from kardboard import auth, forms, models, tasks, tickethelpers, util, version, views
 import logging
 
 

@@ -2,6 +2,7 @@ import csv
 import cStringIO
 import datetime
 import importlib
+import os
 
 from dateutil import relativedelta
 from flask import (
@@ -13,102 +14,31 @@ from flask import (
     url_for,
     flash,
     abort,
+    send_from_directory,
 )
 
 import kardboard.auth
 from kardboard.version import VERSION
-from kardboard.app import app, cache
+from kardboard.app import app
 from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
-    month_range,
     slugify,
     make_start_date,
     make_end_date,
     month_ranges,
     log_exception,
 )
-from kardboard.charts import (
-    ThroughputChart,
-    MovingCycleTimeChart,
-    CumulativeFlowChart,
-    CycleDistributionChart
-)
 
 states = States()
-
-
-def dashboard(year=None, month=None, day=None):
-    date = kardboard.util.now()
-    now = kardboard.util.now()
-    scope = 'current'
-
-    if year:
-        date = date.replace(year=year)
-        scope = 'year'
-    if month:
-        date = date.replace(month=month)
-        scope = 'month'
-        start, end = month_range(date)
-        date = end
-    if day:
-        date = date.replace(day=day)
-        scope = 'day'
-
-    date = make_end_date(date=date)
-
-    wip_cards = list(Kard.in_progress(date))
-    wip_cards = sorted(wip_cards, key=lambda c: c.current_cycle_time(date))
-    wip_cards.reverse()
-
-    backlog_cards = Kard.backlogged(date).order_by('key')
-
-    metrics = [
-        {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
-            year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': len(wip_cards) + backlog_cards.count()},
-    ]
-
-    title = "Dashboard"
-    if scope == 'year':
-        title += " for %s"
-    if scope == 'month':
-        title += " for %s/%s" % (date.month, date.year)
-    if scope == 'day' or scope == 'current':
-        title += " for %s/%s/%s" % (date.month, date.day, date.year)
-
-    forward_date = date + relativedelta.relativedelta(days=1)
-    back_date = date - relativedelta.relativedelta(days=1)
-
-    if forward_date > now:
-        forward_date = None
-
-    context = {
-        'forward_date': forward_date,
-        'back_date': back_date,
-        'scope': scope,
-        'date': date,
-        'title': title,
-        'metrics': metrics,
-        'wip_cards': wip_cards,
-        'backlog_cards': backlog_cards,
-        'updated_at': now,
-        'version': VERSION,
-    }
-
-    return render_template('dashboard.html', **context)
 
 
 def team(team_slug=None):
     date = datetime.datetime.now()
     date = make_end_date(date=date)
     teams = app.config.get('CARD_TEAMS', [])
+    states = States()
 
     team_mapping = {}
     for team in teams:
@@ -122,53 +52,69 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[target_team, ])
 
+    wip_cards = [k for k in board.cards if k.state in states.in_progress]
+    done_this_week = [k for k in board.cards if k.state == states.done]
+
+    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
+    days = sum(days)
+
     metrics = [
+        {'WIP': len(wip_cards)},
+        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.filter(team=target_team).done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.filter(team=target_team).done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': len(board.cards)},
+        {'Done this week': len(done_this_week)},
     ]
 
     done_cards = Kard.objects.done().filter(team=target_team).order_by('-done_date')
 
     title = "%s cards" % target_team
 
+    report_config = (
+        {'slug': 'cycle', 'name': 'Cycle time'},
+        {'slug': 'classes', 'name': 'Throughput'},
+        {'slug': 'leaderboard', 'name': 'Leaderboard'},
+        {'slug': 'done', 'name': 'Done'}
+    )
+
     context = {
         'title': title,
-        'done_cards': done_cards,
+        'team_slug': team_slug,
+        'target_team': target_team,
         'metrics': metrics,
+        'report_config': report_config,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
 
-    return render_template('state.html', **context)
+    return render_template('team.html', **context)
 
 
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
+    states = States()
 
     board = DisplayBoard()  # defaults to all teams, 7 days of done
+    board.cards  # force the card calculation
+    board.rows
 
     title = app.config.get('SITE_NAME')
 
-    wip_cards = Kard.in_progress(date)
-    backlog_cards = Kard.backlogged(date)
+    wip_cards = [k for k in board.cards if k.state in states.in_progress]
+    done_this_week = [k for k in board.cards if k.state == states.done]
+
+    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
+    days = sum(days)
+
     metrics = [
+        {'WIP': len(wip_cards)},
+        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
-        {'Done this week': Kard.objects.done_in_week(
-            year=date.year, month=date.month, day=date.day).count()},
-        {'Done this month':
-            Kard.objects.done_in_month(
-                year=date.year, month=date.month, day=date.day).count()},
-        {'On the board': wip_cards.count() + backlog_cards.count()},
+        {'Done this week': len(done_this_week)},
     ]
 
     context = {
@@ -180,8 +126,7 @@ def state():
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-
-    return render_template('state.html', **context)
+    return render_template('team.html', **context)
 
 
 def _init_new_card_form(*args, **kwargs):
@@ -452,6 +397,7 @@ def done(group="all", months=3, start=None):
 
     return render_template('done.html', **context)
 
+
 def report_leaderboard(group="all", months=3, person=None, start_month=None, start_year=None):
     start = datetime.datetime.today()
     if start_month and start_year:
@@ -529,26 +475,21 @@ def report_service_class(group="all", months=3, start=None):
             rg = ReportGroup(group, filtered_cards)
             cards = rg.queryset
 
-            if cards.count() == 0:
-                # We don't need to have rows for
-                # service classes we didn't do
-                continue
-            month_name = start.strftime("%B")
-            if month_name not in months:
-                row.append(month_name)
-                months.append(month_name)
-            else:
-                row.append('')
-            row.append(cls)
-            row.append(cards.count())
             if cards.count() > 0:
+                month_name = start.strftime("%B")
+                if month_name not in months:
+                    row.append(month_name)
+                    months.append(month_name)
+                else:
+                    row.append('')
+
+                row.append(cls)
+                row.append(cards.count())
                 row.append("%d" % cards.average('_cycle_time'))
                 row.append("%d" % cards.average('_lead_time'))
-            else:
-                row.append('N/A')
-                row.append('N/A')
-            row = tuple(row)
-            datatable['rows'].append(row)
+            if row:
+                row = tuple(row)
+                datatable['rows'].append(row)
 
     context = {
         'title': "By service class",
@@ -560,7 +501,7 @@ def report_service_class(group="all", months=3, start=None):
     return render_template('report-classes.html', **context)
 
 
-def chart_throughput(group="all", months=3, start=None):
+def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
 
@@ -575,8 +516,12 @@ def chart_throughput(group="all", months=3, start=None):
         num = cards.count()
         month_counts.append((start.strftime("%B"), num))
 
-    chart = ThroughputChart(900, 300)
-    chart.add_bars(month_counts)
+    chart = {}
+    chart['categories'] = [c[0] for c in month_counts]
+    chart['series'] = [{
+        'data': [c[1] for c in month_counts],
+        'name': 'Cards',
+    }]
 
     context = {
         'title': "How much have we done?",
@@ -586,10 +531,10 @@ def chart_throughput(group="all", months=3, start=None):
         'version': VERSION,
     }
 
-    return render_template('chart-throughput.html', **context)
+    return render_template('report-throughput.html', **context)
 
 
-def chart_cycle(group="all", months=3, year=None, month=None, day=None):
+def report_cycle(group="all", months=3, year=None, month=None, day=None):
     today = datetime.datetime.today()
     if day:
         end_day = datetime.datetime(year=year, month=month, day=day)
@@ -610,10 +555,19 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
     daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
 
-    chart = MovingCycleTimeChart(900, 300)
-    chart.add_first_line(daily_moving_lead)
-    chart.add_line(daily_moving_averages)
-    chart.set_legend(('Lead time', 'Cycle time'))
+    start_date = daily_moving_averages[0][0]
+    chart = {}
+    chart['series'] = [
+        {
+            'name': 'Lead time',
+            'data': [r[1] for r in daily_moving_lead],
+        },
+        {
+            'name': 'Cycle time',
+            'data': [r[1] for r in daily_moving_averages],
+        }
+    ]
+    chart['goal'] = app.config.get('CYCLE_TIME_GOAL', ())
 
     daily_moving_averages.reverse()  # reverse order for display
     daily_moving_lead.reverse()
@@ -621,17 +575,19 @@ def chart_cycle(group="all", months=3, year=None, month=None, day=None):
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
         'chart': chart,
+        'months': months,
+        'start_date': start_date,
         'daily_averages': daily_moving_averages,
         'daily_lead': daily_moving_lead,
         'version': VERSION,
     }
 
-    return render_template('chart-cycle.html', **context)
+    return render_template('report-cycle.html', **context)
 
 
-def chart_cycle_distribution(group="all", months=3):
+def report_cycle_distribution(group="all", months=3):
     ranges = (
-        (0, 4, "< 5 days"),
+        (0, 4, "Less than 5 days"),
         (5, 10, "5-10 days"),
         (11, 15, "11-15 days"),
         (16, 20, "16-20 days"),
@@ -658,7 +614,7 @@ def chart_cycle_distribution(group="all", months=3):
         context = {
             'error': "Zero cards were completed in the past %s months" % months
         }
-        return render_template('chart-cycle-distro.html', **context)
+        return render_template('report-cycle-distro.html', **context)
 
     distro = []
     for row in ranges:
@@ -666,20 +622,20 @@ def chart_cycle_distribution(group="all", months=3):
         query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
             Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
+        pct = round(pct, 2)
         distro.append((label, pct))
 
-    chart = CycleDistributionChart(700, 400)
-    chart.add_data([r[1] for r in distro])
-    chart.set_pie_labels([r[0] for r in distro])
+    chart = {}
+    chart['data'] = distro
+
     context = {
         'data': distro,
         'chart': chart,
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
-        'distro': distro,
         'version': VERSION,
     }
-    return render_template('chart-cycle-distro.html', **context)
+    return render_template('report-cycle-distro.html', **context)
 
 
 def robots():
@@ -701,44 +657,31 @@ def report_flow(group="all", months=3):
         date__lte=end_day,
         group=group)
 
-    chart = CumulativeFlowChart(900, 300)
-    chart.add_data([r.backlog_cum for r in records])
-    chart.add_data([r.in_progress_cum for r in records])
-    chart.add_data([r.done for r in records])
-    chart.setup_grid(records)
+    chart = {}
+    chart['categories'] = [report.date.strftime("%m/%d") for report in records]
+    series = [
+        {'name': "Planning", 'data': []},
+        {'name': "Todo", 'data': []},
+        {'name': "Done", 'data': []},
+    ]
+    for row in records:
+        series[0]['data'].append(row.backlog)
+        series[1]['data'].append(row.in_progress)
+        series[2]['data'].append(row.done)
+    chart['series'] = series
 
+    start_date = records.order_by('date').first().date
     records.order_by('-date')
     context = {
         'title': "Cumulative Flow",
         'updated_at': datetime.datetime.now(),
         'chart': chart,
+        'start_date': start_date,
         'flowdata': records,
         'version': VERSION,
     }
-
     return render_template('chart-flow.html', **context)
 
-def _detailed_flow_chart(reports):
-    chart = {}
-    chart['categories'] = [report.date.strftime("%m/%d") for report in reports]
-
-    # TODO: This is a really slow operation, 8 seconds on my laptop for 5 days with 8 states/day
-    # For now tasks.update_flow_reports not only captures the data for the day, but it also
-    # calls cache.delete_memoize for the most likely combinations of groups and months
-    # and then calls report_detailed_flow again to re-prime the cache.
-    series = []
-    for state in States():
-        seri = {'name': state}
-        data = [report.snapshot.get(state, {}).get('count', 0) for report in reports]
-        seri['data'] = data
-        series.append(seri)
-    chart['series'] = series
-
-    import json
-    for key, value in chart.items():
-        chart[key] = json.dumps(value)
-
-    return chart
 
 def report_detailed_flow(group="all", months=3):
     end = kardboard.util.now()
@@ -750,30 +693,39 @@ def report_detailed_flow(group="all", months=3):
     reports = FlowReport.objects.filter(
         date__gte=start_day,
         date__lte=end_day,
-        group=group)
+        group=group).only('state_counts', 'date')
     if not reports:
         abort(404)
 
-    cache_key = 'cumflowchart-%s-%s' % (group, months)
-    chart = cache.get(cache_key)
-    if not chart:
-        chart = _detailed_flow_chart(reports)
-        # FlowReport objects are only refreshed every 5 minutes by default but there is
-        # a job, see details below, that deletes and refreshes this
-        # from cache. So we set a long expiry.
-        cache.set(cache_key, chart, 24 * 60 * 60)
+    chart = {}
+    chart['categories'] = []
 
+    series = []
+    for state in States():
+        seri = {'name': state, 'data': []}
+        series.append(seri)
+
+    for report in reports:
+        chart['categories'].append(report.date.strftime("%m/%d"))
+        for seri in series:
+            daily_seri_data = report.state_counts.get(seri['name'], 0)
+            seri['data'].append(daily_seri_data)
+    chart['series'] = series
+
+    start_date = reports.order_by('date').first().date
     reports.order_by('-date')
     context = {
         'title': "Detailed Cumulative Flow",
         'reports': reports,
         'months': months,
         'chart': chart,
+        'start_date': start_date,
         'updated_at': reports[0].updated_at,
         'states': States(),
         'version': VERSION,
     }
     return render_template('report-detailed-flow.html', **context)
+
 
 @kardboard.util.redirect_to_next_url
 def login():
@@ -830,3 +782,45 @@ def person(name):
         'version': VERSION,
     }
     return render_template('person.html', **context)
+
+
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+app.add_url_rule('/', 'state', state)
+app.add_url_rule('/card/<key>/', 'card', card, methods=["GET", "POST"])
+app.add_url_rule('/card/add/', 'card_add', card_add, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/edit/', 'card_edit', card_edit, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/delete/', 'card_delete', card_delete, methods=["GET", "POST"])
+app.add_url_rule('/card/<key>/block/', 'card_block', card_block, methods=["GET", "POST"])
+app.add_url_rule('/card/export/', 'card_export', card_export)
+app.add_url_rule('/reports/', 'reports_index', reports_index)
+app.add_url_rule('/reports/<group>/throughput/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/throughput/<int:months>/', 'report_throughput', report_throughput)
+app.add_url_rule('/reports/<group>/cycle/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/<int:months>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle', report_cycle)
+app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
+app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
+app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/done/', 'done', done)
+app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/classes/<int:months>/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:months>/<person>/', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/<person>', 'report_leaderboard', report_leaderboard)
+app.add_url_rule('/login/', 'login', login, methods=["GET", "POST"])
+app.add_url_rule('/logout/', 'logout', logout)
+app.add_url_rule('/person/<name>/', 'person', person)
+app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
+app.add_url_rule('/robots.txt', 'robots', robots,)
+app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/favicon.ico', 'favicon', favicon)

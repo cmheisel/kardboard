@@ -2,8 +2,6 @@ import datetime
 import math
 import importlib
 
-from ordereddict import OrderedDict
-
 from dateutil.relativedelta import relativedelta
 
 from mongoengine.queryset import QuerySet, Q
@@ -69,6 +67,7 @@ class DisplayBoard(object):
         self.states = States()
         self.done_days = done_days
         self._cards = None
+        self._rows = []
 
         if teams == None:
             teams = [t for t in app.config['CARD_TEAMS'] if t]  # Remove blanks
@@ -101,6 +100,8 @@ class DisplayBoard(object):
 
     @property
     def rows(self):
+        if self._rows:
+            return self._rows
         rows = []
         for team in self.teams:
             row = []
@@ -130,24 +131,27 @@ class DisplayBoard(object):
                 cell = {'cards': cards, 'state': state}
                 row.append(cell)
             rows.append(row)
-        return rows
+        self._rows = rows
+        return self._rows
 
     @property
     def cards(self):
         if self._cards:
             return self._cards
 
-        in_progress_q = Q(done_date=None,
-            start_date__exists=True,
+        in_progress_q = Q(
+            state__in=self.states.in_progress,
             team__in=self.teams)
-        backlog_q = Q(backlog_date__exists=True,
-            start_date=None,
+        backlog_q = Q(
+            state__in=self.states.pre_start,
             team__in=self.teams)
         done_q = Q(done_date__gte=now() - relativedelta(days=self.done_days),
             team__in=self.teams)
         cards_query = backlog_q | in_progress_q | done_q
 
-        self._cards = list(Kard.objects.filter(cards_query))
+        self._cards = list(
+            Kard.objects.filter(cards_query).exclude('_ticket_system_data')
+        )
         return self._cards
 
 
@@ -247,8 +251,10 @@ class KardQuerySet(QuerySet):
             date = make_end_date(date=date)
         start_date, end_date = week_range(date)
 
-        results = self.done().filter(done_date__lte=date,
-            done_date__gte=start_date)
+        results = self.done().filter(
+            done_date__lte=date,
+            done_date__gte=start_date
+        )
         return results
 
     def average(self, field_str):
@@ -274,9 +280,13 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date,
             )
 
-        average = qs.average('_cycle_time')
+        try:
+            average = qs.average('_cycle_time')
+        except TypeError:
+            average = float('nan')
+
         if math.isnan(average):
-            average = 0
+            return 0
 
         return int(round(average))
 
@@ -441,6 +451,7 @@ class Kard(app.db.Document):
     created_at = app.db.DateTimeField(required=True)
 
     _service_class = app.db.StringField(required=True, db_field="service_class")
+    _assignee = app.db.StringField(db_field="assignee")
     _version = app.db.StringField(required=False, db_field="version")
 
     _ticket_system_updated_at = app.db.DateTimeField()
@@ -513,33 +524,37 @@ class Kard(app.db.Document):
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
-        # If a card is blocked, inspect it's previous state and
-        # if we're moving states unblock it
         if self.blocked:
+            # Do we have a state change?
             try:
                 k = Kard.objects.only('state').get(key=self.key, )
                 if k.state != self.state:
+                    # Houston we have a state change
                     # Card is blocked and it's state is about to change
                     self.unblock()
             except Kard.DoesNotExist:
                 #Card isn't saved can't find its previous state
                 pass
 
-        self._service_class = self.service_class
+        self._service_class = self.ticket_system.service_class or app.config.get('DEFAULT_CLASS', '')
         self._version = self.ticket_system.get_version()
+        self._assignee = self.ticket_system_data.get('assignee', '')
+        self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
 
         super(Kard, self).save(*args, **kwargs)
+
+    @classmethod
+    def update_flow_records(cls):
+        if app.config.get('UPDATE_FLOW_ON_SAVE', False):
+            from kardboard.tasks import update_flow_reports
+            update_flow_reports.apply_async(expires=15 * 60)
 
     @property
     def service_class(self):
         # Fill in the service_class from the ticket helper if
         # there is one, and if not the config'd default
-        if self.ticket_system.service_class:
-            service_class = self.ticket_system.service_class
-        else:
-            service_class = app.config['DEFAULT_CLASS']
-        return service_class.strip()
+        return self._service_class or app.config.get('DEFAULT_CLASS', '')
 
     @classmethod
     def in_progress(klass, date=None):
@@ -707,7 +722,6 @@ class Kard(app.db.Document):
         """
         Instance of :ref:`TICKET_HELPER`
         """
-
         if self._ticket_system:
             return self._ticket_system
 
@@ -745,8 +759,8 @@ class FlowReport(app.db.Document):
     group = app.db.StringField(required=True, default="all", unique_with=['date', ])
     """The report group to which this daily report belongs."""
 
-    data = app.db.ListField(app.db.DictField(),)
-    """The snapshot of data provided for that team on the date."""
+    state_counts = app.db.DictField()
+    """Kanban state as the key and the count of cards in that state, on this date, for this group."""
 
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
@@ -757,25 +771,10 @@ class FlowReport(app.db.Document):
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.datetime.now()
-        self.cached_snapshot = self.make_snapshot()
         super(FlowReport, self).save(*args, **kwargs)
 
     def __str__(self):
         return "<FlowReport: %s -- %s>" % (self.group, self.date)
-
-    @property
-    def snapshot(self):
-        if hasattr(self, 'cached_snapshot'):
-            return self.cached_snapshot
-        else:
-            self.cached_snapshot = self.make_snapshot()
-            return self.cached_snapshot
-
-    def make_snapshot(self):
-        snap = OrderedDict()
-        for state in self.data:
-            snap[state['name']] = state
-        return snap
 
     @classmethod
     def capture(klass, group='all'):
@@ -792,14 +791,11 @@ class FlowReport(app.db.Document):
 
         for state in states:
             group_cards = ReportGroup(group, Kard.objects.filter(state=state)).queryset
-            state_data = {
-                'name': state,
-                'count': group_cards.count()
-            }
-            r.data.append(state_data)
+            r.state_counts[state] = group_cards.count()
 
         r.save()
         return r
+
 
 class DailyRecord(app.db.Document):
     """

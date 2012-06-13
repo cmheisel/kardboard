@@ -15,4 +15,4 @@ def load_tests(loader, tests, pattern):
     return the_suite
 
 
-load_tests.__test__ = False # Make nose ignore this
+load_tests.__test__ = False  # Make nose ignore this

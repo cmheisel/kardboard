@@ -35,7 +35,6 @@ div.metric {
     border: 1px #92CC47 solid;
     margin: 15px;
     border-radius: 8px;
-    background-color: #234F32;
     background-color: #E5F6F6;
     display: inline-block;
 }
@@ -85,13 +84,19 @@ p.auth {
     font-size: .8em;
 }
 
-p.nav a {
+.nav a {
     color: #92CC47;
     text-decoration: none;
     font-weight: bold;
 }
 
-p.nav a:hover {
+.nav form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.nav a:hover {
     text-decoration: underline;
 }
 

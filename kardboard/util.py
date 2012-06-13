@@ -10,7 +10,6 @@ import jinja2.ext
 import markdown2
 
 from flaskext.mongoengine import MongoEngine
-from werkzeug import import_string, cached_property
 from werkzeug.contrib.cache import RedisCache
 import mongoengine
 
@@ -57,19 +56,6 @@ def redis_cache(app, args, kwargs):
     return RedisCache(default_timeout=timeout)
 
 
-class LazyView(object):
-    def __init__(self, import_name):
-        self.__module__, self.__name__ = import_name.rsplit('.', 1)
-        self.import_name = import_name
-
-    @cached_property
-    def view(self):
-        return import_string(self.import_name)
-
-    def __call__(self, *args, **kwargs):
-        return self.view(*args, **kwargs)
-
-
 def now():
     return datetime.datetime.now()
 
@@ -103,6 +89,8 @@ def business_days_between(date1, date2):
 
 
 def month_ranges(date, num_months):
+    if num_months == 1:
+        return [month_range(date), ]
     end_start, end_end = month_range(date)
     months_ago = end_start - relativedelta(months=num_months - 1)
 
@@ -210,6 +198,51 @@ def timesince(dt, default="just now"):
     return default
 
 
+def jsonencode(data):
+    import json
+    return json.dumps(data)
+
+
+def get_newrelic():
+    try:
+        import newrelic
+        return newrelic
+    except ImportError:
+        return None
+
+
+def get_newrelic_agent():
+    try:
+        import newrelic.agent
+        return newrelic.agent
+    except ImportError:
+        return None
+
+
+def newrelic_head():
+    agent = get_newrelic_agent()
+    if agent:
+        content = [
+            '<!-- New Relic tracking -->'
+        ]
+        header = agent.get_browser_timing_header()
+        content.append(header)
+        return '\n'.join(content)
+    return ''
+
+
+def newrelic_foot():
+    agent = get_newrelic_agent()
+    if agent:
+        content = [
+            '<!-- New Relic tracking -->'
+        ]
+        footer = agent.get_browser_timing_footer()
+        content.append(footer)
+        return '\n'.join(content)
+    return ''
+
+
 class PortAwareMongoEngine(MongoEngine):
     def init_app(self, app):
         db = app.config['MONGODB_DB']
@@ -280,3 +313,12 @@ class Markdown2Extension(jinja2.ext.Extension):
 
     def _markdown_support(self, caller):
         return self.environment.markdowner.convert(caller()).strip()
+
+
+class FixGunicorn(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        environ['SERVER_PORT'] = int(environ['SERVER_PORT'])
+        return self.app(environ, start_response)
