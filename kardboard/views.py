@@ -767,7 +767,6 @@ def login():
             session['username'] = f.username.data
             return True  # redirect
 
-
     context = {
         'title': "Login",
         'form': f,
