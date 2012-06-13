@@ -175,8 +175,11 @@ class JIRAHelper(TicketHelper):
     def login(self, username, password):
         if not self._service:
             self.connect()
-        auth = self._service.login(username, password)
-        return auth
+        try:
+            auth = self._service.login(username, password)
+            return auth
+        except:
+            return False
 
     def get_issue(self, key=None):
         key = key or self.card.key

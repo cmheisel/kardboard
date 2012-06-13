@@ -34,6 +34,12 @@
 {% block content %}
     <form method="POST" action=".">
     <table id="card_form">
+        {% if 'auth_failure' in form.errors %}
+        <tr>
+            <td>&nbsp;</td>
+            <td class="error"><b>Username/Password Incorrect</b></td>
+        </tr>
+        {% endif %}
         {% for field in form %}
             {{ with_errors(field) }}
         {% endfor %}

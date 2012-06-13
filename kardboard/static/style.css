@@ -361,3 +361,5 @@ table.board p.title a:hover {
 table.leaderboard td {
     width: 25%;
 }
+
+.error { color: red; }
