@@ -766,8 +766,6 @@ def login():
         if result:
             session['username'] = f.username.data
             return True  # redirect
-        else:
-            f.errors['auth_failure'] = 'Username/password incorrect'
 
 
     context = {
