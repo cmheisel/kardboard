@@ -512,18 +512,18 @@ def report_throughput(group="all", months=3, start=None):
         start, end = arange
         filtered_cards = Kard.objects.filter(done_date__gte=start,
             done_date__lte=end)
+        rg = ReportGroup(group, filtered_cards)
+        cards = rg.queryset
+
         if with_defects:
             counts = {'card': 0, 'defect': 0}
-            for card in filtered_cards:
+            for card in cards:
                 if card.service_class in defect_classes:
                     counts['defect'] += 1
                 else:
                     counts['card'] += 1
             month_counts.append((start.strftime("%B"), counts))
         else:
-            rg = ReportGroup(group, filtered_cards)
-            cards = rg.queryset
-
             num = cards.count()
             month_counts.append((start.strftime("%B"), num))
 
