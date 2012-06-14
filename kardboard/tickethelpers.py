@@ -79,7 +79,7 @@ class NullHelper(TicketHelper):
         return None
 
     def login(self, username, password):
-        return None
+        return True
 
 
 class TestTicketHelper(TicketHelper):
