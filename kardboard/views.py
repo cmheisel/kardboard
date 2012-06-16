@@ -518,10 +518,16 @@ def report_throughput(group="all", months=3, start=None):
         if with_defects:
             counts = {'card': 0, 'defect': 0}
             for card in cards:
-                if card.service_class in defect_classes:
+                if card.service_class.strip() in defect_classes:
                     counts['defect'] += 1
+                    print "DEFECT: %s %s" % (card.key, card.service_class)
+                    print counts
+                    print
                 else:
                     counts['card'] += 1
+                    print "CARD: %s %s" % (card.key, card.service_class)
+                    print counts
+                    print
             month_counts.append((start.strftime("%B"), counts))
         else:
             num = cards.count()
