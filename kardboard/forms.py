@@ -42,8 +42,8 @@ def start_date_validator(form, field):
             if field.data is None:
                 raise ValidationError("Start date required since the card's state is %s" % form.state.data)
         elif (field.data is None and
-              form.backlog_date is not None and
-              form.done_date is not None):
+              form.backlog_date.data is not None and
+              form.done_date.data is not None):
             raise ValidationError('Card with a backlog date and done date must have a start date')
         else:
             field.errors = []

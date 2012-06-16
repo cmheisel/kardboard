@@ -147,8 +147,8 @@ class CardFormTest(FormTests):
 
     def test_start_date_unrequiredness(self):
         """
-        If the state is not set to DONE_STATE then
-        a done_date is optional.
+        If the state is not set to START_STATE then
+        a start_state is optional.
         """
         f = self.Form(self._post_data())
         f.validate()
@@ -176,6 +176,18 @@ class CardFormTest(FormTests):
         f = self.Form(self._post_data())
         f.validate()
         self.assertEqual(0, len(f.done_date.errors))
+
+    def test_start_and_done_date_togetherness(self):
+        from kardboard.models import States
+        states = States()
+
+        self.required_data['state'] = unicode(states.done)
+        self.required_data['start_date'] = ''
+        self.required_data['done_date'] = u'06/12/2011'
+        f = self.Form(self._post_data())
+        f.validate()
+        self.assertEqual(2, len(f.start_date.errors))
+
 
 if __name__ == "__main__":
     import unittest
