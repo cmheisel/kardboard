@@ -101,7 +101,13 @@ $(function () {
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ report.date.strftime("%m/%d/%Y") }}</td>
         {% for state in states %}
-        <td>{{ report.state_counts.get(state, '--') }}</td>
+        <td>
+            {% if cards_only %}
+            {{ report.state_card_counts.get(state, '--') }}
+            {% else %}
+            {{ report.state_counts.get(state, '--') }}
+            {% endif %}
+        </td>
         {% endfor %}
     </tr>
     {% endfor %}

@@ -25,10 +25,6 @@
     </li>
 
     <li>
-        <a href="/reports/{{ slug }}/flow/3/">Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/6">6</a> / <a href="/reports/{{ slug }}/flow/6">9</a> / <a href="/reports/{{ slug }}/flow/12">12</a>
-    </li>
-
-    <li>
         <a href="/reports/{{ slug }}/classes/3/">By service class</a> / <a href="/reports/{{ slug }}/classes/6">6</a> / <a href="/reports/{{ slug }}/classes/6">9</a> / <a href="/reports/{{ slug }}/classes/12">12</a>
     </li>
 
@@ -36,8 +32,14 @@
         <a href="/reports/{{ slug }}/leaderboard/3/">Developer leaderboard</a> / <a href="/reports/{{ slug }}/leaderboard/6">6</a> / <a href="/reports/{{ slug }}/leaderboard/6">9</a> / <a href="/reports/{{ slug }}/leaderboard/12">12</a>
     </li>
 
+    {% if with_defects %}
     <li>
-        <a href="/reports/{{ slug }}/flow/detail/3/">Detailed Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/detail//6">6</a> / <a href="/reports/{{ slug }}/flow/detail/6">9</a> / <a href="/reports/{{ slug }}/flow/detail/12">12</a>
+        <a href="/reports/{{ slug }}/flow/detail/cards/3/">Detailed Cumulative Flow Cards only</a> / <a href="/reports/{{ slug }}/flow/detail/cards/6">6</a> / <a href="/reports/{{ slug }}/flow/detail/cards/9">9</a> / <a href="/reports/{{ slug }}/flow/detail/cards/12">12</a>
+    </li>
+    {% endif %}
+
+    <li>
+        <a href="/reports/{{ slug }}/flow/detail/3/">Detailed Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/detail//6">6</a> / <a href="/reports/{{ slug }}/flow/detail/9">9</a> / <a href="/reports/{{ slug }}/flow/detail/12">12</a>
     </li>
 </ul>
 </div></div>
