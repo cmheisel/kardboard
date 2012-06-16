@@ -504,6 +504,8 @@ def report_service_class(group="all", months=3, start=None):
 def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
+    defect_classes = app.config.get('DEFECT_CLASSES', None)
+    with_defects = defect_classes is not None
 
     month_counts = []
     for arange in months_ranges:
@@ -513,15 +515,35 @@ def report_throughput(group="all", months=3, start=None):
         rg = ReportGroup(group, filtered_cards)
         cards = rg.queryset
 
-        num = cards.count()
-        month_counts.append((start.strftime("%B"), num))
+        if with_defects:
+            counts = {'card': 0, 'defect': 0}
+            for card in cards:
+                if card.service_class in defect_classes:
+                    counts['defect'] += 1
+                else:
+                    counts['card'] += 1
+            month_counts.append((start.strftime("%B"), counts))
+        else:
+            num = cards.count()
+            month_counts.append((start.strftime("%B"), num))
 
     chart = {}
     chart['categories'] = [c[0] for c in month_counts]
-    chart['series'] = [{
-        'data': [c[1] for c in month_counts],
-        'name': 'Cards',
-    }]
+
+    if with_defects:
+        chart['series'] = [{
+            'data': [c[1]['card'] for c in month_counts],
+            'name': 'Cards'
+        },
+        {
+            'data': [c[1]['defect'] for c in month_counts],
+            'name': 'Defects'
+        }]
+    else:
+        chart['series'] = [{
+            'data': [c[1] for c in month_counts],
+            'name': 'Cards',
+        }]
 
     context = {
         'title': "How much have we done?",
@@ -529,6 +551,7 @@ def report_throughput(group="all", months=3, start=None):
         'chart': chart,
         'month_counts': month_counts,
         'version': VERSION,
+        'with_defects': with_defects,
     }
 
     return render_template('report-throughput.html', **context)
