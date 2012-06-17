@@ -320,5 +320,5 @@ class FixGunicorn(object):
         self.app = app
 
     def __call__(self, environ, start_response):
-        environ['SERVER_PORT'] = int(environ['SERVER_PORT'])
+        environ['SERVER_PORT'] = str(environ['SERVER_PORT'])
         return self.app(environ, start_response)
