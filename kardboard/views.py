@@ -357,6 +357,7 @@ def card_export():
 
 def reports_index():
     report_conf = app.config.get('REPORT_GROUPS', {})
+    with_defects = app.config.get('DEFECT_CLASSES', False)
 
     report_groups = []
     keys = report_conf.keys()
@@ -370,6 +371,7 @@ def reports_index():
         'title': "Reports",
         'updated_at': datetime.datetime.now(),
         'report_groups': report_groups,
+        'with_defects': with_defects,
         'all': ('all', "All teams"),
         'version': VERSION,
     }
@@ -505,6 +507,8 @@ def report_service_class(group="all", months=3, start=None):
 def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
+    defect_classes = app.config.get('DEFECT_CLASSES', None)
+    with_defects = defect_classes is not None
 
     month_counts = []
     for arange in months_ranges:
@@ -514,15 +518,41 @@ def report_throughput(group="all", months=3, start=None):
         rg = ReportGroup(group, filtered_cards)
         cards = rg.queryset
 
-        num = cards.count()
-        month_counts.append((start.strftime("%B"), num))
+        if with_defects:
+            counts = {'card': 0, 'defect': 0}
+            for card in cards:
+                if card.service_class.strip() in defect_classes:
+                    counts['defect'] += 1
+                    print "DEFECT: %s %s" % (card.key, card.service_class)
+                    print counts
+                    print
+                else:
+                    counts['card'] += 1
+                    print "CARD: %s %s" % (card.key, card.service_class)
+                    print counts
+                    print
+            month_counts.append((start.strftime("%B"), counts))
+        else:
+            num = cards.count()
+            month_counts.append((start.strftime("%B"), num))
 
     chart = {}
     chart['categories'] = [c[0] for c in month_counts]
-    chart['series'] = [{
-        'data': [c[1] for c in month_counts],
-        'name': 'Cards',
-    }]
+
+    if with_defects:
+        chart['series'] = [{
+            'data': [c[1]['card'] for c in month_counts],
+            'name': 'Cards'
+        },
+        {
+            'data': [c[1]['defect'] for c in month_counts],
+            'name': 'Defects'
+        }]
+    else:
+        chart['series'] = [{
+            'data': [c[1] for c in month_counts],
+            'name': 'Cards',
+        }]
 
     context = {
         'title': "How much have we done?",
@@ -530,6 +560,7 @@ def report_throughput(group="all", months=3, start=None):
         'chart': chart,
         'month_counts': month_counts,
         'version': VERSION,
+        'with_defects': with_defects,
     }
 
     return render_template('report-throughput.html', **context)
@@ -684,17 +715,26 @@ def report_flow(group="all", months=3):
     return render_template('chart-flow.html', **context)
 
 
-def report_detailed_flow(group="all", months=3):
+def report_detailed_flow_cards(group="all", months=3):
+    return report_detailed_flow(group, months, cards_only=True)
+
+
+def report_detailed_flow(group="all", months=3, cards_only=False):
     end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
 
     start_day = make_start_date(date=months_ranges[0][0])
     end_day = make_end_date(date=end)
 
+    if cards_only:
+        only_arg = ('state_card_counts', 'date', 'group')
+    else:
+        only_arg = ('state_counts', 'date', 'group')
+
     reports = FlowReport.objects.filter(
         date__gte=start_day,
         date__lte=end_day,
-        group=group).only('state_counts', 'date')
+        group=group).only(*only_arg)
     if not reports:
         abort(404)
 
@@ -709,7 +749,10 @@ def report_detailed_flow(group="all", months=3):
     for report in reports:
         chart['categories'].append(report.date.strftime("%m/%d"))
         for seri in series:
-            daily_seri_data = report.state_counts.get(seri['name'], 0)
+            if cards_only:
+                daily_seri_data = report.state_card_counts.get(seri['name'], 0)
+            else:
+                daily_seri_data = report.state_counts.get(seri['name'], 0)
             seri['data'].append(daily_seri_data)
     chart['series'] = series
 
@@ -719,6 +762,7 @@ def report_detailed_flow(group="all", months=3):
         'title': "Detailed Cumulative Flow",
         'reports': reports,
         'months': months,
+        'cards_only': cards_only,
         'chart': chart,
         'start_date': start_date,
         'updated_at': reports[0].updated_at,
@@ -806,6 +850,8 @@ app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
 app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
+app.add_url_rule('/reports/<group>/flow/detail/cards/', 'report_detailed_flow_cards', report_detailed_flow_cards)
+app.add_url_rule('/reports/<group>/flow/detail/cards/<int:months>/', 'report_detailed_flow_cards', report_detailed_flow_cards)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
 app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)

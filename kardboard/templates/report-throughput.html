@@ -36,6 +36,11 @@ $(function () {
                         return this.value;
                     }
                 }
+                {% if with_defects %}
+                , stackLabels: {
+                    enabled: true
+                }
+                {% endif %}
             },
 
             tooltip: {
@@ -46,6 +51,11 @@ $(function () {
             },
 
             plotOptions: {
+                {% if with_defects %}
+                column: {
+                    stacking: 'normal'
+                }
+                {% endif %}
             },
 
             series: [
@@ -70,14 +80,26 @@ $(function () {
 <div id="wip_data">
 <table>
     <tr>
-    	<th>Month</th>
-    	<th>Cards done</th>
+        <th>Month</th>
+        {% if with_defects %}
+            <th>Defects Done</th>
+            <th>Cards Done</th>
+            <th>Total</th>
+        {% else %}
+            <th>Cards Done</th>
+        {% endif %}
     </tr>
 
     {% for row in month_counts %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-    	<td>{{ row[0] }}</td>
-    	<td>{{ row[1] }}</td>
+        <td>{{ row[0] }}</td>
+        {% if with_defects %}
+            <td>{{ row[1]['defect'] }}</td>
+            <td>{{ row[1]['card'] }}</th>
+            <td>{{ row[1]['card'] + row[1]['defect'] }}</td>
+        {% else %}
+        	<td>{{ row[1] }}</td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>

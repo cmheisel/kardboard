@@ -677,6 +677,8 @@ class Kard(app.db.Document):
                 pass
 
         self._service_class = self.ticket_system.service_class or app.config.get('DEFAULT_CLASS', '')
+        if self._service_class:
+            self._service_class = self._service_class.strip()
         self._version = self.ticket_system.get_version()
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
@@ -830,6 +832,13 @@ class Kard(app.db.Document):
         return False
 
     @property
+    def is_card(self):
+        defect_classes = app.config.get('DEFECT_CLASSES', [])
+        if self.service_class in defect_classes:
+            return False
+        return True
+
+    @property
     def cycle_vs_goal(self):
         if not self.cycle_goal:
             return 0
@@ -909,6 +918,9 @@ class FlowReport(app.db.Document):
     """The report group to which this daily report belongs."""
 
     state_counts = app.db.DictField()
+    """Kanban state as the key and the count of cards and defects in that state, on this date, for this group."""
+
+    state_card_counts = app.db.DictField()
     """Kanban state as the key and the count of cards in that state, on this date, for this group."""
 
     updated_at = app.db.DateTimeField(required=True)
@@ -941,6 +953,9 @@ class FlowReport(app.db.Document):
         for state in states:
             group_cards = ReportGroup(group, Kard.objects.filter(state=state)).queryset
             r.state_counts[state] = group_cards.count()
+
+            non_defects = [c for c in group_cards.only('_service_class') if c.is_card]
+            r.state_card_counts[state] = len(non_defects)
 
         r.save()
         return r

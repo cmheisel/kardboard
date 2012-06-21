@@ -183,6 +183,10 @@ def normalize_people():
     logger = normalize_people.get_logger()
     people_cache = {}
 
+    if app.config.get('DISABLE_TASK_PEOPLE', False):
+        logger.debug("SKIPPING normalize_people because DISABLE_TASK_PEOPLE is True")
+        return None
+
     for k in Kard.objects.all():
         logger.debug("Considering %s" % k.key)
         reporter = k.ticket_system_data.get('reporter', '')

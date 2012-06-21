@@ -13,13 +13,15 @@ class KardboardTestCase(unittest2.TestCase):
     def setUp(self):
         if os.environ.get('KARDBOARD_SETTINGS'):
             os.environ['KARDBOARD_SETTINGS'] = ''
+
+        from kardboard import default_settings
+        default_settings.TEMPLATE_DEBUG = True
         from kardboard.views import app
         from flaskext.mongoengine import MongoEngine
 
         app.config.from_object('kardboard.default_settings')
         app.config['MONGODB_DB'] = 'kardboard-unittest'
         app.config['DEBUG'] = True
-        app.config['TEMPLATE_DEBUG'] = True
         app.config['TESTING'] = True
         app.config['CELERY_ALWAYS_EAGER'] = True
         app.db = MongoEngine(app)

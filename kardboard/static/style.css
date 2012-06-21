@@ -362,6 +362,7 @@ table.leaderboard td {
     width: 25%;
 }
 
+.error { color: red; }
 .changelog-entry { margin-bottom: 15px; }
 .changelog-entry h5 { margin-bottom: 5px; margin-top: 0px; } 
 .changelog-entry table { margin-left: 0px; width: 100%; font-size: 0.83em; }
