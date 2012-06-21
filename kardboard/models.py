@@ -1,10 +1,13 @@
 import datetime
 import math
 import importlib
+import time
 
 from dateutil.relativedelta import relativedelta
 
 from mongoengine.queryset import QuerySet, Q
+
+from flask import session
 
 from kardboard.app import app
 from kardboard.util import (
@@ -150,7 +153,7 @@ class DisplayBoard(object):
         cards_query = backlog_q | in_progress_q | done_q
 
         self._cards = list(
-            Kard.objects.filter(cards_query).exclude('_ticket_system_data')
+            Kard.objects.filter(cards_query).exclude('_ticket_system_data', '_version_history')
         )
         return self._cards
 
@@ -389,7 +392,7 @@ class Person(app.db.Document):
         [self.tested.remove(k) for k in list(self.tested) if not isinstance(k, Kard)]
 
     def save(self, *args, **kwargs):
-        self.updated_at = datetime.datetime.now()
+        self.updated_at = now()
         self.cleanup()
         super(Person, self).save(*args, **kwargs)
 
@@ -407,6 +410,97 @@ class BlockerRecord(app.db.EmbeddedDocument):
 
     unblocked_at = app.db.DateTimeField(required=False)
     """When the card's blockage stopped."""
+
+
+class KardSnapshot(app.db.EmbeddedDocument):
+    """
+    A state and diff holder for a single Kard. Note: the proper
+    way of creating a snapshot from a card is by using ``KardSnapshot.create``
+    rather than ``__init__``
+    """
+    CREATE = 'C'
+    INITIAL = 'I'
+    EDIT = 'E'
+    DELETE = 'D'
+
+    action = app.db.StringField(required=True)
+    updated_at = app.db.DateTimeField(required=True, default=now())
+    updated_by = app.db.StringField()
+    state = app.db.DictField(required=True, default={})
+    diff = app.db.DictField(required=True, default={})
+
+    @property
+    def action_verb(self):
+        if self.action == KardSnapshot.INITIAL:
+            return 'Initialized'
+        elif self.action == KardSnapshot.CREATE:
+            return 'Created'
+        elif self.action == KardSnapshot.EDIT:
+            return 'Edited'
+        elif self.action == KardSnapshot.DELETE:
+            return 'Deleted'
+        else:
+            return None
+
+    def _is_action(self, action):
+        return self.action == action
+
+    @property
+    def initial_record(self):
+        print self._is_action(KardSnapshot.INITIAL)
+        return self._is_action(KardSnapshot.INITIAL)
+
+    @property
+    def create_record(self):
+        return self._is_action(KardSnapshot.CREATE)
+
+    @property
+    def edit_record(self):
+        return self._is_action(KardSnapshot.EDIT)
+
+    @property
+    def delete_record(self):
+        return self._is_action(KardSnapshot.DELETE)
+
+    @classmethod
+    def create(self, card, action, updated_by=None, updated_at=now(), compare=None):
+        """ Construct the snapshot and diff """
+        snapshot = KardSnapshot(action=action,
+                                updated_by=updated_by,
+                                updated_at=updated_at,
+                                state={},
+                                diff={})
+
+        # Record the state and create the diff
+        for field in Kard.SNAPSHOT_FIELDS:
+            old = None
+            new = card._data.get(field, None)
+            if compare is not None:
+                old = compare.state.get(field, None)
+            if old != new:
+                snapshot.diff[field] = dict(old=old, new=new)
+            snapshot.state[field] = new
+
+        # Only return a version if something changed
+        return snapshot if len(snapshot.diff) else None
+
+    @classmethod
+    def value_string(self, value=None):
+        """ Converts a value to a human readable form. Mainly for datetimes """ 
+        if value is None:
+            return ''
+
+        try:
+            val_type = type(value).__name__
+
+            if val_type == 'str':
+                return value
+            elif val_type == 'datetime':
+                return value.strftime('%m/%d/%Y') if value is not None else ''
+            else:
+                return str(value)
+        except:
+            return ''
 
 
 class Kard(app.db.Document):
@@ -449,6 +543,10 @@ class Kard(app.db.Document):
     )
 
     created_at = app.db.DateTimeField(required=True)
+    updated_at = app.db.DateTimeField()
+
+    created_by = app.db.StringField()
+    updated_by = app.db.StringField()
 
     _service_class = app.db.StringField(required=True, db_field="service_class")
     _assignee = app.db.StringField(db_field="assignee")
@@ -457,20 +555,61 @@ class Kard(app.db.Document):
     _ticket_system_updated_at = app.db.DateTimeField()
     _ticket_system_data = app.db.DictField()
 
+    _version_history = app.db.SortedListField(
+                            app.db.EmbeddedDocumentField('KardSnapshot'),
+                            ordering='updated_at'
+                        )
+
     meta = {
         'queryset_class': KardQuerySet,
         'collection': 'kard',
         'ordering': ['+priority', '-backlog_date']
     }
 
-    EXPORT_FIELDNAMES = (
+    # Used to create a version snapshot
+    SNAPSHOT_FIELDS = [
         'key',
         'title',
         'backlog_date',
         'start_date',
         'done_date',
         'state',
-    )
+        'priority',
+        'team'
+    ]
+
+    def __init__(self, *args, **kwargs):
+        super(Kard, self).__init__(*args, **kwargs)
+
+        # This is simply compatibility with automated updateds for cards
+        # that don't have any version history. This won't happen for cards
+        # that are created.
+        if self.last_version is None and self.id is not None:
+            self.snapshot(KardSnapshot.INITIAL)
+
+    def snapshot(self, action, previous=None):
+        """
+        Record a snapshot using previous dict as a basis for setting edited fields.
+        Special care is taken for dates since they won't compare correctly if one
+        has time information and the other doesn't
+        """
+        version = KardSnapshot.create(self,
+                                      action,
+                                      updated_by=session.get('username', None),
+                                      updated_at=now(),
+                                      compare=previous)
+        if version is not None:
+            self._version_history.append(version)
+
+    @property
+    def last_version(self):
+        if len(self._version_history) > 0:
+            return self._version_history[-1]
+        else:
+            return None
+
+    def get_version_history(self, limit=3):
+        return [ version for version in reversed(self._version_history) ][:limit]
 
     def _convert_dates_to_datetimes(self, date):
         if not date:
@@ -512,6 +651,7 @@ class Kard(app.db.Document):
 
         if not self.created_at:
             self.created_at = now()
+            self.created_by = session['username']
 
         # Auto move to done
         if self.done_date:
@@ -543,6 +683,15 @@ class Kard(app.db.Document):
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
+
+        # Versioning Updates
+        self.updated_at = datetime.datetime.now()
+        self.updated_by = session['username']
+
+        if self.id is None:
+            self.snapshot(KardSnapshot.CREATE)
+        else:
+            self.snapshot(KardSnapshot.EDIT, previous=self.last_version)
 
         super(Kard, self).save(*args, **kwargs)
 

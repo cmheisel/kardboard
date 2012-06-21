@@ -197,6 +197,7 @@ def card_edit(key):
         if f.validate():
             f.populate_obj(card)
             card.save()
+
             flash("Card %s successfully edited" % card.key)
             return True   # Redirect
 
