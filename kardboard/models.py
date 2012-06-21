@@ -460,7 +460,8 @@ class Kard(app.db.Document):
     meta = {
         'queryset_class': KardQuerySet,
         'collection': 'kard',
-        'ordering': ['+priority', '-backlog_date']
+        'ordering': ['+priority', '-backlog_date'],
+        'indexes': (('state', 'team'), ('team', 'done_date')),
     }
 
     EXPORT_FIELDNAMES = (
