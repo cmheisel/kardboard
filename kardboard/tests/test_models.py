@@ -812,3 +812,72 @@ class PersonTests(KardboardTestCase):
 
         self.person.test(other_card)
         self.assertEqual(2, len(self.person.tested))
+
+
+class KardSnapshotTestCase(KardboardTestCase):
+    def setUp(self):
+        super(KardSnapshotTestCase, self).setUp()
+
+        self.year = 2011
+        self.month = 8
+        self.day = 15
+        self.test_date = datetime.datetime(year=self.year,
+                                           month=self.month,
+                                           day=self.day)
+        self.card = self.make_card(start_date=self.test_date,
+                                   backlog_date=self.test_date,
+                                   state='Resolved',
+                                   team='FooBar')
+        self._create_snapshots()
+
+    def tearDown(self):
+        super(KardSnapshotTestCase, self).tearDown()
+
+    def _create_snapshots(self):
+        from kardboard.models import KardSnapshot
+        # Original State
+        self.original = KardSnapshot.create(self.card, KardSnapshot.CREATE,
+                                            updated_at=datetime.datetime.now(),
+                                            updated_by='foo')
+
+        # Edited State
+        self.card.title = 'Edited Title'
+        self.card.start_date = datetime.datetime(year=self.year + 1,
+                                                 month=self.month,
+                                                 day=self.day)
+        self.edited = KardSnapshot.create(self.card, KardSnapshot.CREATE,
+                                          updated_at=datetime.datetime.now(),
+                                          updated_by='foo',
+                                          compare=self.original)
+
+    def test_value_string_for_str(self):
+        self.assertEquals(self.card.key,
+                          self.original.value_string(self.card.key))
+        self.assertEquals(self.card.team,
+                          self.original.value_string(self.card.team))
+
+    def test_value_string_for_datetime(self):
+        orig_state = self.original.state
+
+        expected = orig_state['start_date'].strftime("%m/%d/%Y")
+        self.assertEquals(expected, self.original.value_string(orig_state['start_date']))
+        self.assertEquals(expected, self.original.value_string(orig_state['backlog_date']))
+
+    def test_diff_for_original(self):
+        for field, old_new in self.original.diff.items():
+            self.assertEquals(old_new['new'], self.original.state[field])
+            self.assertIsNone(old_new['old'])
+
+    def test_diff_for_edited(self):
+        diff = self.edited.diff
+
+        # Check correct diff capture
+        self.assertNotIn('state', diff)
+        self.assertNotIn('key', diff)
+        self.assertIn('title', diff)
+        self.assertIn('start_date', diff)
+
+        # Check diff values for correctness
+        self.assertEquals(diff['title']['old'], self.original.state['title'])
+        self.assertEquals(diff['title']['new'], self.edited.state['title'])
+        self.assertNotEquals(diff['title']['old'], diff['title']['new'])

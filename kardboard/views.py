@@ -195,10 +195,6 @@ def card_edit(key):
     if request.method == "POST":
         f = _init_card_form(request.form)
         if f.validate():
-            # Check if we need an initial version before tracking changes
-            if len(card.version_history) == 0:
-                card.snapshot('INITIAL')
-
             f.populate_obj(card)
             card.save()
 

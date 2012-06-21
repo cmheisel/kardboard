@@ -25,35 +25,36 @@
 {% endmacro %}
 
 
-{% macro card_diff(version, diff) %}
-    <div class="changelog-entry">
-        <h5>
-            {% if version.action == 'CREATE' %}
-                Created by
-            {% elif version.action == 'UPDATE' %}
-                Updated by
-            {% elif version.action == 'DELETE' %}
-                Deleted by
-            {% elif version.action == 'INITIAL' %}
-                Initial by
-            {% endif %}
-            <a href="{{ url_for('person', name=version.updated_by) }}">{{ version.updated_by }}</a> at {{ none_or_date(version.updated_at) }}
-        </h5>
-        <table>
-            <tr>
-                <th>Field</th>
-                <th>Old Value</th>
-                <th>New Value</th>
-            </tr>
-            {% for name, change in diff.items() %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
-                <td style="width: 20%">{{ name }}</td>
-                <td style="width: 40%">{{ version.field_string(name, change['old']) }}</td>
-                <td style="width: 40%">{{ version.field_string(name, change['new']) }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
+{% macro card_diff(version) %}
+    {% if not version.initial_record %}
+        <div class="changelog-entry">
+            <h5>
+                {{ version.action_verb }} by
+                    
+                {% if version.updated_by is none %}
+                    <i>System</i>
+                {% else %}
+                    <a href="{{ url_for('person', name=version.updated_by) }}">{{ version.updated_by }}</a> 
+                {% endif %}
+                at {{ version.updated_at.strftime("%m/%d/%Y %I:%M %p") }}
+            </h5>
+
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Old Value</th>
+                    <th>New Value</th>
+                </tr>
+                {% for name, diff in version.diff.items() %}
+                <tr class="{{ loop.cycle('odd', 'even') }}">
+                    <td style="width: 20%">{{ name|replace('_', ' ')|capitalize }}</td>
+                    <td style="width: 40%">{{ version.value_string(diff['old']) }}</td>
+                    <td style="width: 40%">{{ version.value_string(diff['new']) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 {% endmacro %}
 
 
@@ -150,19 +151,21 @@
         {% endmarkdown2 %}
         {% endautoescape %}
         {% endif %}
+    {% endif %}
 
+    {% set versions = card.get_version_history() %}
+    {# Don't show initial bookkeeping #}
+    {% if versions|count > 0 and not (versions|count == 1 and versions[0].initial_record) %}
         <h4>Changelog</h4>
-        {% for snapshot, diff in card.get_snapshot_diffs() %}
-            {{ card_diff(snapshot, diff) }}
+        {% for version in versions %}
+            {{ card_diff(version) }}
         {% endfor %}
+    {% endif %}
 
-      {% endif %}
-
-      {{ card_controls(request, card) }}
+    {{ card_controls(request, card) }}
 
 
-      </div>
-
+    </div>
 </div>
 
 {% endblock content %}
