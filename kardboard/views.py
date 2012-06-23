@@ -55,18 +55,12 @@ def team(team_slug=None):
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
-    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
-    days = sum(days)
-
     metrics = [
         {'WIP': len(wip_cards)},
-        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
         {'Done this week': len(done_this_week)},
     ]
-
-    done_cards = Kard.objects.done().filter(team=target_team).order_by('-done_date')
 
     title = "%s cards" % target_team
 
@@ -106,12 +100,8 @@ def state():
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
-    days = [k.current_cycle_time(date) for k in wip_cards if k.current_cycle_time() is not None]
-    days = sum(days)
-
     metrics = [
         {'WIP': len(wip_cards)},
-        {'Days': days},
         {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)},
         {'Done this week': len(done_this_week)},
