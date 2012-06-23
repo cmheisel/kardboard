@@ -2,7 +2,7 @@ import datetime
 
 from dateutil import relativedelta
 
-from kardboard.models import Kard, Person
+from kardboard.models import Kard, Person, Q
 from flask.ext.celery import Celery
 from kardboard.app import app
 from kardboard.util import log_exception
@@ -173,13 +173,7 @@ def _get_person(name, cache):
 
 
 @celery.task(name="tasks.normalize_people", ignore_result=True)
-def normalize_people():
-    """
-    Data migration that sets up the initial set of Person
-    objects. After this is run they'll be created
-    and updated by the actually_update method of
-    a card's ticket helper.
-    """
+def normalize_people(days=7):
     logger = normalize_people.get_logger()
     people_cache = {}
 
@@ -187,7 +181,10 @@ def normalize_people():
         logger.debug("SKIPPING normalize_people because DISABLE_TASK_PEOPLE is True")
         return None
 
-    for k in Kard.objects.all():
+    one_week_ago = datetime.datetime.now() - relativedelta.relativedelta(days=days)
+    kards = Kard.objects.filter(Q(start_date__gte=one_week_ago) | Q(done_date__gte=one_week_ago))
+
+    for k in kards:
         logger.debug("Considering %s" % k.key)
         reporter = k.ticket_system_data.get('reporter', '')
         devs = k.ticket_system_data.get('developers', [])

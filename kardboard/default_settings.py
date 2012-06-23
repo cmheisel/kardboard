@@ -66,9 +66,14 @@ CELERYBEAT_SCHEDULE = {
     # How often should we update all the Person
     # objects to make sure they reflect reality, due to deleted cards
     # or people being removed from a card
-    'update_person': {
+    'update_people_recently': {
         'task': 'tasks.normalize_people',
-        'schedule': crontab(minute="*/4"),
+        'schedule': crontab(minute="*/60"),
+    },
+    'update_people_yearly': {
+        'task': 'tasks.normalize_people',
+        'schedule': crontab(minute=1, hour=1),
+        'args': (365, ),
     },
     # How often (probably nighly) should we update daily records for the past
     # 365 days
@@ -81,12 +86,12 @@ CELERYBEAT_SCHEDULE = {
     # 14 days
     'calc-daily-records-week': {
         'task': 'tasks.queue_daily_record_updates',
-        'schedule': crontab(minute="*/5"),
+        'schedule': crontab(minute="*/15"),
         'args': (14, ),
     },
     # Capture/update the day's flow data
     'update_flow_reports': {
         'task': 'tasks.update_flow_reports',
-        'schedule': crontab(hour="*/4"),
+        'schedule': crontab(minute="*/30"),
     }
 }
