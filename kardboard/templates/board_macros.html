@@ -19,7 +19,7 @@
 
 {% macro card_detail(card, request) -%}
     {% set vs_goal = card.cycle_vs_goal %}
-    <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.service_class|slugify }}" id="card_{{ card.key }}">
+    <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.service_class|slugify }} {% if card.blocked %}card_blocked{% endif %}" id="card_{{ card.key }}">
         <div class="card_key"><span>{{ card.key }}</span>
             {% if card.done_date %}
                 - {{ card.cycle_time }}d
@@ -30,27 +30,31 @@
                 - #{{ card.priority }}
                 {% endif %}
             {% endif %}
+            {% if not card.is_card %}&#9763;{% endif %}
         </div>
 
-        <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a></p>
+        <div class="card_contents">
+        <div class="title">
+            <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a></p>
 
-        {% if card.blocked %}
-        <div class="blocker">
-
-            <p>{{ card.blockers[-1].reason }}</p>
-        </div>
+            {% if card.blocked %}
+            <div class="blocker">
+                <p>{{ card.blockers[-1].reason }}</p>
+            </div>
         {% endif %}
+
+        </div>
+
 
         {% set assignee = card.assignee %}
         <p class="assignee">
             {% set version = card.version %}
             {% if version %}{{ version }} &ndash; {% endif %}
-            {{ card.service_class }}
-            {% if assignee %}<br /><a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}
+            {% if assignee %}<a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}
         </p>
+        </div>
 
     </div>
-    </a>
 {%- endmacro %}
 
 {% macro board(board, request) -%}

@@ -292,8 +292,9 @@ table.board div.card_on_board p.assignee {
 }
 
 .team_page_board table.board {
-    width: 96%;
-    margin: 0 2% 0 2%;
+    width: 100%;
+    padding: 0 10px 10px 10px;
+    margin: 0;
 }
 
 table.board div.card_on_board div.card_key {
@@ -353,13 +354,36 @@ table.board p.title a:hover {
     color: #367000;
 }
 
-.card_type_bug, .card_type_production-bug {
-    background: url("ant.png") bottom left no-repeat;
-    background-size: 25px;
-}
-
 table.leaderboard td {
     width: 25%;
 }
 
 .error { color: red; }
+
+.card_on_board div.title {
+    height: 1em;
+    overflow: hidden;
+}
+
+.card_on_board:hover div.title {
+    height: 100%;
+    overflow: visible;
+}
+
+table.board div.card_blocked {
+    background: #991111 url('/static/stripes.png') bottom left repeat-x;
+}
+
+table.board div.card_blocked div.card_contents {
+    background-color: white;
+    border-radius: 4px;
+}
+
+table.board div.card_blocked:hover {
+    background: transparent;
+}
+
+table.board div.card_blocked:hover div.card_contents {
+    border-radius: 0px;
+    background-color: transparent;
+}
