@@ -221,7 +221,7 @@ class JIRAHelper(TicketHelper):
     def issue_to_dictionary(self, obj):
         idic = {}
         keys = ['summary', 'key', 'reporter', 'assignee', 'description',
-            'status', 'type', 'updated', 'fixVersions']
+            'status', 'type', 'updated', 'fixVersions', 'created']
         for key in keys:
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
@@ -376,6 +376,7 @@ class JIRAHelper(TicketHelper):
         now = datetime.datetime.now()
         self.card._ticket_system_data = issue_dict
         self.card._ticket_system_updated_at = now
+        self.card.created_at = issue_dict['created']
         self.card = self.update_state(self.card)
         if self.card.id:
             self.card.save()

@@ -115,6 +115,8 @@ class DisplayBoard(object):
                     versioned = [c for c in cards if c.priority == None and c._version != None]
                     versioned.sort(key=lambda c: c._version)
                     non_versioned = [c for c in cards if c.priority == None and c._version == None]
+                    non_versioned.sort(key=lambda c: c.created_at)
+                    non_versioned.reverse()
 
                     cards = pri_cards + versioned + non_versioned
                 elif state in self.states.in_progress:

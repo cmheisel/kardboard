@@ -27,6 +27,7 @@ class MockJIRAIssue(Mock):
     status = '6'
     type = '4'
     updated = datetime.datetime(2011, 12, 22, 12, 40, 19)
+    created = datetime.datetime(2011, 12, 20, 10, 00, 27)
     fixVersions = [
         MockFixVersion(
             archived=False,
