@@ -763,6 +763,9 @@ def report_detailed_flow(group="all", months=3, cards_only=False):
 
 @kardboard.util.redirect_to_next_url
 def login():
+    if session.get('username', None) is not None:
+        return True
+
     f = LoginForm(request.form)
 
     if request.method == "POST" and f.validate():
