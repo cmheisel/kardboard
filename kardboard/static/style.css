@@ -3,6 +3,7 @@ body {
     color: #eee;
     font-family: "Helvetica Neue", Helvetica, sans-serif;
     text-align: center;
+    font-size: 1em;
 }
 
 h1 {
@@ -269,20 +270,44 @@ table.board div.card_on_board {
 
 table.board div.card_on_board p {
     color: #333;
-    font-size: 14px;
+    font-size: .8em;
     margin: 0 0 6px 0;
     padding: 0;
 }
 
 table.board div.card_on_board p.assignee {
     text-align: right;
-    font-size: 12px;
+    font-size: .7em;
+    margin: 0;
+    padding: 0;
+}
+
+.overview_board table.board {
+    width: 100%;
+    margin: 0;
+}
+
+.overview_board table.board td {
+    width: 14.3%;
+}
+
+.overview_board .assignee {
+    display: none;
+}
+
+.overview_board .cards_backlog,
+.overview_board .backlog {
+    display: none;
+}
+
+.overview_board table.board td.team,
+.overview_board table.board th.team {
+    width: 5%;
 }
 
 .team_page_board table.board td {
     width: 16.6%;
 }
-
 
 .team_page_board {
     width: 100%;
@@ -298,10 +323,10 @@ table.board div.card_on_board p.assignee {
 }
 
 table.board div.card_on_board div.card_key {
-    font-size: 14px;
+    font-size: .8em;
     text-align: left;
     padding: 0 3px 0 3px;
-    margin: -8px -8px 8px -8px;
+    margin: -8px -8px .3em -8px;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
@@ -360,30 +385,6 @@ table.leaderboard td {
 
 .error { color: red; }
 
-.card_on_board div.title {
-    height: 1em;
-    overflow: hidden;
-}
-
-.card_on_board:hover div.title {
-    height: 100%;
-    overflow: visible;
-}
-
-table.board div.card_blocked {
-    background: #991111 url('/static/stripes.png') bottom left repeat-x;
-}
-
-table.board div.card_blocked div.card_contents {
-    background-color: white;
-    border-radius: 4px;
-}
-
-table.board div.card_blocked:hover {
-    background: transparent;
-}
-
-table.board div.card_blocked:hover div.card_contents {
-    border-radius: 0px;
-    background-color: transparent;
+a.forkme img {
+    position: absolute; top: 0; right: 0; border: 0;
 }

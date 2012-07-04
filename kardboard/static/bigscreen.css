@@ -1,0 +1,46 @@
+body.bigscreen div.nav,
+body.bigscreen #team_report_nav,
+body.bigscreen .auth,
+body.bigscreen a.forkme,
+body.bigscreen h1,
+body.bigscreen .metric {
+    display: none;
+}
+
+body.bigscreen {
+    font-size: .9em;
+}
+
+body.bigscreen .card_on_board div.title,
+.overview_board .card_on_board div.title {
+    height: 1em;
+    overflow: hidden;
+}
+
+body.bigscreen .card_on_board:hover div.title,
+.overview_board .card_on_board:hover div.title {
+    height: 100%;
+    overflow: visible;
+}
+
+body.bigscreen .card_on_board:hover .assignee,
+.overview_board .card_on_board:hover .assignee {
+    display: block;
+}
+
+body.bigscreen table.board div.card_blocked div.card_key {
+    background: #991111 url('/static/stripes.png') bottom left repeat-x;
+    color: white;
+    font-weight: bold;
+}
+
+body.bigscreen table.board div.card_blocked:hover
+.overview_board table.board div.card_blocked:hover {
+    background: transparent;
+}
+
+body.bigscreen table.board div.card_blocked:hover div.card_contents
+.overview_board table.board div.card_blocked:hover div.card_contents {
+    border-radius: 0px;
+    background-color: transparent;
+}

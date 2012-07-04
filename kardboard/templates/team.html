@@ -19,7 +19,7 @@
 {% endif %}
 
 {% if team_slug %}
-    <p class="nav"><strong>How's {{ target_team }} doing?</strong>:
+    <p class="nav" id="team_report_nav"><strong>How's {{ target_team }} doing?</strong>:
     {% for report in report_config %}
         <a href="/reports/{{ team_slug }}/{{ report['slug'] }}/1/">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
     {% endfor %}
@@ -35,13 +35,10 @@
 </p>
 
 
-{% if team_slug %}
-<div class="team_page_board">
-{% endif %}
+
+<div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}">
 {{ board_macros.board(board, request) }}
-{% if board %}
 </div>
-{% endif %}
 
 
 {% endblock content %}

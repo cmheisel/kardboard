@@ -13,6 +13,7 @@
             {{ title }}{% if title != config.get('SITE_NAME') %} | {{ config.get('SITE_NAME') }}{% endif %}
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?{{ version|slugify }}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='bigscreen.css') }}?{{ version|slugify }}" type="text/css">
 
         {% if config.get('LOGGR_KEY', None) %}
             {% set loggr_key = config['LOGGR_KEY'] %}
@@ -21,8 +22,9 @@
             {% set loggr_key = '' %}
         {% endif %}
 
-        <script src="{{ url_for('static', filename='jquery.min.js') }}" type="text/javascript"></script>
-        <script src="{{ url_for('static', filename='highcharts.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='jquery.min.js') }}?{{ version|slugify }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='bigscreen.js') }}?{{ version|slugify }}" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='highcharts.js') }}?{{ version|slugify }}" type="text/javascript"></script>
         {% block extrajs %}
         {% endblock %}
     </head>
@@ -63,8 +65,8 @@
         <p class="updated">Updated at {{ updated_at }}</p>
         <p class="version">kardboard {{ version }}</p>
 
-        <a href="https://github.com/cmheisel/kardboard">
-            <img style="position: absolute; top: 0; right: 0; border: 0;" src="{{ url_for('static', filename='forkme.png') }}" alt="Fork me on GitHub" />
+        <a href="https://github.com/cmheisel/kardboard" class="forkme">
+            <img src="{{ url_for('static', filename='forkme.png') }}" alt="Fork me on GitHub" />
         </a>
 
         {% if config.get('GOOGLE_ANALYTICS', '') %}
