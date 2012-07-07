@@ -1,5 +1,5 @@
 function toggle_bigscreen() {
-    if(screen.width == window.innerWidth && screen.height == window.innerHeight) {
+    if(screen.width == window.outerWidth && screen.height == window.outerHeight) {
         $("body").toggleClass("bigscreen", true);
     }
     else {
