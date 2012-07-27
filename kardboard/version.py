@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-version = "1.5"
+version = "1.5.1"
 
 
 def get_git_version():
