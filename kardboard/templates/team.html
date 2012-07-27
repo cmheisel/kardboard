@@ -37,7 +37,13 @@
 
 
 <div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}">
-{{ board_macros.board(board, request) }}
+
+{% if not team_slug %}
+    {% set repeat_headers = True %}
+{% else %}
+    {% set repeat_headers = False %}
+{% endif %}
+{{ board_macros.board(board, request, repeat_headers) }}
 </div>
 
 

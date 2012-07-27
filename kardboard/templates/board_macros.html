@@ -57,7 +57,7 @@
     </div>
 {%- endmacro %}
 
-{% macro board(board, request) -%}
+{% macro board(board, request, repeat_headers=False) -%}
 <table class="board">
 <tr>
   {% for header in board.headers %}
@@ -78,6 +78,27 @@
 </tr>
 
 {% for row in board %}
+
+{% if repeat_headers and not loop.first %}
+<tr>
+  {% for header in board.headers %}
+    {% if header.get('state', '') not in ('OTIS Verify', 'Done') %}
+    <th class="{{ header.get('state', header.get('label', ''))|slugify }}">
+        {% if header.get('label') %}
+            {{ header.label }}
+        {% elif header.get('state', '') in ('Build to OTIS', 'Prodward Bound') %}
+            {{ header.state }}
+        {% else %}
+            {{ header.state }}
+        {% endif %}
+
+    </th>
+    {% endif %}
+  {% endfor %}
+</tr>
+{% endif %}
+
+
 <tr>
 {% for cell in row %}
     {% if cell.get('label') %}
@@ -89,7 +110,7 @@
         {% endfor %}
         {% if cell.get('state', '') in ('Build to OTIS', 'Prodward Bound') %}
             {% for card in row[loop.index0+1]['cards'] %}
-                {% if loop.first and cell['cards']|length > 0 %}
+                {% if loop.first %}
                     <div class="split_cell_header">
                         {{ card.state }}
                     </div>
