@@ -394,8 +394,9 @@ hr {
 }
 
 table.board div.split_cell_header {
-    margin: 0 0 1em 0;
-    width: 100%;
+    margin: 0 -3px 1em -3px;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
     background-color: #92CC47;
     font-weight: bold;
 }
