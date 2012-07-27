@@ -82,7 +82,7 @@
 {% if repeat_headers and not loop.first %}
 <tr>
   {% for header in board.headers %}
-    {% if header.get('state', '') not in ('OTIS Verify', 'Done') %}
+    {% if header.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
     <th class="{{ header.get('state', header.get('label', ''))|slugify }}">
         {% if header.get('label') %}
             {{ header.label }}
