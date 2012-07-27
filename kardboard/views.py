@@ -3,6 +3,7 @@ import cStringIO
 import datetime
 import importlib
 import os
+from collections import namedtuple
 
 from dateutil import relativedelta
 from flask import (
@@ -65,6 +66,7 @@ def team(team_slug=None):
     title = "%s cards" % target_team
 
     report_config = (
+        {'slug': 'assignee', 'name': 'Assignee breakdown'},
         {'slug': 'cycle', 'name': 'Cycle time'},
         {'slug': 'classes', 'name': 'Throughput'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
@@ -605,6 +607,40 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
 
     return render_template('report-cycle.html', **context)
 
+def report_assignee(group="all"):
+
+    states_of_interest = [ s for s in states if s not in (states.backlog, states.done)]
+    # ReportGroup of WIP
+    rg = ReportGroup(group, Kard.objects.filter(state__in=states_of_interest))
+
+    distro = {}
+    for k in rg.queryset.all():
+        assignee = k._assignee or "Unassigned"
+        distro.setdefault(assignee, 0)
+        distro[assignee] += 1
+
+    total = 0
+    total = float(sum(distro.values()))
+
+    distro = distro.items()
+    distro.sort(key=lambda x: x[1])
+    distro.reverse()
+
+    percentages = [ (x[0], (x[1] / total)) for x in distro ]
+    percentages = [ (x[0], round(x[1], 2)) for x in percentages ]
+
+    chart = {}
+    chart['data'] = percentages
+
+    context = {
+        'data': distro,
+        'chart': chart,
+        'total': total,
+        'title': "Assignee breakdown",
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+    return render_template('report-assignee.html', **context)
 
 def report_cycle_distribution(group="all", months=3):
     ranges = (
@@ -845,6 +881,7 @@ app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
 app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/classes/<int:months>/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)
 app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/reports/<group>/leaderboard/<int:start_year>-<int:start_month>/<int:months>/', 'report_leaderboard', report_leaderboard)

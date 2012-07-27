@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block extrajs %}
+{{ super() }}
+{% autoescape false %}
+<script type="text/javascript">
+$(function () {
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+
+            chart: {
+                renderTo: 'container',
+                type: 'line'
+            },
+
+            title: {
+                text: '{{ title }}'
+            },
+
+            tooltip: {
+                formatter: function() {
+                    cards = (this.percentage * {{ total }}) / 100
+                    return ''+
+                        this.point.name +': '+ cards.toFixed(0) + " cards";
+                }
+            },
+
+           plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function() {
+                            cards = (this.percentage * {{ total }}) / 100
+                            return '<b>'+ this.point.name +':</b> ' + cards.toFixed(0);
+                        }
+                    }
+                }
+            },
+
+            series: [{
+                type: 'pie',
+                name: '{{ title }}',
+                data: {{ chart['data']|jsonencode }}
+            }]
+        });
+    });
+});</script>
+{% endautoescape %}
+{% endblock extrajs %}
+
+{% block content %}
+
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
+<div id="wip_data">
+{% if error %}
+    <h3>{{ error }}</h3>
+{% else %}
+<table>
+    <tr>
+    	<th>Assignee</th>
+    	<th># of cards</th>
+    </tr>
+
+    {% for row in data %}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+    	<td>{{ row[0] }}</td>
+    	<td>{{ row[1] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+</div>
+{% endblock content %}
