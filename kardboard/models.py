@@ -508,7 +508,7 @@ class Kard(app.db.Document):
 
         return True
 
-    def save(self, *args, **kwargs):
+    def _set_dates(self):
         self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)
         self.start_date = self._convert_dates_to_datetimes(self.start_date)
         self.done_date = self._convert_dates_to_datetimes(self.done_date)
@@ -516,16 +516,20 @@ class Kard(app.db.Document):
         if not self.created_at:
             self.created_at = now()
 
+    def _assignee_state_changes(self):
+        assignee_rules = app.config.get('STATE_ASSIGNEE_RULES', {}).get(self.state, {})
+        target_state = assignee_rules.get(self._assignee, None)
+        if target_state:
+            self.state = target_state
+
+    def _state_changes(self):
         # Auto move to done
         if self.done_date:
             states = States()
             self.in_progress = False
             self.state = states.done
 
-        # Auto fill in final cycle and lead time
-        if self.done_date and self.start_date:
-            self._cycle_time = self.cycle_time
-            self._lead_time = self.lead_time
+        self._assignee_state_changes()
 
         if self.blocked:
             # Do we have a state change?
@@ -539,6 +543,18 @@ class Kard(app.db.Document):
                 #Card isn't saved can't find its previous state
                 pass
 
+    def _set_cycle_lead_times(self):
+        # Auto fill in final cycle and lead time
+        if self.done_date and self.start_date:
+            self._cycle_time = self.cycle_time
+            self._lead_time = self.lead_time
+
+
+    def save(self, *args, **kwargs):
+        self._set_dates()
+
+        self._set_cycle_lead_times()
+
         self._service_class = self.ticket_system.service_class or app.config.get('DEFAULT_CLASS', '')
         if self._service_class:
             self._service_class = self._service_class.strip()
@@ -546,6 +562,8 @@ class Kard(app.db.Document):
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
+
+        self._state_changes()
 
         super(Kard, self).save(*args, **kwargs)
 
