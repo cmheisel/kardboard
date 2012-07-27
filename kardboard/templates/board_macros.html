@@ -88,8 +88,12 @@
                 {{ card_detail(card, request) }}
         {% endfor %}
         {% if cell.get('state', '') in ('Build to OTIS', 'Prodward Bound') %}
-            {% if cell['cards']|length > 0 %}<hr />{% endif %}
             {% for card in row[loop.index0+1]['cards'] %}
+                {% if loop.first and cell['cards']|length > 0 %}
+                    <div class="split_cell_header">
+                        {{ card.state }}
+                    </div>
+                {% endif %}
                     {{ card_detail(card, request) }}
             {% endfor %}
         {% endif %}

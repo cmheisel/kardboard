@@ -119,7 +119,7 @@ table tr.even {
     background-color: #fff;
 }
 
-table td, table th  {
+table td, table th {
     margin: 0;
     padding: 3px;
 }
@@ -387,4 +387,15 @@ table.leaderboard td {
 
 a.forkme img {
     position: absolute; top: 0; right: 0; border: 0;
+}
+
+hr {
+    border: .25em solid #006890;
+}
+
+table.board div.split_cell_header {
+    margin: 0 0 1em 0;
+    width: 100%;
+    background-color: #92CC47;
+    font-weight: bold;
 }
