@@ -642,7 +642,10 @@ def report_assignee(group="all"):
     }
     return render_template('report-assignee.html', **context)
 
-def report_cycle_distribution(group="all", months=3):
+def report_defect_cycle_distribution(group="all", months=3):
+    return report_cycle_distribution(group, months, defects_only=True)
+
+def report_cycle_distribution(group="all", months=3, defects_only=False):
     ranges = (
         (0, 4, "Less than 5 days"),
         (5, 10, "5-10 days"),
@@ -664,6 +667,10 @@ def report_cycle_distribution(group="all", months=3):
     }
 
     query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
+    if defects_only:
+        query = query & Q(_service_class__in=app.config.get('DEFECT_CLASSES', []))
+    else:
+        query = query & Q(_service_class__nin=app.config.get('DEFECT_CLASSES', []))
     rg = ReportGroup(group, Kard.objects.filter(query))
 
     total = rg.queryset.count()
@@ -678,6 +685,10 @@ def report_cycle_distribution(group="all", months=3):
         lower, upper, label = row
         query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
             Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
+        if defects_only:
+            query = query & Q(_service_class__in=app.config.get('DEFECT_CLASSES', []))
+        else:
+            query = query & Q(_service_class__nin=app.config.get('DEFECT_CLASSES', []))
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
         pct = round(pct, 2)
         distro.append((label, pct))
@@ -689,9 +700,18 @@ def report_cycle_distribution(group="all", months=3):
         'data': distro,
         'chart': chart,
         'title': "How quick can we do it?",
+        'months': months,
+        'total': total,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
+    if defects_only:
+        context['title'] = "Defects: %s" % (context['title'])
+        context['card_type'] = 'defects'
+    else:
+        context['title'] = "Cards: %s" % (context['title'])
+        context['card_type'] = 'cards'
+
     return render_template('report-cycle-distro.html', **context)
 
 
@@ -871,6 +891,8 @@ app.add_url_rule('/reports/<group>/cycle/<int:months>/', 'report_cycle', report_
 app.add_url_rule('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle', report_cycle)
 app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_cycle_distribution', report_cycle_distribution)
 app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/defects/', 'report_defect_cycle_distribution', report_defect_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/defects/<int:months>/', 'report_defect_cycle_distribution', report_defect_cycle_distribution)
 app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
