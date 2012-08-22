@@ -32,22 +32,20 @@ def redirect_to_next_url(fn):
     """
     @functools.wraps(fn)
     def _wrapped_view_fn(*args, **kwargs):
-        from flask import session, redirect, request
-        if not session.get('next_url'):
-            next_url = request.args.get('next', '/')
-            session['next_url'] = next_url
-
         # Call the decorated function
         retval = fn(*args, **kwargs)
 
         if retval == True:
-            next_url = session.get('next_url', '/')
-            if 'next_url' in session:
-                del session['next_url']
-            return redirect(next_url)
+            from flask import redirect, request
+            referrer = request.referrer if request.referrer.startswith(request.host_url) else None
 
-        # Must not need the redirect, return the original return value
-        return retval
+            next_url = request.args.get('next', None) or referrer or "/"
+            logging.debug("%s called with %s as NEXT" % (fn.__name__, next_url))
+            return redirect(next_url)
+        else:
+            # Must not need the redirect, return the original return value
+            return retval
+
     return _wrapped_view_fn
 
 

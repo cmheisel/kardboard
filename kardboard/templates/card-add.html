@@ -32,7 +32,7 @@
 {% endmacro %}
 
 {% block content %}
-    <form method="POST" action=".">
+    <form method="POST" action="{{ request.url }}">
     <table id="card_form">
         {% for field in form %}
             {{ with_errors(field) }}
