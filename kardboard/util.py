@@ -37,7 +37,7 @@ def redirect_to_next_url(fn):
 
         if retval == True:
             from flask import redirect, request
-            referrer = request.referrer if request.referrer.startswith(request.host_url) else None
+            referrer = request.referrer if request.referrer and request.referrer.startswith(request.host_url) else None
 
             next_url = request.args.get('next', None) or referrer or "/"
             logging.debug("%s called with %s as NEXT" % (fn.__name__, next_url))
