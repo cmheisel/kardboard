@@ -12,7 +12,7 @@
 
 {% macro card_controls(request, card) %}
       <p class="card_controls">
-           {% set next_url = request.path %}
+           {% set next_url = request.full_path %}
            <a href="{{ url_for('team', team_slug=card.team|slugify) }}#card_{{ card.key }}">{{ card.team }}</a> /
            <a href="{{ card.ticket_system.get_ticket_url() }}">JIRA</a> /
             <a href="{{ url_for('card_edit', key=card.key, next=next_url) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key, next=next_url) }}">Delete</a> /

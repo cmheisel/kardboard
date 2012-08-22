@@ -32,7 +32,7 @@
         {% if config.get('TICKET_AUTH', False) %}
             <p class="auth nav">
                 {% if 'username' in session %}
-                    Hi {{ session['username'] }}! | <a href="{{ url_for('logout', next=request.url) }}">Logout</a>
+                    Hi {{ session['username'] }}! | <a href="{{ url_for('logout', next=request.full_path) }}">Logout</a>
                     {% if loggr_key %}
                     <script type="text/javascript">
                         var username = "{{ session['username'] }}";
@@ -41,7 +41,7 @@
                     </script>
                     {% endif %}
                 {% else %}
-                    <a href="{{ url_for('login', next=request.url) }}">Login</a>
+                    <a href="{{ url_for('login', next=request.full_path) }}">Login</a>
                 {% endif %}
             </p>
         {% endif %}
