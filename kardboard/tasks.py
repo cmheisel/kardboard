@@ -92,16 +92,14 @@ def queue_updates():
     old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
     statsd_conn  = app.statsd.get_client('tasks.queue_updates')
-    new_counter = statsd_conn.get_client('new', statsd.Counter)
-    old_counter = statsd_conn.get_client('old', statsd.Counter)
-    done_counter = statsd_conn.get_client('done', statsd.Counter)
+    gauge = statsd_conn.get_client(class_=statsd.Gauge)
 
     [update_ticket.delay(k.id) for k in new_cards]
-    new_counter = len(new_cards)
-    [update_ticket.delay(k.id) for k in old_cards.limit(150)]
-    old_counter = len(old_cards.limit(150))
-    [update_ticket.delay(k.id) for k in old_done_cards.limit(50)]
-    done_counter = len(old_done_cards.limit(50))
+    gauge.send('new', len(new_cards))
+    [update_ticket.delay(k.id) for k in old_cards]
+    gauge.send('old', len(old_cards))
+    [update_ticket.delay(k.id) for k in old_done_cards.limit(75)]
+    gauge.send('done', len(old_done_cards.limit(75)))
 
     logger.info(
         "Queued updates -- NEW: %s EXISTING: %s DONE: %s" % (
