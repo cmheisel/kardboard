@@ -1,6 +1,7 @@
 import os
 
 import path
+import statsd
 
 from flask import Flask
 from flaskext.cache import Cache
@@ -55,6 +56,15 @@ def get_app():
         app._exceptional = exceptional
 
     app.wsgi_app = FixGunicorn(app.wsgi_app)
+
+    statsd_conf = app.config.get('STATSD_CONF', {})
+
+    statsd_connection = statsd.Connection(
+        host=statsd_conf.get('host', '127.0.0.1'),
+        port=statsd_conf.get('port', 8125),
+        sample_rate=statsd_conf.get('sample_rate', 1),
+    )
+    app.statsd = statsd.Client('kardboard', statsd_connection)
 
     return app
 
