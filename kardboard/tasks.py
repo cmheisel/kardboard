@@ -28,8 +28,8 @@ def update_ticket(card_id):
     update_counter = statsd_conn.get_client('update', class_=statsd.Counter)
     error_counter = statsd_conn.get_client('error', class_=statsd.Counter)
 
-    total_timer = statsd_conn.get_client('total', class_=statsd.Timer)
-    total_timer.start()
+    timer = statsd_conn.get_client(class_=statsd.Timer)
+    timer.start()
 
     consider_counter += 1
 
@@ -73,10 +73,7 @@ def update_ticket(card_id):
             logger.info("update_ticket running for %s" % (k.key, ))
             try:
                 update_counter += 1
-                update_timer = statsd_conn.get_client('update', class_=statsd.Timer)
-                update_timer.start()
                 k.ticket_system.actually_update()
-                update_timer.stop()
             except AttributeError:
                 error_counter += 1
                 logger.warning('Updating kard: %s and we got an AttributeError' % k.key)
@@ -91,7 +88,7 @@ def update_ticket(card_id):
         message = "update_ticket: Couldn't update ticket %s from ticket system" % (card_id, )
         log_exception(e, message)
 
-    total_timer.stop()
+    timer.stop()
 
 
 @celery.task(name="tasks.queue_updates", ignore_result=True)

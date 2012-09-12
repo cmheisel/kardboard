@@ -2,6 +2,8 @@ import urlparse
 import datetime
 import cPickle as pickle
 
+import statsd
+
 from kardboard.app import cache
 from kardboard.app import app
 from kardboard.util import ImproperlyConfigured, log_exception
@@ -119,6 +121,8 @@ class JIRAHelper(TicketHelper):
         super(JIRAHelper, self).__init__(config, kard)
         self.logger = app.logger
         self.testing = app.config.get('TESTING')
+        self.statsd = app.statsd.get_client('tickethelpers.JIRAHelper')
+
         self.issues = {}
         self._service = None
 
@@ -349,6 +353,12 @@ class JIRAHelper(TicketHelper):
         return card
 
     def actually_update(self, issue=None):
+        statsd_conn = self.statsd.get_client('actually_update')
+        counter = statsd_conn.get_client(class_=statsd.Counter)
+        timer = statsd_conn.get_client(class_=statsd.Timer)
+        timer.start()
+        counter += 1
+
         super(JIRAHelper, self).update()
 
         if not issue:
@@ -385,6 +395,7 @@ class JIRAHelper(TicketHelper):
             self.logger.info(
                 "%s updated at %s" % (self.card.key,
                     self.card._ticket_system_updated_at))
+        timer.stop()
 
     def get_ticket_url(self, key=None):
         key = key or self.card.key
