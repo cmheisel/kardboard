@@ -23,6 +23,16 @@ def force_update_ticket(card_id):
 def update_ticket(card_id):
     from kardboard.app import app
 
+    statsd_conn = app.statsd.get_client('tasks.update_ticket')
+    consider_counter = statsd_conn.get_client('consider', class_=statsd.Counter)
+    update_counter = statsd_conn.get_client('update', class_=statsd.Counter)
+    error_counter = statsd_conn.get_client('error', class_=statsd.Counter)
+
+    total_timer = statsd_conn.get_client('total', class_=statsd.Timer)
+    total_timer.start()
+
+    consider_counter += 1
+
     logger = update_ticket.get_logger()
     try:
         # We want to update cards if their local update time
@@ -62,17 +72,26 @@ def update_ticket(card_id):
         if should_update:
             logger.info("update_ticket running for %s" % (k.key, ))
             try:
+                update_counter += 1
+                update_timer = statsd_conn.get_client('update', class_=statsd.Timer)
+                update_timer.start()
                 k.ticket_system.actually_update()
+                update_timer.stop()
             except AttributeError:
+                error_counter += 1
                 logger.warning('Updating kard: %s and we got an AttributeError' % k.key)
                 raise
 
     except Kard.DoesNotExist:
+        error_counter += 1
         logger.error(
             "update_ticket: Kard with id %s does not exist" % (card_id, ))
     except Exception, e:
+        error_counter += 1
         message = "update_ticket: Couldn't update ticket %s from ticket system" % (card_id, )
         log_exception(e, message)
+
+    total_timer.stop()
 
 
 @celery.task(name="tasks.queue_updates", ignore_result=True)
@@ -219,6 +238,13 @@ def normalize_people(days=7):
 def jira_add_team_cards(team, filter_id):
     from kardboard.tickethelpers import JIRAHelper
     from kardboard.models import States
+    from kardboard.app import app
+
+    statsd_conn = app.statsd.get_client('tasks.jira_add_team_cards')
+
+    counter = statsd_conn.get_client(class_=statsd.Counter)
+    total_timer = statsd_conn.get_client(class_=statsd.Timer)
+    total_timer.start()
 
     logger = jira_add_team_cards.get_logger()
     logger.info("JIRA BACKLOG SYNC %s: %s" % (team, filter_id))
@@ -241,7 +267,9 @@ def jira_add_team_cards(team, filter_id):
             c = Kard(**defaults)
             c.ticket_system.actually_update(issue)
             c.save()
+            counter += 1
 
+    total_timer.stop()
 
 @celery.task(name="tasks.jira_queue_team_cards", ignore_result=True)
 def jira_queue_team_cards():
