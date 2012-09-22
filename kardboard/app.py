@@ -1,4 +1,5 @@
 import os
+import socket
 
 import path
 import statsd
@@ -17,7 +18,6 @@ from kardboard.util import (
     newrelic_foot,
     FixGunicorn
 )
-
 
 def get_app():
     app = Flask('kardboard')
@@ -64,7 +64,11 @@ def get_app():
         port=statsd_conf.get('port', 8125),
         sample_rate=statsd_conf.get('sample_rate', 1),
     )
-    app.statsd = statsd.Client('kardboard', statsd_connection)
+
+    machine_name = socket.getfqdn().split('.')[0]
+    environment_name = app.config.get('ENV_MAPPING', {}).get(machine_name, 'default')
+    prefix_name = '%s.%s.kardboard' % (environment_name, machine_name)
+    app.statsd = statsd.Client(prefix_name, statsd_connection)
 
     return app
 
