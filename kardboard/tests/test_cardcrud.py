@@ -234,6 +234,27 @@ class CardCRUDTests(KardboardTestCase):
         self.assertEqual(11, k.backlog_date.day)
         self.assertEqual(1911, k.backlog_date.year)
 
+    def test_edit_card_and_redirects(self):
+        klass = self._get_target_class()
+
+        card = klass(**self.required_data)
+        card.backlog_date = datetime.datetime.now()
+        card.save()
+
+        target_url = "/card/%s/edit/?next=%%2Fcard%%2F%s%%2F" % (card.key, card.key)
+
+        res = self.app.get(target_url)
+        action_url = 'action="http://localhost%s"' % target_url
+        self.assertIn(action_url, res.data)
+
+        res = self.app.post(target_url,
+            data=self.required_data)
+
+        k = klass.objects.get(key=self.required_data['key'])
+        self.assertEqual(302, res.status_code)
+        self.assertEqual('http://localhost/card/%s/' % card.key, res.location)
+
+
     def test_delete_card(self):
         klass = self._get_target_class()
 
