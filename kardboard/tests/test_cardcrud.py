@@ -244,7 +244,7 @@ class CardCRUDTests(KardboardTestCase):
         target_url = "/card/%s/edit/?next=%%2Fcard%%2F%s%%2F" % (card.key, card.key)
 
         res = self.app.get(target_url)
-        action_url = 'action="http://localhost%s"' % target_url
+        action_url = 'action="%s"' % target_url
         self.assertIn(action_url, res.data)
 
         res = self.app.post(target_url,

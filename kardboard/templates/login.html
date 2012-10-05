@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% import "form_macros.html" as form_macros %}
+
 {% macro with_errors(field) %}
     {% if field.errors %}
         <tr class="form_row form_row_error">
@@ -32,7 +34,7 @@
 {% endmacro %}
 
 {% block content %}
-    <form method="POST" action="{{ request.url }}">
+    <form method="POST" action="{{ form_macros.form_url(request) }}">
     <table id="card_form">
         {% if 'auth_failure' in form.errors %}
         <tr>
