@@ -6,10 +6,10 @@ import statsd
 
 from flask import Flask
 from flaskext.cache import Cache
+from flask.ext.mongoengine import MongoEngine
 from jinja2 import ModuleLoader
 
 from kardboard.util import (
-    PortAwareMongoEngine,
     slugify,
     timesince,
     jsonencode,
@@ -27,7 +27,7 @@ def get_app():
 
     app.secret_key = app.config['SECRET_KEY']
 
-    app.db = PortAwareMongoEngine(app)
+    app.db = MongoEngine(app)
 
     app.jinja_env.add_extension('kardboard.util.Markdown2Extension')
     app.jinja_env.filters['slugify'] = slugify

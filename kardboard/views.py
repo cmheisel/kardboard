@@ -451,7 +451,7 @@ def report_service_class(group="all", months=3, start=None):
     months_ranges = month_ranges(start, months)
     rg = ReportGroup(group, Kard.objects)
     rg_cards = rg.queryset
-    classes = rg_cards.distinct('service_class')
+    classes = list(rg_cards.distinct('_service_class'))
     classes.sort()
 
     datatable = {

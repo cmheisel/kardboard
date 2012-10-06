@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from kardboard.app import app
 
 from mongoengine.queryset import Q
-from flaskext.mongoengine import QuerySet
+from flask.ext.mongoengine import QuerySet
 
 from kardboard.models.blocker import BlockerRecord
 from kardboard.models.states import States
@@ -162,7 +162,7 @@ class Kard(app.db.Document):
         'queryset_class': KardQuerySet,
         'collection': 'kard',
         'ordering': ['+priority', '-backlog_date'],
-        'indexes': (('state', 'team'), ('team', 'done_date')),
+        'indexes': [('state', 'team'), ('team', 'done_date')],
     }
 
     EXPORT_FIELDNAMES = (
