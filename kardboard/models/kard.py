@@ -4,7 +4,7 @@ import math
 
 from dateutil.relativedelta import relativedelta
 
-from kardboard.app import app, cache
+from kardboard.app import app
 
 from mongoengine.queryset import Q
 from flask.ext.mongoengine import QuerySet
@@ -216,25 +216,17 @@ class Kard(app.db.Document):
             self.created_at = now()
 
     @property
-    def state_cache_key(self):
-        return "state_%s" % (self.id, )
-
-    def _get_old_state(self):
-        old_state = cache.get(self.state_cache_key)
-        if old_state is None:
-            try:
-                k = Kard.objects.only('state').get(key=self.key, )
-                old_state = k.state
-                cache.set(self.state_cache_key, old_state)
-            except Kard.DoesNotExist:
-                pass
+    def old_state(self):
+        try:
+            k = Kard.objects.only('state').get(key=self.key, )
+            old_state = k.state
+        except Kard.DoesNotExist:
+            old_state = None
         return old_state
 
     @property
     def state_changing(self):
-        old_state = self._get_old_state()
-
-        if old_state != self.state:
+        if self.old_state != self.state:
             return True
         else:
             return False
@@ -279,7 +271,6 @@ class Kard(app.db.Document):
         self.key = self.key.upper()
 
         self._auto_state_changes()
-
         super(Kard, self).save(*args, **kwargs)
 
     @classmethod

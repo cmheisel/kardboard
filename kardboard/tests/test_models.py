@@ -344,6 +344,23 @@ class KardTests(KardTestCase):
         k.state = "Todo"
         self.assertEqual(False, k.state_changing)
 
+    def test_old_state(self):
+        k = self._make_one(state="Todo")
+        self.assertEqual(None, k.old_state)
+        k.save()
+
+        k.state = "Doing"
+        self.assertEqual("Todo", k.old_state)
+        k.save()
+
+        k.state = "Done"
+        self.assertEqual("Doing", k.old_state)
+        k.save()
+
+        self.assertEqual("Done", k.old_state)
+        k.save()
+        self.assertEqual("Done", k.old_state)
+
     def test_created_at(self):
         now = datetime.datetime.now()
         k = self._make_one()
