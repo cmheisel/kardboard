@@ -245,7 +245,7 @@ class Kard(app.db.Document):
         if target_state:
             self.state = target_state
 
-    def _state_changes(self):
+    def _auto_state_changes(self):
         # Auto move to done
         if self.done_date:
             states = States()
@@ -278,7 +278,7 @@ class Kard(app.db.Document):
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
 
-        self._state_changes()
+        self._auto_state_changes()
 
         super(Kard, self).save(*args, **kwargs)
 
