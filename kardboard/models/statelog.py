@@ -32,3 +32,9 @@ class StateLog(app.db.Document):
         hours = round(hours)
 
         return hours
+
+    def save(self, *args, **kwargs):
+        if self.entered and self.exited:
+            self._duration = self.duration
+
+        super(StateLog, self).save(*args, **kwargs)

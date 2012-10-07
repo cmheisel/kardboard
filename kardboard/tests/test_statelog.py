@@ -11,6 +11,14 @@ class StatelogTests(KardboardTestCase):
         self.cards = [self.make_card() for i in xrange(0, 5)]
         [card.save() for card in self.cards]
 
+        entered = self.now() - relativedelta(days=2)
+        state = self.states[0]
+        sl = self._make_one(
+            entered=entered,
+            state=state,
+        )
+        self.sl = sl
+
     def _get_target_class(self):
         from kardboard.models.statelog import StateLog
         return StateLog
@@ -29,12 +37,16 @@ class StatelogTests(KardboardTestCase):
         sl.save()
         assert sl.id
 
-    def test_state_duration(self):
-        entered = self.now() - relativedelta(days=2)
-        state = self.states[0]
-        sl = self._make_one(
-            entered=entered,
-            state=state,
-        )
+    def test_state_duration_calc(self):
         expected = 48
-        self.assertEqual(expected, sl.duration)
+        self.assertEqual(expected, self.sl.duration)
+
+    def test_state_duration_non_storage(self):
+        expected = None
+        self.assertEqual(expected, self.sl._duration)
+
+    def test_state_duration_storage(self):
+        self.sl.exited = self.now()
+        self.sl.save()
+        expected = 48
+        self.assertEqual(expected, self.sl._duration)
