@@ -1,5 +1,8 @@
+from mongoengine import signals
+
 from kardboard.app import app
 from kardboard.util import now, delta_in_hours
+from kardboard.models.kard import Kard
 
 
 class StateLog(app.db.Document):
@@ -18,6 +21,56 @@ class StateLog(app.db.Document):
     _duration = app.db.IntField(required=False)
     # The duration the card was in this state
 
+    created_at = app.db.DateTimeField(required=True)
+    updated_at = app.db.DateTimeField(required=True)
+
+    meta = {'cascade': False}
+
+    def save(self, *args, **kwargs):
+        if self.id is None:
+            self.created_at = now()
+        if self.entered and self.exited:
+            self._duration = self.duration
+        self.updated_at = now()
+        super(StateLog, self).save(*args, **kwargs)
+
+    def __repr__(self):
+        return "<StateLog: %s, %s, %s -- %s, %s hours>" % (
+            self.card.key,
+            self.state,
+            self.entered,
+            self.exited,
+            self._duration
+            )
+
+    @classmethod
+    def kard_pre_save(cls, sender, document, **kwargs):
+        observed_card = document
+
+        if observed_card.state_changing is False:
+            # No need to worry about logging it, nothing's changing!
+            return None
+
+        # If you're here it's because the observed_card's state is changing
+        if observed_card.old_state is not None:
+            try:
+                slo = cls.objects.get(card=observed_card, state=observed_card.old_state)
+                slo.exited = now()
+                slo.save()  #  Close the old state log
+            except cls.DoesNotExist:
+                #  For some reason we didn't record the old state, this should only happen when first rolled out
+                pass
+
+    @classmethod
+    def kard_post_save(cls, sender, document, **kwargs):
+        observed_card = document
+
+        # This could be a freshly created card, so create a log for it
+        sl, created = cls.objects.get_or_create(auto_save=False, card=observed_card, state=observed_card.state)
+        if created:
+            sl.entered = now()
+            sl.save()
+
     @property
     def duration(self):
         if self._duration is not None:
@@ -30,8 +83,5 @@ class StateLog(app.db.Document):
         delta = exited - self.entered
         return delta_in_hours(delta)
 
-    def save(self, *args, **kwargs):
-        if self.entered and self.exited:
-            self._duration = self.duration
-
-        super(StateLog, self).save(*args, **kwargs)
+signals.pre_save.connect(StateLog.kard_pre_save, sender=Kard)
+signals.post_save.connect(StateLog.kard_post_save, sender=Kard)
