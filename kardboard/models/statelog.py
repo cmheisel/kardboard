@@ -1,5 +1,5 @@
 from kardboard.app import app
-from kardboard.util import now
+from kardboard.util import now, delta_in_hours
 
 
 class StateLog(app.db.Document):
@@ -28,10 +28,7 @@ class StateLog(app.db.Document):
         else:
             exited = now()
         delta = exited - self.entered
-        hours = (delta.total_seconds() / 60.0) / 60.0
-        hours = round(hours)
-
-        return hours
+        return delta_in_hours(delta)
 
     def save(self, *args, **kwargs):
         if self.entered and self.exited:
