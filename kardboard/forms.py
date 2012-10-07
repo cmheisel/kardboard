@@ -1,7 +1,12 @@
-
-#import datetime
-
-from wtforms import Form, TextField, SelectField, IntegerField, PasswordField, validators, ValidationError
+from wtforms import (
+    Form,
+    TextField,
+    SelectField,
+    IntegerField,
+    PasswordField,
+    validators,
+    ValidationError
+)
 from wtforms.ext.dateutil.fields import DateField
 
 from kardboard.models import Kard, States
@@ -63,19 +68,19 @@ TEAM_CHOICES = (
 
 class CardForm(Form):
     key = TextField(u'JIRA Key',
-        validators=[validators.required()])
+                    validators=[validators.required()])
     title = TextField(u'Card title',
-        validators=[validators.required()])
+                      validators=[validators.required()])
     team = SelectField(u'Team', choices=TEAM_CHOICES,
-        validators=[validators.required()])
+                       validators=[validators.required()])
     state = SelectField(u'State', choices=STATE_CHOICES,
-        validators=[validators.required()])
+                        validators=[validators.required()])
     backlog_date = DateField(u'Backlog date', display_format="%m/%d/%Y",
-        validators=[validators.required()])
+                             validators=[validators.required()])
     start_date = DateField(u'Start date', display_format="%m/%d/%Y",
-        validators=[start_date_validator, ])
+                           validators=[start_date_validator, ])
     done_date = DateField(u'Done date', display_format="%m/%d/%Y",
-        validators=[done_date_validator, ])
+                          validators=[done_date_validator, ])
     priority = IntegerField(u'Ordering', validators=[validators.optional()])
 
     def populate_obj(self, obj):
@@ -86,14 +91,14 @@ class CardForm(Form):
 
 class CardBlockForm(Form):
     reason = TextField(u'Reason',
-        validators=[validators.required()])
+                       validators=[validators.required()])
     blocked_at = DateField(u'Blocked starting', display_format="%m/%d/%Y",
-        validators=[validators.required()])
+                           validators=[validators.required()])
 
 
 class CardUnblockForm(Form):
     unblocked_at = DateField(u'Unblocked date', display_format="%m/%d/%Y",
-        validators=[validators.required()])
+                             validators=[validators.required()])
 
 
 def get_card_form(new=False):
@@ -107,6 +112,6 @@ def get_card_form(new=False):
 
 class LoginForm(Form):
     username = TextField(u'Username',
-        validators=[validators.required()])
+                         validators=[validators.required()])
     password = PasswordField(u'Password',
-        validators=[validators.required()])
+                             validators=[validators.required()])
