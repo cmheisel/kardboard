@@ -18,6 +18,7 @@ class KardboardTestCase(unittest2.TestCase):
         default_settings.TEMPLATE_DEBUG = True
         from kardboard.views import app
         from flask.ext.mongoengine import MongoEngine
+        from kardboard.util import now
 
         app.config.from_object('kardboard.default_settings')
         app.config['MONGODB_DB'] = 'kardboard-unittest'
@@ -34,6 +35,7 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.used_keys = []
         self._setup_logging()
+        self.now = now
 
         super(KardboardTestCase, self).setUp()
 
