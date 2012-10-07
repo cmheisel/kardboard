@@ -252,7 +252,7 @@ class CardCRUDTests(KardboardTestCase):
 
         k = klass.objects.get(key=self.required_data['key'])
         self.assertEqual(302, res.status_code)
-        self.assertEqual('http://localhost/card/%s/' % card.key, res.location)
+        self.assertEqual('http://localhost/card/%s/' % k.key, res.location)
 
 
     def test_delete_card(self):
