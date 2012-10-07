@@ -142,6 +142,11 @@ class KardboardTestCase(unittest2.TestCase):
         p = self._get_person_class()(**fields)
         return p
 
+    def assertEqualDateTimes(self, expected, actual):
+        expected = (expected.year, expected.month, expected.day, expected.hour, expected.minute)
+        actual = (actual.year, actual.month, actual.day, actual.hour, actual.minute)
+        self.assertEqual(expected, actual)
+
 
 class DashboardTestCase(KardboardTestCase):
     def setUp(self):
