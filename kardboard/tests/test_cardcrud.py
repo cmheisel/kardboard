@@ -64,6 +64,7 @@ class CardUnblockTests(KardboardTestCase):
         self.blocked_at = datetime.datetime(
             2011, 6, 12)
         self.card = self.make_card()
+        self.card.save()
         self.card.block("Foo", self.blocked_at)
         self.card.save()
         self.required_data = {

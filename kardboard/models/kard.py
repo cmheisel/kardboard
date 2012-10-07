@@ -4,7 +4,7 @@ import math
 
 from dateutil.relativedelta import relativedelta
 
-from kardboard.app import app
+from kardboard.app import app, cache
 
 from mongoengine.queryset import Q
 from flask.ext.mongoengine import QuerySet
@@ -215,6 +215,30 @@ class Kard(app.db.Document):
         if not self.created_at:
             self.created_at = now()
 
+    @property
+    def state_cache_key(self):
+        return "state_%s" % (self.id, )
+
+    def _get_old_state(self):
+        old_state = cache.get(self.state_cache_key)
+        if old_state is None:
+            try:
+                k = Kard.objects.only('state').get(key=self.key, )
+                old_state = k.state
+                cache.set(self.state_cache_key, old_state)
+            except Kard.DoesNotExist:
+                pass
+        return old_state
+
+    @property
+    def state_changing(self):
+        old_state = self._get_old_state()
+
+        if old_state != self.state:
+            return True
+        else:
+            return False
+
     def _assignee_state_changes(self):
         assignee_rules = app.config.get('STATE_ASSIGNEE_RULES', {}).get(self.state, {})
         target_state = assignee_rules.get(self._assignee, None)
@@ -232,22 +256,14 @@ class Kard(app.db.Document):
 
         if self.blocked:
             # Do we have a state change?
-            try:
-                k = Kard.objects.only('state').get(key=self.key, )
-                if k.state != self.state:
-                    # Houston we have a state change
-                    # Card is blocked and it's state is about to change
-                    self.unblock()
-            except Kard.DoesNotExist:
-                #Card isn't saved can't find its previous state
-                pass
+            if self.state_changing:
+                self.unblock()
 
     def _set_cycle_lead_times(self):
         # Auto fill in final cycle and lead time
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
-
 
     def save(self, *args, **kwargs):
         self._set_dates()
