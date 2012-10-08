@@ -304,18 +304,9 @@ class JIRAHelper(TicketHelper):
         return None
 
     def id_devs(self, issue):
-        backend_developer_id = 10210
-        ui_devs_id = 10211
+        developer_id = 10210
         custom_fields = issue.customFieldValues
-        be_devs = self._get_custom_field_values(backend_developer_id, custom_fields)
-        ui_devs = self._get_custom_field_values(ui_devs_id, custom_fields)
-
-        devs = []
-        if be_devs:
-            devs = devs + be_devs
-        if ui_devs:
-            devs = devs + ui_devs
-
+        devs = self._get_custom_field_values(developer_id, custom_fields) or []
         return list(set(devs))
 
     def id_testers(self, issue):

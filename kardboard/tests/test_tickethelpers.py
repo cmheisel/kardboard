@@ -85,4 +85,4 @@ class JIRAHelperTests(KardboardTestCase):
 
         k = self.card
         devs = k.ticket_system.id_devs(MockJIRAIssueWithOnlyUIDevs())
-        assert len(devs) > 0
+        assert len(devs) == 0
