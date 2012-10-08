@@ -475,3 +475,7 @@ class Kard(app.db.Document):
             return {}
         else:
             return self._ticket_system_data
+
+    @property
+    def assignee(self):
+        return self._assignee

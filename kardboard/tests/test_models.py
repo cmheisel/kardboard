@@ -324,6 +324,13 @@ class KardTestCase(KardboardTestCase):
 
 
 class KardTests(KardTestCase):
+    def test_assignee(self):
+        k = self._make_one(_assignee="cheisel")
+        self.assertEqual('cheisel', k.assignee)
+
+        k = self._make_one()
+        self.assertEqual(None, k.assignee)
+
     def test_created_at(self):
         now = datetime.datetime.now()
         k = self._make_one()
