@@ -64,6 +64,7 @@ class CardUnblockTests(KardboardTestCase):
         self.blocked_at = datetime.datetime(
             2011, 6, 12)
         self.card = self.make_card()
+        self.card.save()
         self.card.block("Foo", self.blocked_at)
         self.card.save()
         self.required_data = {
@@ -252,7 +253,7 @@ class CardCRUDTests(KardboardTestCase):
 
         k = klass.objects.get(key=self.required_data['key'])
         self.assertEqual(302, res.status_code)
-        self.assertEqual('http://localhost/card/%s/' % card.key, res.location)
+        self.assertEqual('http://localhost/card/%s/' % k.key, res.location)
 
 
     def test_delete_card(self):

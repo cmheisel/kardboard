@@ -8,3 +8,4 @@ from kardboard.models.states import States
 from kardboard.models.boards import DisplayBoard
 from kardboard.models.personcardset import PersonCardSet
 from kardboard.models.flowreport import FlowReport
+from kardboard.models.statelog import StateLog

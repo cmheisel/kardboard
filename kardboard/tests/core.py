@@ -18,6 +18,7 @@ class KardboardTestCase(unittest2.TestCase):
         default_settings.TEMPLATE_DEBUG = True
         from kardboard.views import app
         from flask.ext.mongoengine import MongoEngine
+        from kardboard.util import now
 
         app.config.from_object('kardboard.default_settings')
         app.config['MONGODB_DB'] = 'kardboard-unittest'
@@ -34,6 +35,7 @@ class KardboardTestCase(unittest2.TestCase):
 
         self.used_keys = []
         self._setup_logging()
+        self.now = now
 
         super(KardboardTestCase, self).setUp()
 
@@ -139,6 +141,11 @@ class KardboardTestCase(unittest2.TestCase):
         fields.update(**kwargs)
         p = self._get_person_class()(**fields)
         return p
+
+    def assertEqualDateTimes(self, expected, actual):
+        expected = (expected.year, expected.month, expected.day, expected.hour, expected.minute)
+        actual = (actual.year, actual.month, actual.day, actual.hour, actual.minute)
+        self.assertEqual(expected, actual)
 
 
 class DashboardTestCase(KardboardTestCase):

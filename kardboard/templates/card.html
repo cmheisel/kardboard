@@ -2,11 +2,35 @@
 
 {% block title %}{{ card.key }}{% endblock title %}
 
-{% macro none_or_date(field) %}
+{% macro blank_or_date(field) %}
     {% if field %}
         {{ field.strftime("%m/%d/%Y") }}
     {% else %}
-        None
+
+    {% endif %}
+{% endmacro %}
+
+{% macro blank_or_datetime(field) %}
+    {% if field %}
+        {{ field.strftime("%m/%d/%Y %I:%M %p") }}
+    {% else %}
+
+    {% endif %}
+{% endmacro %}
+
+{% macro blank_or_value(field) %}
+    {% if field %}
+        {{ field.strftime("%m/%d/%Y %I:%M %p") }}
+    {% else %}
+
+    {% endif %}
+{% endmacro %}
+
+{% macro hours_to_days(hours) %}
+    {% if hours < 24 %}
+        {{ hours|int }}h
+    {% else %}
+        {{ hours/24.0 }}d
     {% endif %}
 {% endmacro %}
 
@@ -40,34 +64,80 @@
       {{ card_controls(request, card) }}
 
       <h3>{{ card.ticket_system_data.get('summary', card.title) }}</h2>
-      <ul>
-        <li>
-            <strong>Cycle time:</strong>
-            {% if card.done_date %}
-                {{ card.cycle_time }}
-            {% else %}
-                {{ card.current_cycle_time() }}
-            {% endif %}
-        </li>
-        <li><strong>State:</strong> {{ card.state }}</li>
-        <li><strong>Backlog date:</strong> {{ none_or_date(card.backlog_date) }}</li>
-        <li><strong>Start date:</strong> {{ none_or_date(card.start_date) }}</li>
-        <li><strong>Done date:</strong> {{ none_or_date(card.done_date) }}</li>
-        <li><strong>Team:</strong> {{ card.team }}</li>
-      </ul>
 
-      {% if card.blocked_ever %}
-      <h4>Blocked history</h4>
-      <ul>
-      {% for blocker in card.blockers %}
-      <li>{{ none_or_date(blocker.blocked_at) }} - {{ none_or_date(blocker.unblocked_at) }}<br />
-      {{ blocker.reason }}</li>
-      {% endfor %}
-      </ul>
-      {% endif %}
+        <table>
+            <tr>
+                <th>Cycle time</th>
+                <th>Lead time</th>
+                <th>Backlogged</th>
+                <th>Started</th>
+                <th>Done</th>
+            </tr>
+            <tr>
+                <td>
+                    {% if card.done_date %}
+                        {{ card.cycle_time }}
+                    {% else %}
+                        {{ card.current_cycle_time() }}
+                    {% endif %}
+                </td>
+                <td>
+                    {{ card.lead_time }}
+                </td>
+                <td>
+                    {{ blank_or_date(card.backlogged_date) }}
+                </td>
+                <td>
+                    {{ blank_or_date(card.start_date) }}
+                </td>
+                <td>
+                    {{ blank_or_date(card.done_date) }}
+                </td>
+            </tr>
+        </table>
+
+
+        <table id="card-state-history">
+            <caption>History</caption>
+            <tr>
+                <th>State</th>
+                <th>Duration</th>
+                <th>Entered</th>
+                <th>Exited</th>
+            </tr>
+            {% for log in card_log %}
+            <tr>
+                <td>{{ log.state }}</td>
+                <td>{{ hours_to_days(log.duration) }}</td>
+                <td>{{ blank_or_datetime(log.entered) }}</td>
+                <td>{{ blank_or_datetime(log.exited) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+
+        {% if card.blocked_ever %}
+        <table>
+            <caption>Blockers</caption>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Reason</th>
+            </tr>
+
+            {% for blocker in card.blockers %}
+            <tr>
+                <td>{{ blank_or_date(blocker.blocked_at) }}</td>
+                <td>{{ blank_or_date(blocker.unblocked_at) }}</td>
+                <td>{{ blocker.reason }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
 
       {% if card.ticket_system_data %}
-      <h4>Ticket information</h4>
+      <h4>JIRA information</h4>
       <ul>
 
         {% set assignee = card.ticket_system_data.get('assignee', '') %}
@@ -108,16 +178,6 @@
                 {{ status_label }}
         </li>
         </ul>
-
-        {% if card.ticket_system_data.get('description') %}
-        <h4>Description</h4>
-        {% autoescape false %}
-        {% markdown2 %}
-        {{ card.ticket_system_data.get('description')|urlize(nofollow=True) }}
-        {% endmarkdown2 %}
-        {% endautoescape %}
-        {% endif %}
-
 
       {% endif %}
 

@@ -37,8 +37,6 @@ class DetailPageTests(DashboardTestCase):
             self.card.title,
             self.card.key,
             self.card.backlog_date.strftime("%m/%d/%Y"),
-            "Start date:",
-            "Done date:",
             "/card/%s/edit/" % self.card.key,
             "/card/%s/delete/" % self.card.key,
         ]

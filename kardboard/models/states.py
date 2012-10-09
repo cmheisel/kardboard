@@ -55,6 +55,9 @@ class States(object):
     def __str__(self):
         return str(self.states)
 
+    def __getitem__(self,key):
+        return self.states[key]
+
     def index(self, *args, **kwargs):
         return self.states.index(*args, **kwargs)
 

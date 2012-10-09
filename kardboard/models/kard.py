@@ -215,13 +215,29 @@ class Kard(app.db.Document):
         if not self.created_at:
             self.created_at = now()
 
+    @property
+    def old_state(self):
+        try:
+            k = Kard.objects.only('state').get(key=self.key, )
+            old_state = k.state
+        except Kard.DoesNotExist:
+            old_state = None
+        return old_state
+
+    @property
+    def state_changing(self):
+        if self.old_state != self.state:
+            return True
+        else:
+            return False
+
     def _assignee_state_changes(self):
         assignee_rules = app.config.get('STATE_ASSIGNEE_RULES', {}).get(self.state, {})
         target_state = assignee_rules.get(self._assignee, None)
         if target_state:
             self.state = target_state
 
-    def _state_changes(self):
+    def _auto_state_changes(self):
         # Auto move to done
         if self.done_date:
             states = States()
@@ -232,22 +248,14 @@ class Kard(app.db.Document):
 
         if self.blocked:
             # Do we have a state change?
-            try:
-                k = Kard.objects.only('state').get(key=self.key, )
-                if k.state != self.state:
-                    # Houston we have a state change
-                    # Card is blocked and it's state is about to change
-                    self.unblock()
-            except Kard.DoesNotExist:
-                #Card isn't saved can't find its previous state
-                pass
+            if self.state_changing:
+                self.unblock()
 
     def _set_cycle_lead_times(self):
         # Auto fill in final cycle and lead time
         if self.done_date and self.start_date:
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
-
 
     def save(self, *args, **kwargs):
         self._set_dates()
@@ -262,8 +270,7 @@ class Kard(app.db.Document):
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
 
-        self._state_changes()
-
+        self._auto_state_changes()
         super(Kard, self).save(*args, **kwargs)
 
     @classmethod

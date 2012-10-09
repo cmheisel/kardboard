@@ -14,6 +14,18 @@ from werkzeug.contrib.cache import RedisCache
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
+def delta_in_hours(delta):
+    try:
+        seconds = delta.total_seconds()
+    except AttributeError:
+        # We're in pythont 2.6
+        seconds = delta.seconds
+        days = delta.days
+        seconds = seconds + (days * 24 * 60 * 60)
+
+    hours = (seconds / 60.0) / 60.0
+    hours = round(hours)
+    return hours
 
 class ImproperlyConfigured(Exception):
     pass
@@ -32,7 +44,7 @@ def redirect_to_next_url(fn):
         # Call the decorated function
         retval = fn(*args, **kwargs)
 
-        if retval == True:
+        if retval is True:
             from flask import redirect, request
             referrer = request.referrer if request.referrer and request.referrer.startswith(request.host_url) else None
 
