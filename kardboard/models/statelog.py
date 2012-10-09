@@ -9,7 +9,8 @@ class StateLog(app.db.Document):
     card = app.db.ReferenceField(
         'Kard',
         reverse_delete_rule=app.db.CASCADE,
-        required=True
+        required=True,
+        dbref=False,
     )
     # Card that this record is about
     state = app.db.StringField(required=True)
@@ -24,7 +25,10 @@ class StateLog(app.db.Document):
     created_at = app.db.DateTimeField(required=True)
     updated_at = app.db.DateTimeField(required=True)
 
-    meta = {'cascade': False}
+    meta = {
+        'cascade': False,
+        'ordering': ['-created_at'],
+    }
 
     def save(self, *args, **kwargs):
         if self.id is None:
@@ -50,6 +54,15 @@ class StateLog(app.db.Document):
         if observed_card.state_changing is False:
             # No need to worry about logging it, nothing's changing!
             return None
+
+        try:
+            observed_card.old_state
+        except AttributeError:
+            print observed_card
+            print type(observed_card)
+            print dir(observed_card)
+            print 'old_state' in dir(observed_card)
+            raise
 
         # If you're here it's because the observed_card's state is changing
         if observed_card.old_state is not None:

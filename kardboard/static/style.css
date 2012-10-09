@@ -400,3 +400,13 @@ table.board div.split_cell_header {
     background-color: #92CC47;
     font-weight: bold;
 }
+
+.card_detail table {
+    width: 94%;
+    margin: 0 3% 2em 3%;
+    padding: 0;
+}
+
+.card_detail caption {
+    color: #000;
+}
