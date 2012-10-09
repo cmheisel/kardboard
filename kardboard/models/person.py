@@ -8,17 +8,17 @@ class Person(app.db.Document):
     """A unique string that identifies the person"""
 
     reported = app.db.ListField(
-        app.db.ReferenceField('Kard'),
+        app.db.ReferenceField('Kard', dbref=False),
         required=False)
     """The list of cards the person was responsible for reporting."""
 
     developed = app.db.ListField(
-        app.db.ReferenceField('Kard'),
+        app.db.ReferenceField('Kard', dbref=False),
         required=False)
     """The list of cards the person was responsible for developing."""
 
     tested = app.db.ListField(
-        app.db.ReferenceField('Kard'),
+        app.db.ReferenceField('Kard', dbref=False),
         required=False)
     """The list of cards the person was responsible for testing."""
 
