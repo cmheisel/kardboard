@@ -3,7 +3,6 @@ import cStringIO
 import datetime
 import importlib
 import os
-from collections import namedtuple
 
 from dateutil import relativedelta
 from flask import (
@@ -21,7 +20,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -31,9 +30,6 @@ from kardboard.util import (
     month_ranges,
     log_exception,
 )
-
-states = States()
-
 
 def team(team_slug=None):
     date = datetime.datetime.now()
@@ -126,6 +122,7 @@ def _init_new_card_form(*args, **kwargs):
 
 
 def _init_card_form(*args, **kwargs):
+    states = States()
     new = kwargs.get('new', False)
     if new:
         del kwargs['new']
@@ -209,9 +206,12 @@ def card(key):
     except Kard.DoesNotExist:
         abort(404)
 
+    card_log = StateLog.objects.filter(card=card)
+
     context = {
         'title': "%s -- %s" % (card.key, card.title),
         'card': card,
+        'card_log': card_log,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
@@ -608,7 +608,7 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
     return render_template('report-cycle.html', **context)
 
 def report_assignee(group="all"):
-
+    states = States()
     states_of_interest = [ s for s in states if s not in (states.backlog, states.done)]
     # ReportGroup of WIP
     rg = ReportGroup(group, Kard.objects.filter(state__in=states_of_interest))
