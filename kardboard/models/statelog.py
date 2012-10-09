@@ -28,6 +28,7 @@ class StateLog(app.db.Document):
     meta = {
         'cascade': False,
         'ordering': ['-created_at'],
+        'indexes': ['card', 'state', ['card', 'created_at']]
     }
 
     def save(self, *args, **kwargs):
