@@ -410,3 +410,7 @@ table.board div.split_cell_header {
 .card_detail caption {
     color: #000;
 }
+
+#card-state-history {
+    display: none;
+}
