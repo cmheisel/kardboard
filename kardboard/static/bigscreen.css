@@ -16,21 +16,15 @@ body.bigscreen {
     font-size: .9em;
 }
 
-body.bigscreen .card_on_board div.title,
-.overview_board .card_on_board div.title {
-    height: 1em;
-    overflow: hidden;
+body.bigscreen .card_on_board p.title {
+    margin: 0;
 }
 
-body.bigscreen .card_on_board:hover div.title,
-.overview_board .card_on_board:hover div.title {
-    height: 100%;
-    overflow: visible;
-}
 
-body.bigscreen .card_on_board:hover .assignee,
-.overview_board .card_on_board:hover .assignee {
+body.bigscreen .card_on_board .assignee,
+body.bigscreen .overview_board .card_on_board .assignee {
     display: block;
+    margin: 0;
 }
 
 body.bigscreen table.board div.card_blocked div.card_key {
