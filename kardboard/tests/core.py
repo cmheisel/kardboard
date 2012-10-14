@@ -20,14 +20,17 @@ class KardboardTestCase(unittest2.TestCase):
         from flask.ext.mongoengine import MongoEngine
         from kardboard.util import now
 
+        delattr(app, 'db')
+        from mongoengine.connection import connect, disconnect
+        disconnect()
+
         app.config.from_object('kardboard.default_settings')
-        app.config['MONGODB_DB'] = 'kardboard-unittest'
+        app.config['MONGODB_DB'] = 'kardboard_unittest'
         app.config['DEBUG'] = True
         app.config['TESTING'] = True
         app.config['CELERY_ALWAYS_EAGER'] = True
+        connect(app.config['MONGODB_DB'])
         app.db = MongoEngine(app)
-
-        self._flush_db()
 
         self.config = app.config
         self.app = app.test_client()
@@ -42,7 +45,7 @@ class KardboardTestCase(unittest2.TestCase):
     def tearDown(self):
         if hasattr(self.config, 'TICKET_HELPER'):
             del self.config['TICKET_HELPER']
-
+        self._flush_db()
         self.flask_app.logger.handlers = self._old_logging_handlers
 
     def _setup_logging(self):

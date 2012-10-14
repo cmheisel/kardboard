@@ -46,6 +46,12 @@ class KardQuerySet(QuerySet):
 
         return the_sum / float(count)
 
+    def distinct(self, field_str):
+        if field_str == "_service_class":
+            field_str = "service_class"
+            return self._cursor.distinct(field_str)
+        return super(KardQuerySet, self).distinct(field_str)
+
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
         """
         The moving average of cycle time for every day in the last N weeks.
@@ -162,7 +168,8 @@ class Kard(app.db.Document):
         'queryset_class': KardQuerySet,
         'collection': 'kard',
         'ordering': ['+priority', '-backlog_date'],
-        'indexes': [('state', 'team'), ('team', 'done_date')],
+        'auto_create_index': True,
+        'indexes': [('state', 'team'), ('team', 'done_date'), '_service_class', '_cycle_time', '_lead_time'],
     }
 
     EXPORT_FIELDNAMES = (
