@@ -8,6 +8,7 @@ from flask import Flask
 from flaskext.cache import Cache
 from flask.ext.mongoengine import MongoEngine
 from jinja2 import ModuleLoader
+from flask_debugtoolbar import DebugToolbarExtension
 
 from kardboard.util import (
     slugify,
@@ -74,3 +75,4 @@ def get_app():
 
 app = get_app()
 cache = Cache(app)
+toolbar = DebugToolbarExtension(app)

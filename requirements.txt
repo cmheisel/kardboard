@@ -1,6 +1,7 @@
 -i https://simple.crate.io/
 Flask==0.8
 Flask-WTF==0.5.2
+Flask-DebugToolbar==0.7.1
 Jinja2==2.5.5
 WTForms==1.0.1
 Werkzeug==0.7
