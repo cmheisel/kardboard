@@ -64,7 +64,7 @@ class KardQuerySet(QuerySet):
         qs = self.done().filter(
             done_date__lte=end_date,
             done_date__gte=start_date,
-            )
+        )
 
         try:
             average = qs.average('_cycle_time')
@@ -88,7 +88,7 @@ class KardQuerySet(QuerySet):
         qs = self.done().filter(
             done_date__lte=end_date,
             done_date__gte=start_date,
-            )
+        )
 
         average = qs.average('_lead_time')
         if math.isnan(average):
@@ -208,7 +208,7 @@ class Kard(app.db.Document):
             unblocked_at = datetime.datetime.now()
         self.blocked = False
 
-        open_blockers = [b for b in self.blockers if b.unblocked_at == None]
+        open_blockers = [b for b in self.blockers if b.unblocked_at is None]
         for b in open_blockers:
             b.unblocked_at = unblocked_at
 
@@ -392,8 +392,20 @@ class Kard(app.db.Document):
             return None
 
         if not today:
-            today = datetime.datetime.now()
+            today = now()
         return business_days_between(self.start_date, today)
+
+    def current_lead_time(self, today=None):
+        """
+        Caclucation of the number of days between the backlogging of a card
+        and a comparison point (defaults to today).
+        """
+        if not self.backlog_date:
+            return None
+
+        if not today:
+            today = now()
+        return business_days_between(self.backlog_date, today)
 
     @property
     def cycle_goal(self):

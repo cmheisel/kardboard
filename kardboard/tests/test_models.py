@@ -408,7 +408,7 @@ class KardTests(KardTestCase):
         self.assertEquals(30, self.done_card.lead_time)
         self.assertEquals(30, self.done_card._lead_time)
 
-    def test_wip_cycle_time(self):
+    def test_current_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
 
         self.assertEquals(None, self.wip_card.cycle_time)
@@ -420,6 +420,19 @@ class KardTests(KardTestCase):
         actual = self.wip_card.current_cycle_time(
                 today=today)
         self.assertEquals(25, actual)
+
+    def test_current_lead_time(self):
+        today = datetime.datetime(year=2011, month=6, day=12)
+
+        self.assertEquals(None, self.wip_card.cycle_time)
+        self.assertEquals(None, self.wip_card._cycle_time)
+
+        self.assertEquals(None, self.wip_card.lead_time)
+        self.assertEquals(None, self.wip_card._lead_time)
+
+        actual = self.wip_card.current_lead_time(
+                today=today)
+        self.assertEquals(30, actual)
 
     def test_elabo_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)

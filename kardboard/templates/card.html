@@ -82,10 +82,14 @@
                     {% endif %}
                 </td>
                 <td>
-                    {{ card.lead_time }}
+                    {% if card.done_date %}
+                        {{ card.lead_time }}
+                    {% else %}
+                        {{ card.current_lead_time() }}
+                    {% endif %}
                 </td>
                 <td>
-                    {{ blank_or_date(card.backlogged_date) }}
+                    {{ blank_or_date(card.backlog_date) }}
                 </td>
                 <td>
                     {{ blank_or_date(card.start_date) }}
