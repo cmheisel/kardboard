@@ -30,7 +30,7 @@
     {% if hours < 24 %}
         {{ hours|int }}h
     {% else %}
-        {{ hours/24.0 }}d
+        {{ "%.1f"|format(hours/24.0) }}d
     {% endif %}
 {% endmacro %}
 
