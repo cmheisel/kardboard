@@ -47,9 +47,6 @@ class KardQuerySet(QuerySet):
         return the_sum / float(count)
 
     def distinct(self, field_str):
-        if field_str == "_service_class":
-            field_str = "service_class"
-            return self._cursor.distinct(field_str)
         return super(KardQuerySet, self).distinct(field_str)
 
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
@@ -157,7 +154,8 @@ class Kard(app.db.Document):
 
     created_at = app.db.DateTimeField(required=True)
 
-    _service_class = app.db.StringField(required=True, db_field="service_class")
+    _service_class = app.db.StringField(required=False, db_field="service_class")
+    _type = app.db.StringField(required=False)
     _assignee = app.db.StringField(db_field="assignee")
     _version = app.db.StringField(required=False, db_field="version")
 
@@ -169,7 +167,7 @@ class Kard(app.db.Document):
         'collection': 'kard',
         'ordering': ['+priority', '-backlog_date'],
         'auto_create_index': True,
-        'indexes': [('state', 'team'), ('team', 'done_date'), '_service_class', '_cycle_time', '_lead_time'],
+        'indexes': [('state', 'team'), ('team', 'done_date'), 'team', '_type', '_service_class', '_cycle_time', '_lead_time'],
     }
 
     EXPORT_FIELDNAMES = (
@@ -269,9 +267,9 @@ class Kard(app.db.Document):
 
         self._set_cycle_lead_times()
 
-        self._service_class = self.ticket_system.service_class or app.config.get('DEFAULT_CLASS', '')
-        if self._service_class:
-            self._service_class = self._service_class.strip()
+        self._type = self.ticket_system.type or app.config.get('DEFAULT_TYPE', '')
+        if self._type:
+            self._type = self._type.strip()
         self._version = self.ticket_system.get_version()
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
@@ -287,10 +285,10 @@ class Kard(app.db.Document):
             update_flow_reports.apply_async(expires=15 * 60)
 
     @property
-    def service_class(self):
-        # Fill in the service_class from the ticket helper if
+    def type(self):
+        # Fill in the type from the ticket helper if
         # there is one, and if not the config'd default
-        return self._service_class or app.config.get('DEFAULT_CLASS', '')
+        return self._type or app.config.get('DEFAULT_TYPE', '')
 
     @classmethod
     def in_progress(klass, date=None):
@@ -430,8 +428,8 @@ class Kard(app.db.Document):
 
     @property
     def is_card(self):
-        defect_classes = app.config.get('DEFECT_CLASSES', [])
-        if self.service_class in defect_classes:
+        defect_types = app.config.get('DEFECT_TYPES', [])
+        if self.type in defect_types:
             return False
         return True
 

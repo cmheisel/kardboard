@@ -30,7 +30,7 @@ REPORT_GROUPS = {
     'team-2': (('Team 2',), 'Team 2'),
 }
 
-DEFAULT_CLASS = "Card"
+DEFAULT_TYPE = "Card"
 
 BROKER_TRANSPORT = "redis"
 BROKER_HOST = "localhost"  # Maps to redis host.

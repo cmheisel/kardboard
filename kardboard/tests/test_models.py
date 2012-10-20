@@ -278,9 +278,9 @@ class KardClassTests(KardboardTestCase):
     def _make_one(self, **kwargs):
         return self.make_card(**kwargs)
 
-    def test_default_class(self):
+    def test_default_type(self):
         card = self._make_one()
-        self.assertEqual(self.config['DEFAULT_CLASS'], card.service_class)
+        self.assertEqual(self.config['DEFAULT_TYPE'], card.type)
 
 
 class KardTestCase(KardboardTestCase):
