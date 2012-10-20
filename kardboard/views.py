@@ -64,7 +64,7 @@ def team(team_slug=None):
     report_config = (
         {'slug': 'assignee', 'name': 'Assignee breakdown'},
         {'slug': 'cycle', 'name': 'Cycle time'},
-        {'slug': 'classes', 'name': 'Throughput'},
+        {'slug': 'types', 'name': 'Throughput'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
         {'slug': 'done', 'name': 'Done'}
     )
@@ -348,7 +348,7 @@ def card_export():
 
 def reports_index():
     report_conf = app.config.get('REPORT_GROUPS', {})
-    with_defects = app.config.get('DEFECT_CLASSES', False)
+    with_defects = app.config.get('DEFECT_TYPES', False)
 
     report_groups = []
     keys = report_conf.keys()
@@ -446,26 +446,26 @@ def report_leaderboard(group="all", months=3, person=None, start_month=None, sta
     return render_template('leaderboard.html', **context)
 
 
-def report_service_class(group="all", months=3, start=None):
+def report_types(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
     rg = ReportGroup(group, Kard.objects)
     rg_cards = rg.queryset
-    classes = list(rg_cards.distinct('_service_class'))
-    classes.sort()
+    types = list(rg_cards.distinct('_type'))
+    types.sort()
 
     datatable = {
-        'headers': ('Month', 'Class', 'Throughput', 'Cycle Time', 'Lead Time'),
+        'headers': ('Month', 'Type', 'Throughput', 'Cycle Time', 'Lead Time'),
         'rows': [],
     }
 
     months = []
     for arange in months_ranges:
-        for cls in classes:
+        for typ in types:
             row = []
             start, end = arange
             filtered_cards = Kard.objects.filter(done_date__gte=start,
-                done_date__lte=end, _service_class=cls)
+                done_date__lte=end, _type=typ)
             rg = ReportGroup(group, filtered_cards)
             cards = rg.queryset
 
@@ -477,7 +477,7 @@ def report_service_class(group="all", months=3, start=None):
                 else:
                     row.append('')
 
-                row.append(cls)
+                row.append(typ)
                 row.append(cards.count())
                 row.append("%d" % cards.average('_cycle_time'))
                 row.append("%d" % cards.average('_lead_time'))
@@ -486,20 +486,20 @@ def report_service_class(group="all", months=3, start=None):
                 datatable['rows'].append(row)
 
     context = {
-        'title': "By service class",
+        'title': "By type",
         'updated_at': datetime.datetime.now(),
         'datatable': datatable,
         'version': VERSION,
     }
 
-    return render_template('report-classes.html', **context)
+    return render_template('report-types.html', **context)
 
 
 def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
-    defect_classes = app.config.get('DEFECT_CLASSES', None)
-    with_defects = defect_classes is not None
+    defect_types = app.config.get('DEFECT_TYPES', None)
+    with_defects = defect_types is not None
 
     month_counts = []
     for arange in months_ranges:
@@ -512,16 +512,10 @@ def report_throughput(group="all", months=3, start=None):
         if with_defects:
             counts = {'card': 0, 'defect': 0}
             for card in cards:
-                if card.service_class.strip() in defect_classes:
+                if card.type.strip() in defect_types:
                     counts['defect'] += 1
-                    print "DEFECT: %s %s" % (card.key, card.service_class)
-                    print counts
-                    print
                 else:
                     counts['card'] += 1
-                    print "CARD: %s %s" % (card.key, card.service_class)
-                    print counts
-                    print
             month_counts.append((start.strftime("%B"), counts))
         else:
             num = cards.count()
@@ -668,9 +662,9 @@ def report_cycle_distribution(group="all", months=3, defects_only=False):
 
     query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
     if defects_only:
-        query = query & Q(_service_class__in=app.config.get('DEFECT_CLASSES', []))
+        query = query & Q(_type__in=app.config.get('DEFECT_TYPES', []))
     else:
-        query = query & Q(_service_class__nin=app.config.get('DEFECT_CLASSES', []))
+        query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
     rg = ReportGroup(group, Kard.objects.filter(query))
 
     total = rg.queryset.count()
@@ -686,9 +680,9 @@ def report_cycle_distribution(group="all", months=3, defects_only=False):
         query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day) & \
             Q(_cycle_time__gte=lower) & Q(_cycle_time__lte=upper)
         if defects_only:
-            query = query & Q(_service_class__in=app.config.get('DEFECT_CLASSES', []))
+            query = query & Q(_type__in=app.config.get('DEFECT_TYPES', []))
         else:
-            query = query & Q(_service_class__nin=app.config.get('DEFECT_CLASSES', []))
+            query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
         pct = round(pct, 2)
         distro.append((label, pct))
@@ -904,8 +898,8 @@ app.add_url_rule('/reports/<group>/flow/detail/cards/', 'report_detailed_flow_ca
 app.add_url_rule('/reports/<group>/flow/detail/cards/<int:months>/', 'report_detailed_flow_cards', report_detailed_flow_cards)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
-app.add_url_rule('/reports/<group>/classes/', 'report_service_class', report_service_class)
-app.add_url_rule('/reports/<group>/classes/<int:months>/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/types/', 'report_types', report_types)
+app.add_url_rule('/reports/<group>/types/<int:months>/', 'report_types', report_types)
 app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)
 app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)

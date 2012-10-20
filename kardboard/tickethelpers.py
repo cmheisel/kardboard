@@ -49,13 +49,13 @@ class TicketHelper(object):
         pass
 
     @property
-    def service_class(self):
-        return self.get_service_class()
+    def type(self):
+        return self.get_type()
 
-    def get_service_class(self):
+    def get_type(self):
         """
-        Method called to extract, if any, the service class from the upstream ticket system.
-        For example: Bug, Feature, Expedite, etc.
+        Method called to extract, if any, the ticket type from the upstream ticket system.
+        For example: Bug, Feature, Improvement, etc.
         """
         pass
 
@@ -214,13 +214,13 @@ class JIRAHelper(TicketHelper):
                 raise
         return version
 
-    def get_service_class(self, key=None):
-        service_class = None
+    def get_type(self, key=None):
+        ticket_type = None
         if not self.card._ticket_system_data:
             self.card.ticket_system.update(sync=True)
-        service_class = self.card._ticket_system_data.get('type', {}).get('name', '')
-        service_class.strip()
-        return service_class
+        ticket_type = self.card._ticket_system_data.get('type', {}).get('name', '')
+        ticket_type.strip()
+        return ticket_type
 
     def issue_to_dictionary(self, obj):
         idic = {}
@@ -269,7 +269,7 @@ class JIRAHelper(TicketHelper):
                 the_types = pickle.loads(the_types)
             except pickle.UnpicklingError:
                 the_types = None
-        if the_types == None:
+        if the_types is None:
             self.logger.warn("Cache miss for %s" % key)
             the_types = self.service.getIssueTypes()
             the_types = [self.object_to_dict(t) for t in the_types]
@@ -281,7 +281,7 @@ class JIRAHelper(TicketHelper):
         try:
             return the_type[0]
         except IndexError:
-            type_help = ["%s -- %s" % (t['id'], t['name']) \
+            type_help = ["%s -- %s" % (t['id'], t['name'])
                 for t in the_types]
             self.logger.warn("Couldn't find type_id: %s in %s" %
                 (type_id, type_help))

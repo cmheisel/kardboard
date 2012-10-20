@@ -13,8 +13,8 @@ class PersonCardSet(object):
         return self.cards.union(self.defects)
 
     def add_card(self, card):
-        defect_classes = app.config.get('DEFECT_CLASSES', ())
-        if card.service_class in defect_classes:
+        defect_types = app.config.get('DEFECT_TYPES', ())
+        if card.type in defect_types:
             self.defects.add(card)
         else:
             self.cards.add(card)

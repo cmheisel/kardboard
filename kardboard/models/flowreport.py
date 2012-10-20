@@ -56,7 +56,7 @@ class FlowReport(app.db.Document):
             group_cards = ReportGroup(group, Kard.objects.filter(state=state)).queryset
             r.state_counts[state] = group_cards.count()
 
-            non_defects = [c for c in group_cards.only('_service_class') if c.is_card]
+            non_defects = [c for c in group_cards.only('_type') if c.is_card]
             r.state_card_counts[state] = len(non_defects)
 
         r.save()
