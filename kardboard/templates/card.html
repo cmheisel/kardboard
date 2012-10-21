@@ -72,6 +72,7 @@
                 <th>Backlogged</th>
                 <th>Started</th>
                 <th>Done</th>
+                <th>Due</th>
             </tr>
             <tr>
                 <td>
@@ -96,6 +97,9 @@
                 </td>
                 <td>
                     {{ blank_or_date(card.done_date) }}
+                </td>
+                <td>
+                    {{ blank_or_date(card.due_date ) }}
                 </td>
             </tr>
         </table>

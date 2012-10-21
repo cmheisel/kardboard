@@ -14,6 +14,7 @@ from werkzeug.contrib.cache import RedisCache
 import translitcodec
 from dateutil.relativedelta import relativedelta
 
+
 def delta_in_hours(delta):
     try:
         seconds = delta.total_seconds()
@@ -203,6 +204,47 @@ def timesince(dt, default="just now"):
             return "%d %s ago" % (period, singular if period == 1 else plural)
 
     return default
+
+
+def timeuntil(dt):
+    """
+    Returns string representing "time util" e.g.
+    3 days, 5 hours, etc.
+    """
+    tardis = 'future'
+    now = datetime.datetime.now()
+    if dt < now:
+        tardis = 'past'
+
+    if tardis == 'future':
+        diff = relativedelta(dt, now)
+    elif tardis == 'past':
+        diff = relativedelta(now, dt)
+
+    msg = []
+    if diff.months > 0:
+        msg.append("%s months" % diff.months)
+    if diff.days > 0:
+        msg.append("%s days" % diff.days)
+    if diff.hours > 0 and diff.days <= 0:
+        msg.append("%s hours" % diff.hours)
+    if diff.minutes > 0 and diff.hours <= 0:
+        msg.append("%s minutes" % diff.minutes)
+
+    if len(msg) > 1:
+        msg = ', '.join(msg)
+    elif len(msg) == 1:
+        msg = ''.join(msg)
+
+    if tardis == 'future':
+        msg = "In %s" % msg
+    elif tardis == 'past':
+        msg = "%s ago" % msg
+
+    if msg:
+        return msg
+
+    return dt.strftime("%m/%d/%Y")
 
 
 def jsonencode(data):
