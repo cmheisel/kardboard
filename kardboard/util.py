@@ -2,9 +2,11 @@ import datetime
 import re
 import traceback
 import logging
-from logging.handlers import RotatingFileHandler
 import os
 import functools
+import math
+
+from logging.handlers import RotatingFileHandler
 
 import jinja2.ext
 import markdown2
@@ -12,7 +14,24 @@ import markdown2
 from werkzeug.contrib.cache import RedisCache
 
 import translitcodec
+assert translitcodec
 from dateutil.relativedelta import relativedelta
+
+
+def average(values):
+    """Computes the arithmetic mean of a list of numbers.
+
+    >>> print average([20, 30, 70])
+    40.0
+    """
+    return sum(values, 0.0) / len(values)
+
+
+def standard_deviation(values):
+    avg = average(values)
+    variance = map(lambda x: (x - avg)**2, values)
+    standard_deviation = math.sqrt(average(variance))
+    return standard_deviation
 
 
 def delta_in_hours(delta):

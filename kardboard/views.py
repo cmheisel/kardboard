@@ -29,6 +29,7 @@ from kardboard.util import (
     make_end_date,
     month_ranges,
     log_exception,
+    standard_deviation,
 )
 
 def team(team_slug=None):
@@ -52,10 +53,19 @@ def team(team_slug=None):
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
+    three_months_ago = date - relativedelta.relativedelta(months=3)
+    done_past_three_months = Kard.objects.filter(team=target_team,
+        done_date__exists=True, done_date__gte=three_months_ago)
+    std_dev = standard_deviation([k.cycle_time for k in done_past_three_months])
+    ave_cycle_time = Kard.objects.filter(team=target_team).moving_cycle_time(
+        year=date.year, month=date.month, day=date.day)
+    confidence_cycle = int(round(ave_cycle_time + std_dev + std_dev))
+
+
     metrics = [
         {'WIP': len(wip_cards)},
-        {'Ave. Cycle Time': Kard.objects.filter(team=target_team).moving_cycle_time(
-            year=date.year, month=date.month, day=date.day)},
+        {'Ave. Cycle Time': ave_cycle_time},
+        {'95% confidence level': confidence_cycle},
         {'Done this week': len(done_this_week)},
     ]
 
@@ -98,10 +108,11 @@ def state():
     wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
+    blocked = [k for k in wip_cards if k.blocked]
+
     metrics = [
         {'WIP': len(wip_cards)},
-        {'Ave. Cycle Time': Kard.objects.moving_cycle_time(
-            year=date.year, month=date.month, day=date.day)},
+        {'Blocked': len(blocked)},
         {'Done this week': len(done_this_week)},
     ]
 
@@ -603,7 +614,7 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
 
 def report_assignee(group="all"):
     states = States()
-    states_of_interest = [ s for s in states if s not in (states.backlog, states.done)]
+    states_of_interest = [s for s in states if s not in (states.backlog, states.done)]
     # ReportGroup of WIP
     rg = ReportGroup(group, Kard.objects.filter(state__in=states_of_interest))
 
@@ -620,8 +631,8 @@ def report_assignee(group="all"):
     distro.sort(key=lambda x: x[1])
     distro.reverse()
 
-    percentages = [ (x[0], (x[1] / total)) for x in distro ]
-    percentages = [ (x[0], round(x[1], 2)) for x in percentages ]
+    percentages = [(x[0], (x[1] / total)) for x in distro]
+    percentages = [(x[0], round(x[1], 2)) for x in percentages]
 
     chart = {}
     chart['data'] = percentages
