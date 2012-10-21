@@ -154,6 +154,7 @@ class Kard(app.db.Document):
 
     created_at = app.db.DateTimeField(required=True)
 
+    due_date = app.db.DateTimeField(required=False)
     _service_class = app.db.StringField(required=False, db_field="service_class")
     _type = app.db.StringField(required=False)
     _assignee = app.db.StringField(db_field="assignee")
@@ -165,9 +166,9 @@ class Kard(app.db.Document):
     meta = {
         'queryset_class': KardQuerySet,
         'collection': 'kard',
-        'ordering': ['+priority', '-backlog_date'],
+        'ordering': ['-due_date', '+priority', '-backlog_date'],
         'auto_create_index': True,
-        'indexes': [('state', 'team'), ('team', 'done_date'), 'team', '_type', '_service_class', '_cycle_time', '_lead_time'],
+        'indexes': [('state', 'team'), ('team', 'done_date'), 'team', '_type', '_service_class', '_cycle_time', '_lead_time', 'due_date'],
     }
 
     EXPORT_FIELDNAMES = (
@@ -216,6 +217,7 @@ class Kard(app.db.Document):
         self.backlog_date = self._convert_dates_to_datetimes(self.backlog_date)
         self.start_date = self._convert_dates_to_datetimes(self.start_date)
         self.done_date = self._convert_dates_to_datetimes(self.done_date)
+        self.due_date = self._convert_dates_to_datetimes(self.due_date)
 
         if not self.created_at:
             self.created_at = now()
