@@ -13,6 +13,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from kardboard.util import (
     slugify,
     timesince,
+    timeuntil,
     jsonencode,
     configure_logging,
     newrelic_head,
@@ -33,6 +34,7 @@ def get_app():
     app.jinja_env.add_extension('kardboard.util.Markdown2Extension')
     app.jinja_env.filters['slugify'] = slugify
     app.jinja_env.filters['timesince'] = timesince
+    app.jinja_env.filters['timeuntil'] = timeuntil
     app.jinja_env.filters['jsonencode'] = jsonencode
     app.jinja_env.globals['newrelic_head'] = newrelic_head
     app.jinja_env.globals['newrelic_foot'] = newrelic_foot
