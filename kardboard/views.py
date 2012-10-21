@@ -73,8 +73,8 @@ def team(team_slug=None):
 
     report_config = (
         {'slug': 'assignee', 'name': 'Assignee breakdown'},
-        {'slug': 'cycle', 'name': 'Cycle time'},
-        {'slug': 'types', 'name': 'Throughput'},
+        {'slug': 'cycle/distribution', 'name': 'Cycle time'},
+        {'slug': 'throughput', 'name': 'Throughput'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
         {'slug': 'done', 'name': 'Done'}
     )
