@@ -59,7 +59,11 @@ def team(team_slug=None):
     std_dev = standard_deviation([k.cycle_time for k in done_past_three_months])
     ave_cycle_time = Kard.objects.filter(team=target_team).moving_cycle_time(
         year=date.year, month=date.month, day=date.day)
-    confidence_cycle = int(round(ave_cycle_time + std_dev + std_dev))
+    confidence_cycle = round(ave_cycle_time + std_dev + std_dev)
+    try:
+        confidence_cycle = int(confidence_cycle)
+    except ValueError:
+        pass
 
 
     metrics = [

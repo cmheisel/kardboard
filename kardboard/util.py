@@ -24,6 +24,8 @@ def average(values):
     >>> print average([20, 30, 70])
     40.0
     """
+    if len(values) == 0:
+        return float('nan')
     return sum(values, 0.0) / len(values)
 
 
