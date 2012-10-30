@@ -652,9 +652,18 @@ def report_assignee(group="all"):
     return render_template('report-assignee.html', **context)
 
 def report_defect_cycle_distribution(group="all", months=3):
-    return report_cycle_distribution(group, months, defects_only=True)
+    return report_cycle_distribution(group, months, limit='defects')
 
-def report_cycle_distribution(group="all", months=3, defects_only=False):
+def report_card_cycle_distribution(group="all", months=3):
+    return report_cycle_distribution(group, months, limit='cards')
+
+def report_cycle_distribution(group="all", months=3, limit=None):
+    defects_only, cards_only = False, False
+    if limit == 'cards':
+        cards_only = True
+    if limit == 'defects':
+        defects_only = True
+
     ranges = (
         (0, 4, "Less than 5 days"),
         (5, 10, "5-10 days"),
@@ -678,7 +687,7 @@ def report_cycle_distribution(group="all", months=3, defects_only=False):
     query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
     if defects_only:
         query = query & Q(_type__in=app.config.get('DEFECT_TYPES', []))
-    else:
+    elif cards_only:
         query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
     rg = ReportGroup(group, Kard.objects.filter(query))
 
@@ -717,9 +726,12 @@ def report_cycle_distribution(group="all", months=3, defects_only=False):
     if defects_only:
         context['title'] = "Defects: %s" % (context['title'])
         context['card_type'] = 'defects'
-    else:
+    elif cards_only:
         context['title'] = "Cards: %s" % (context['title'])
         context['card_type'] = 'cards'
+    else:
+        context['title'] = "All: %s" % (context['title'])
+        context['card_type'] = 'cards and defects'
 
     return render_template('report-cycle-distro.html', **context)
 
@@ -901,10 +913,12 @@ app.add_url_rule('/reports/<group>/throughput/<int:months>/', 'report_throughput
 app.add_url_rule('/reports/<group>/cycle/', 'report_cycle', report_cycle)
 app.add_url_rule('/reports/<group>/cycle/<int:months>/', 'report_cycle', report_cycle)
 app.add_url_rule('/reports/<group>/cycle/from/<int:year>/<int:month>/<int:day>/', 'report_cycle', report_cycle)
-app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_cycle_distribution', report_cycle_distribution)
-app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/', 'report_card_cycle_distribution', report_card_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/<int:months>/', 'report_card_cycle_distribution', report_card_cycle_distribution)
 app.add_url_rule('/reports/<group>/cycle/distribution/defects/', 'report_defect_cycle_distribution', report_defect_cycle_distribution)
 app.add_url_rule('/reports/<group>/cycle/distribution/defects/<int:months>/', 'report_defect_cycle_distribution', report_defect_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/all/', 'report_cycle_distribution', report_cycle_distribution)
+app.add_url_rule('/reports/<group>/cycle/distribution/all/<int:months>/', 'report_cycle_distribution', report_cycle_distribution)
 app.add_url_rule('/reports/<group>/flow/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/<int:months>/', 'report_flow', report_flow)
 app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report_detailed_flow)
