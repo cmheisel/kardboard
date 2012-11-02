@@ -49,15 +49,6 @@ def get_app():
 
     configure_logging(app)
 
-    try:
-        from flaskext.exceptional import Exceptional
-    except ImportError:
-        pass
-    exceptional_key = app.config.get('EXCEPTIONAL_API_KEY', '')
-    if exceptional_key:
-        exceptional = Exceptional(app)
-        app._exceptional = exceptional
-
     app.wsgi_app = FixGunicorn(app.wsgi_app)
 
     statsd_conf = app.config.get('STATSD_CONF', {})
