@@ -347,14 +347,25 @@ class JIRAHelper(TicketHelper):
         current_ticket_status = \
             card._ticket_system_data.get(u'status', {}).get(u'name', '')
 
-        state, datefield = mappings.get(current_ticket_status, (None, None))
+        current_resolution = card._ticket_system_data.get(u'resolution', {}).get(u'name', '')
+
+        mapping = mappings.get(current_ticket_status, (None, None, None))
+        state, datefield = mapping[0], mapping[1]
+        resolution = None
+        if len(mapping) >= 3:
+            resolution = mapping[2]
+
         if state:
             oldstate = card.state
             if card.state != state:
-                card.state = state
-                self.logger.info(
-                    "AUTOMOVE: %s state moved %s => %s because status was %s" % (self.card.key,
-                        oldstate, card.state, current_ticket_status))
+                if resolution is None or resolution is not None and current_resolution == resolution:
+                    card.state = state
+                    resolution_msg = ""
+                    if resolution is not None:
+                        resolution_msg = "and resolution was %s" % current_resolution
+                    self.logger.info(
+                        "AUTOMOVE: %s state moved %s => %s because status was %s %s" % (self.card.key,
+                            oldstate, card.state, current_ticket_status, resolution_msg))
         if datefield:
             current_value = getattr(card, datefield)
             if not current_value:
