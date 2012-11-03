@@ -7,3 +7,5 @@ pytest==2.3.2
 pytest-cache==0.9
 pytest-pep8==1.0.2
 unittest2==0.5.1
+tox==1.4.2
+virtualenv==1.8.2 # Needed by tox
