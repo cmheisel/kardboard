@@ -1,5 +1,0 @@
-{{ title }}
-============================================
-
-{% for card in cards %}* {{ card.done_date.strftime("%Y-%m-%d") }} -- {{ card.key }}: {{ card.title }}
-{% endfor %}
