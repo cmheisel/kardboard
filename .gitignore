@@ -16,3 +16,4 @@ TODO
 kardboard/compiled_templates/tmpl*.py
 kardboard/compiled_templates/*.pyc
 .cache
+.vagrant
