@@ -1,8 +1,10 @@
 # Set global package provider
 Package { provider => 'aptitude' }
 
-#################### Imports
 include mongodb
-include git
-
 mongodb::setup { "kardboard": }
+
+include git
+include devtools
+
+include pythondev

@@ -1,6 +1,7 @@
 class mongodb {
     exec { "apt-update":
         command => "/usr/bin/aptitude update",
+        unless => "/usr/bin/which add-apt-repository",
     }
 
     package { "python-software-properties":

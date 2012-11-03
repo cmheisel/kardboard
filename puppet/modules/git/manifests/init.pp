@@ -1,5 +1,5 @@
 class git {
-  package { 'git':
+  package { 'git-core':
     ensure => 'installed',
   }
 }
