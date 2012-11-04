@@ -8,3 +8,9 @@ include git
 include devtools
 
 include pythondev
+
+import "kardboard"
+class { 'kardboard':
+    kbuser => 'vagrant',
+    src => '/vagrant',
+}

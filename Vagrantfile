@@ -10,5 +10,6 @@ Vagrant::Config.run do |config|
     puppet.manifests_path = "puppet/manifests"
     puppet.manifest_file = "default.pp"
     puppet.module_path = "puppet/modules"
+    puppet.options = "--verbose"
   end
 end
