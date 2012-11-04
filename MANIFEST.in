@@ -1,5 +1,2 @@
-include README.rst
-include requirements.txt
-graft docs
-graft bin
-graft tests
+include *.txt *.ini *.cfg *.rst
+recursive-include kardboard *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml

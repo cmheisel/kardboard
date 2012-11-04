@@ -1,29 +1,40 @@
+import os
+
 from setuptools import setup, find_packages
 
-version = __import__('kardboard.version', fromlist=['version', ]).version
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
-setup(
-    name="kardboard",
-    version=version,
-    author="Chris Heisel",
-    author_email="chris@heisel.org",
-    description=("Dashboard for tracking real-life cards on a real-life Kanban board(s)"),
-    long_description=open("README.rst").read(),
-    url="https://github.com/cmheisel/kardboard",
-    zip_safe=False,
-    include_package_data=True,
-    package_data={
-        # If any package contains *.txt or *.rst files, include them:
-        '': ['*.txt', '*.rst', '.html'],
-    },
-    packages=find_packages(),
-    classifiers=[
-        "Environment :: Web Environment",
-        "Intended Audience :: Developers",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Framework :: Flask",
-        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-        "Topic :: Internet :: WWW/HTTP :: Site Management",
+requires = [
+    'pyramid',
+    'pyramid_debugtoolbar',
+    'waitress',
     ]
-)
+
+setup(name='kardboard',
+      version='2.0',
+      description='kardboard',
+      long_description=README + '\n\n' +  CHANGES,
+      classifiers=[
+        "Programming Language :: Python",
+        "Framework :: Pyramid",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+        ],
+      author='Chris Heisel',
+      author_email='chris@heisel.org',
+      url='https://github.com/cmheisel/kardboard',
+      keywords='web pyramid pylons',
+      packages=find_packages(),
+      include_package_data=True,
+      zip_safe=False,
+      install_requires=requires,
+      tests_require=requires,
+      test_suite="kardboard",
+      entry_points = """\
+      [paste.app_factory]
+      main = kardboard:main
+      """,
+      )
+

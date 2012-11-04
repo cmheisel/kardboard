@@ -4,12 +4,15 @@ Chameleon==2.10
 Mako==0.7.2
 MarkupSafe==0.15
 PasteDeploy==1.5.0
+Pygments==1.5
 WebOb==1.2.3
 ordereddict==1.1
 pyramid==1.4a3
+pyramid-debugtoolbar==1.0.3
 repoze.lru==0.6
 translationstring==1.1
 venusian==1.0a7
+waitress==0.8.1
 zope.deprecation==4.0.0
 zope.interface==4.0.1
 
