@@ -1,9 +1,4 @@
-from .core import ViewTestCase, KardboardTestCase
-
-
-class SimpleTest(KardboardTestCase):
-    def test_sanity(self):
-        assert True
+from .core import ViewTestCase
 
 
 class ViewTests(ViewTestCase):
