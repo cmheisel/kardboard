@@ -45,4 +45,14 @@ class kardboard($kbuser = 'kardboard', $vepath = 'kardboardve', $src = 'git') {
       require => [Package['gcc'], Package['python2.6-dev'], Package['python-virtualenv'], Exec['kardboard-src'],]
     }
 
+    # Needs runinvenv
+    exec { 'setup-develop':
+      user => $kbuser,
+      path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
+      cwd => "/home/$kbuser/$vepath/src/kardboard/",
+      command => "runinenv /home/$kbuser/$vepath python setup.py develop",
+      unless => "ls /home/kardboard/$kbuser/lib/python2.6/site-packages/ | grep kardboard",
+      require => [Exec['install-requirements'], File['/bin/runinenv'],],
+    }
+
 }
