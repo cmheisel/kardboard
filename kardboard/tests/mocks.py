@@ -26,6 +26,7 @@ class MockJIRAIssue(Mock):
     description = ''
     status = '6'
     type = '4'
+    resolution = '1'
     updated = datetime.datetime(2011, 12, 22, 12, 40, 19)
     created = datetime.datetime(2011, 12, 20, 10, 00, 27)
     fixVersions = [
@@ -86,7 +87,7 @@ class MockJIRAService(Mock):
                 'description': '',
                 'id': '4',
                 'name': 'New Feature',
-                'icon': \
+                'icon':
                     'http://jira.example.com/images/icons/type_feature.gif',
             }),
         ]
@@ -110,6 +111,14 @@ class MockJIRAService(Mock):
             'name': 'Closed',
         }), ]
 
+    def getResolutions(self):
+        return [
+            MockJIRAObject({
+            'description': "A fix for this issue is checked into the tree and tested.",
+            'icon': None,
+            'id': "1",
+            'name': "Fixed", }),
+        ]
 
 class MockJIRAClient(Mock):
     service = MockJIRAService()

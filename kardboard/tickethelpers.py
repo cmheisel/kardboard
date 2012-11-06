@@ -225,11 +225,12 @@ class JIRAHelper(TicketHelper):
     def issue_to_dictionary(self, obj):
         idic = {}
         keys = ['summary', 'key', 'reporter', 'assignee', 'description',
-            'status', 'type', 'updated', 'fixVersions', 'created']
+            'status', 'type', 'updated', 'fixVersions', 'created', 'resolution']
         for key in keys:
             idic[key] = getattr(obj, key)
         idic['status'] = self.resolve_status(idic['status'])
         idic['type'] = self.resolve_type(idic['type'])
+        idic['resolution'] = self.resolve_resolution(idic['resolution'])
         idic['fixVersions'] = [self.object_to_dict(v) for v in idic['fixVersions']]
 
         return idic
@@ -238,6 +239,27 @@ class JIRAHelper(TicketHelper):
         keys = [k for k in dir(obj) if not k.startswith("_")]
         dic = dict([(key, getattr(obj, key)) for key in keys])
         return dic
+
+    def resolve_resolution(self, resolution_id):
+        key = "%s_resolutions" % self.cache_prefix
+        resolutions = cache.get(key)
+        if resolutions:
+            try:
+                resolutions = pickle.loads(resolutions)
+            except pickle.UnpicklingError:
+                resolutions = None
+        if not resolutions:
+            self.logger.warn("Cache miss for %s" % key)
+            resolutions = self.service.getResolutions()
+            resolutions = [self.object_to_dict(r) for r in resolutions]
+            cache.set(key, pickle.dumps(resolutions))
+        resolution = [r for r in resolutions if r.get('id') == resolution_id]
+        try:
+            return resolution[0]
+        except IndexError:
+            self.logger.warn("Couldn't find resolution_id: %s in %s" %
+                (resolution_id, resolutions))
+            return {}
 
     def resolve_status(self, status_id):
         key = "%s_statuses" % self.cache_prefix
@@ -325,14 +347,25 @@ class JIRAHelper(TicketHelper):
         current_ticket_status = \
             card._ticket_system_data.get(u'status', {}).get(u'name', '')
 
-        state, datefield = mappings.get(current_ticket_status, (None, None))
+        current_resolution = card._ticket_system_data.get(u'resolution', {}).get(u'name', '')
+
+        mapping = mappings.get(current_ticket_status, (None, None, None))
+        state, datefield = mapping[0], mapping[1]
+        resolution = None
+        if len(mapping) >= 3:
+            resolution = mapping[2]
+
         if state:
             oldstate = card.state
             if card.state != state:
-                card.state = state
-                self.logger.info(
-                    "AUTOMOVE: %s state moved %s => %s because status was %s" % (self.card.key,
-                        oldstate, card.state, current_ticket_status))
+                if resolution is None or resolution is not None and current_resolution == resolution:
+                    card.state = state
+                    resolution_msg = ""
+                    if resolution is not None:
+                        resolution_msg = "and resolution was %s" % current_resolution
+                    self.logger.info(
+                        "AUTOMOVE: %s state moved %s => %s because status was %s %s" % (self.card.key,
+                            oldstate, card.state, current_ticket_status, resolution_msg))
         if datefield:
             current_value = getattr(card, datefield)
             if not current_value:

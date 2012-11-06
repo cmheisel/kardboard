@@ -73,7 +73,6 @@ class JIRAHelperTests(KardboardTestCase):
         expected = "New Feature"
         self.assertEqual(expected, h.get_type())
 
-
     def test_get_ticket_url(self):
         h = self._make_one()
         expected = "%s/browse/%s" % (self.config['JIRA_WSDL'],
