@@ -3,6 +3,10 @@
 mongoengine==0.7.5
 pymongo==2.3
 
+# Dateutil
+python-dateutil==2.1
+six==1.2.0
+
 # Pyramid 1.4a3
 Chameleon==2.10
 Mako==0.7.2
