@@ -63,6 +63,15 @@ class CardTests(ModelTestCase):
             expected_current_state,
             c.current_state)
 
+    def test_setting_state_on_a_new_ticket(self):
+        c = self.make_one()
+        c.set_state(state='Elaboration')
+        c.save()
+
+        self.assertEqualStates(
+            {'state': 'Elaboration'},
+            c.current_state)
+
     def ztest_set_current_state(self):
         from ...util import now
 

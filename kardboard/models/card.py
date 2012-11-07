@@ -44,8 +44,9 @@ class Card(Document):
     def save(self, *args, **kwargs):
         if not self.created_at:
             self.created_at = now()
-            self.set_state(card=self.key, state='Backlog',
-                entered_at=self.created_at)
+            if len(self.state_log) == 0:
+                self.set_state(card=self.key, state='Backlog',
+                    entered_at=self.created_at)
 
         super(Card, self).save(*args, **kwargs)
 
