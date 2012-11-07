@@ -38,13 +38,13 @@ class Card(Document):
     created_at = DateTimeField(required=True)
     """The datetime the card was created in the system."""
 
-    state_log = SortedListField(ReferenceField(StateLog,
+    state_logs = SortedListField(ReferenceField(StateLog,
         reverse_delete_rule=PULL))
 
     def save(self, *args, **kwargs):
         if not self.created_at:
             self.created_at = now()
-            if len(self.state_log) == 0:
+            if len(self.state_logs) == 0:
                 self.set_state(card=self.key, state='Backlog',
                     entered_at=self.created_at)
 
@@ -52,7 +52,7 @@ class Card(Document):
 
     @property
     def current_state(self):
-        sl = self.state_log[0]
+        sl = self.state_logs[0]
         return sl.as_dict
 
     def set_state(self, state, **kwargs):
@@ -62,5 +62,5 @@ class Card(Document):
         for attr, value in kwargs.items():
             setattr(sl, attr, value)
         sl.save()
-        if sl not in self.state_log:
-            self.state_log.append(sl)
+        if sl not in self.state_logs:
+            self.state_logs.append(sl)
