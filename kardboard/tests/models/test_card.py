@@ -50,7 +50,7 @@ class CardTests(ModelTestCase):
             new_state,
             c.current_state)
 
-    def ztest_default_state(self):
+    def test_default_state(self):
         c = self.make_one()
         c.save()
 
@@ -60,8 +60,8 @@ class CardTests(ModelTestCase):
         }
 
         self.assertEqualStates(
-            c.current_state,
-            expected_current_state)
+            expected_current_state,
+            c.current_state)
 
     def ztest_set_current_state(self):
         from ...util import now
