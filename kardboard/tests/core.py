@@ -9,6 +9,27 @@ class KardboardTestCase(unittest2.TestCase):
     def make_one(self, *args, **kwargs):
         return self.class_under_test(*args, **kwargs)
 
+    def assertEqualDateTimes(self, actual, expected):
+        attrs = (
+            "year",
+            "month",
+            "day",
+            "hour",
+            "minute",
+        )
+
+        if actual:
+            actual_tuple = [getattr(actual, attrname)
+                for attrname in attrs]
+        else:
+            actual_tuple = None
+        if expected:
+            expected_tuple = [getattr(expected, attrname)
+                for attrname in attrs]
+        else:
+            expected_tuple = None
+        self.assertEqual(actual_tuple, expected_tuple)
+
 
 class ModelTestCase(KardboardTestCase):
     mongodb_name = 'kardboard_unittest'
