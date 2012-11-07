@@ -11,4 +11,4 @@ services:
     - redis
     - memcache
 # command to run tests
-script: py.test --pep8
+script: py.test --pep8 kardboard
