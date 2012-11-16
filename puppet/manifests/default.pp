@@ -3,11 +3,11 @@ Package { provider => 'aptitude' }
 
 include mongodb
 mongodb::setup { "kardboard": }
-
 include git
 include devtools
-
 include pythondev
+
+include redis
 
 import "kardboard"
 class { 'kardboard':
