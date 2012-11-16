@@ -61,11 +61,15 @@ class Card(Document):
         return sl
 
     def set_state(self, state, **kwargs):
-        from .statelog import StateLog
+        from kardboard.models.statelog import StateLog
         sl, created = StateLog.objects.get_or_create(card=self.key,
             state=state)
         for attr, value in kwargs.items():
             setattr(sl, attr, value)
         sl.save()
         if sl not in self.state_logs:
+            if len(self.state_logs) > 0:
+                previous_sl = self.state_logs[-1]
+                previous_sl.exited_at = sl.entered_at
+                previous_sl.save()
             self.state_logs.append(sl)

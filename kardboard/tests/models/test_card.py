@@ -87,3 +87,54 @@ class CardTests(ModelTestCase):
         c.save()
 
         self.assertEqual(2, len(c.state_log))
+
+    def test_state_log_ordering(self):
+        from kardboard.util import relativedelta, now
+        c = self.make_one()
+        c.set_state(state='Backlog',
+            entered_at=now() - relativedelta(hours=1))
+        c.save()
+
+        c.set_state(state="Elaboration",
+            entered_at=now() + relativedelta(hours=2))
+        c.save()
+
+        expected = ["Backlog", "Elaboration"]
+        actual = [sl['state'] for sl in c.state_log]
+        self.assertEqual(expected, actual)
+
+    def test_state_log_auto_exit_set(self):
+        from kardboard.util import relativedelta, now
+        c = self.make_one()
+        c.set_state(state='Backlog',
+            entered_at=now() - relativedelta(hours=1))
+        c.save()
+
+        c.set_state(state="Elaboration",
+            entered_at=now() + relativedelta(hours=2))
+        c.save()
+
+        self.assert_(c.state_log[0]['exited_at'])
+
+    def test_state_log_auto_exit_set_with_several_state_changes(self):
+        from kardboard.util import relativedelta, now
+        c = self.make_one()
+        c.set_state(state='Backlog',
+            entered_at=now() - relativedelta(hours=1))
+        c.save()
+
+        c.set_state(state="Elaboration",
+            entered_at=now() + relativedelta(hours=2))
+        c.save()
+
+        c.set_state(state="Ready to Build",
+            entered_at=now() + relativedelta(hours=3))
+        c.save()
+
+        c.set_state(state="Building",
+            entered_at=now() + relativedelta(hours=4),
+            exited_at=now() + relativedelta(hours=5))
+        c.save()
+
+        for sl in c.state_log:
+            self.assert_(sl['exited_at'])
