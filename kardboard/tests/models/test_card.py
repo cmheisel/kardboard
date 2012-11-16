@@ -1,9 +1,9 @@
-from ..core import ModelTestCase
+from kardboard.tests.core import ModelTestCase
 
 
 class CardTests(ModelTestCase):
     def _get_class(self):
-        from ...models.card import Card
+        from kardboard.models.card import Card
         return Card
 
     def make_one(self, **kwargs):
@@ -72,22 +72,18 @@ class CardTests(ModelTestCase):
             {'state': 'Elaboration'},
             c.current_state)
 
-    def ztest_set_current_state(self):
-        from ...util import now
-
+    def test_setting_state_flow(self):
+        from kardboard.util import relativedelta, now
         c = self.make_one()
+        c.set_state(state='Backlog',
+            entered_at=now() - relativedelta(hours=1))
         c.save()
 
-        new_current_state = {
-            'state': "Backlog",
-            'entered_at': now(),
-            'exited_at': None,
-            'blocked': True,
-            'message': "Waiting on dependent ticket before it can be pulled",
-        }
-        c.current_state = new_current_state
+        c.title = "Changing the title"
         c.save()
 
-        self.assertEqualStates(
-            c.current_state,
-            new_current_state)
+        c.set_state(state="Elaboration",
+            entered_at=now() + relativedelta(hours=2))
+        c.save()
+
+        self.assertEqual(2, len(c.state_log))
