@@ -4,9 +4,10 @@ from mongoengine import (
     DateTimeField,
     IntField,
     BooleanField,
+    ValidationError,
 )
 
-from ..util import now, delta_in_hours
+from kardboard.util import now, delta_in_hours
 
 
 class StateLog(Document):
@@ -43,6 +44,9 @@ class StateLog(Document):
         if not self.entered_at:
             self.entered_at = now()
 
+        if self.exited_at and self.exited_at < self.entered_at:
+            raise ValidationError("A card may not exit before it enters")
+
         if self.entered_at and self.exited_at:
             self._duration = self.duration
         self.updated_at = now()
@@ -50,7 +54,7 @@ class StateLog(Document):
 
     def __repr__(self):
         return "<StateLog: %s, %s, %s -- %s, %s hours>" % (
-            self.card.key,
+            self.card,
             self.state,
             self.entered,
             self.exited,
@@ -61,7 +65,7 @@ class StateLog(Document):
         if self._duration is not None:
             return self._duration
 
-        if self.exited is not None:
+        if self.exited_at is not None:
             exited_at = self.exited_at
         else:
             exited_at = now()
