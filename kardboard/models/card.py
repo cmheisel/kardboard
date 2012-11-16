@@ -51,9 +51,14 @@ class Card(Document):
         super(Card, self).save(*args, **kwargs)
 
     @property
+    def state_log(self):
+        # TODO: Implement this as a lazy list
+        return [sl.as_dict for sl in self.state_logs]
+
+    @property
     def current_state(self):
-        sl = self.state_logs[0]
-        return sl.as_dict
+        sl = self.state_log[0]
+        return sl
 
     def set_state(self, state, **kwargs):
         from .statelog import StateLog
