@@ -52,7 +52,6 @@ class CardTests(ModelTestCase):
 
     def test_default_state(self):
         c = self.make_one()
-        c = self._get_class()(title="Default", key="DEFAULT-1", teams=["Team 1", "Team 2"])
         c.save()
 
         expected_current_state = {

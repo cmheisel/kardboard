@@ -17,7 +17,7 @@ class Card(Document):
     Represents a card on a Kanban board.
     """
 
-    key = StringField(required=True, unique=True)
+    key = StringField(required=True, unique=True, primary_key=True)
     """A unique string that matches a Card to a ticket in a parent system."""
 
     title = StringField(required=True)
