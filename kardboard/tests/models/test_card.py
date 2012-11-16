@@ -19,19 +19,19 @@ class CardTests(ModelTestCase):
     def assertEqualStates(self, expected, actual):
         datetimes = []
 
-        if 'entered_at' in expected.keys():
-            datetimes.append((expected['entered_at'], actual['entered_at']))
-            del expected['entered_at']
-            del actual['entered_at']
-        if 'exited_at' in expected.keys():
-            datetimes.append((expected['exited_at'], actual['exited_at']))
-            del expected['exited_at']
-            del actual['exited_at']
+        keys = expected.keys()
 
         for key, value in expected.items():
+            if key in ("entered_at", "exited_at"):
+                pass
             msg = "%s: Actual: %s != Expected: %s" % (
                 key, value, actual[key])
             self.assertEqual(value, actual[key], msg=msg)
+
+        if 'entered_at' in keys:
+            datetimes.append((expected['entered_at'], actual['entered_at']))
+        if 'exited_at' in keys:
+            datetimes.append((expected['exited_at'], actual['exited_at']))
 
         for expecteddt, actualdt in datetimes:
             self.assertEqualDateTimes(expecteddt, actualdt)
@@ -52,6 +52,7 @@ class CardTests(ModelTestCase):
 
     def test_default_state(self):
         c = self.make_one()
+        c = self._get_class()(title="Default", key="DEFAULT-1", teams=["Team 1", "Team 2"])
         c.save()
 
         expected_current_state = {
