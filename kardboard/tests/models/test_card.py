@@ -138,3 +138,56 @@ class CardTests(ModelTestCase):
 
         for sl in c.state_log:
             self.assert_(sl['exited_at'])
+
+
+class CardBlockingTest(CardTests):
+    def test_blocked_card_shows_it(self):
+        c = self.make_one()
+        c.save()
+        c.block("Test")
+
+        self.assertEqual(True, c.blocked)
+
+    def test_blocked_card_has_reason(self):
+        c = self.make_one()
+        c.save()
+        c.block("Lego")
+
+
+        self.assertEqual(c.blocker['message'], "Lego")
+
+    def test_blocked_card_has_duration(self):
+        from kardboard.util import relativedelta, now
+
+        c = self.make_one()
+        c.save()
+        c.block(
+            "Test",
+            blocked_at=now() - relativedelta(hours=3)
+        )
+
+        self.assertEqual(c.blocker['duration'], 3)
+
+    def test_unblocking_card(self):
+        c = self.make_one()
+        c.save()
+        c.block("Test")
+        c.unblock()
+
+        self.assertEqual(False, c.blocked)
+
+    def test_unblocking_card_duration(self):
+        from kardboard.util import relativedelta, now
+
+        c = self.make_one()
+        c.save()
+        c.block(
+            "Test",
+            blocked_at=now() - relativedelta(hours=3)
+        )
+        c.unblock(
+            unblocked_at=now() + relativedelta(hours=1)
+        )
+
+        self.assertEqual(c.blocker['duration'], 4)
+

@@ -61,6 +61,7 @@ class Card(Document):
         return sl
 
     def set_state(self, state, **kwargs):
+        """Sets the current state for the card."""
         from kardboard.models.statelog import StateLog
         sl, created = StateLog.objects.get_or_create(card=self.key,
             state=state)
@@ -73,3 +74,23 @@ class Card(Document):
                 previous_sl.exited_at = sl.entered_at
                 previous_sl.save()
             self.state_logs.append(sl)
+
+    def block(self, message, blocked_at=None):
+        """Blocks the card in its current state."""
+        sl = self.state_logs[0]
+        sl.block(message, blocked_at)
+
+    def unblock(self, unblocked_at=None):
+        """Unblocks the card in its current state."""
+        sl = self.state_logs[0]
+        sl.unblock(unblocked_at)
+
+    @property
+    def blocker(self):
+        sl = self.state_logs[0]
+        return sl.blocker
+
+    @property
+    def blocked(self):
+        sl = self.state_logs[0]
+        return sl.blocker['blocked']

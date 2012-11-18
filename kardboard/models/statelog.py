@@ -82,3 +82,46 @@ class StateLog(Document):
             'blocked': self.blocked,
             'message': self.message,
         }
+
+    @property
+    def blocker(self):
+        return {
+            'card': self.card,
+            'state': self.state,
+            'blocked': self.blocked,
+            'blocked_at': self._blocked_at,
+            'unblocked_at': self._unblocked_at,
+            'duration': self.block_duration,
+            'message': self.message,
+        }
+
+    @property
+    def block_duration(self):
+        if self._blocked_at is None:
+            return 0
+
+        if self._blocked_duration is not None:
+            return self._blocked_duration
+
+        if self._unblocked_at is not None:
+            unblocked_at = self._unblocked_at
+        else:
+            unblocked_at = now()
+        delta = unblocked_at - self._blocked_at
+        return delta_in_hours(delta)
+
+    def block(self, message, blocked_at=None):
+        if blocked_at is None:
+            blocked_at = now()
+        self.message = message
+        self._blocked_at = blocked_at
+        self.blocked = True
+        self.save()
+
+    def unblock(self, unblocked_at=None):
+        if unblocked_at is None:
+            unblocked_at = now()
+        self._unblocked_at = unblocked_at
+        self._blocked_duration = self.block_duration
+        self.blocked = False
+        self.save()
