@@ -39,7 +39,7 @@ class Card(Document):
     """The datetime the card was created in the system."""
 
     state_logs = SortedListField(ReferenceField(StateLog,
-        reverse_delete_rule=PULL))
+        reverse_delete_rule=PULL, dbref=False))
 
     def save(self, *args, **kwargs):
         if not self.created_at:
