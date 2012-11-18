@@ -8,8 +8,12 @@ def main(global_config, **settings):
     """
     settings['version'] = version
     config = Configurator(settings=settings)
-    #config.add_setting('version', version)
+
+    from mongoengine import connect
+    connect(settings['mongodb_name'])
+
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
+    config.add_route('card_detail', '/card/{key}/')
     config.scan()
     return config.make_wsgi_app()
