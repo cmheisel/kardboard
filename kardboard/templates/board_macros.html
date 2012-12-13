@@ -49,8 +49,7 @@
         {% set assignee = card.assignee %}
         <p class="assignee">
             {% if card.due_date %}Due: {{ card.due_date|timeuntil }}{% endif %}
-            {% set version = card.version %}
-            {% if version %}{{ version }} &ndash; {% endif %}
+            {% if card.service_class %}{{ card.service_class.get('name') }} &ndash; {% endif %}
             {% if assignee %}<a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}
         </p>
         </div>

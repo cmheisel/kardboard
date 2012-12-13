@@ -180,6 +180,13 @@ class Kard(app.db.Document):
         'state',
     )
 
+    @property
+    def service_class(self):
+        if self._service_class:
+            return {'name': self._service_class}
+        else:
+            return {}
+
     def _convert_dates_to_datetimes(self, date):
         if not date:
             return None

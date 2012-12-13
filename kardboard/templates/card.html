@@ -112,6 +112,7 @@
                 <th>Duration</th>
                 <th>Entered</th>
                 <th>Exited</th>
+                <th>Service Class</th>
             </tr>
             {% for log in card_log %}
             <tr>
@@ -119,6 +120,7 @@
                 <td>{{ hours_to_days(log.duration) }}</td>
                 <td>{{ blank_or_datetime(log.entered) }}</td>
                 <td>{{ blank_or_datetime(log.exited) }}</td>
+                <td>{{ log.service_class }}</td>
             </tr>
             {% endfor %}
         </table>
