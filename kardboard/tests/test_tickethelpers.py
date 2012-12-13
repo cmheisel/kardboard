@@ -73,6 +73,18 @@ class JIRAHelperTests(KardboardTestCase):
         expected = "New Feature"
         self.assertEqual(expected, h.get_type())
 
+    def test_get_service_class(self):
+        h = self._make_one()
+        expected = "2 - Fixed Date"
+        self.assertEqual(expected, h.get_service_class())
+
+    def test_get_due_date(self):
+        h = self._make_one()
+        expected = datetime.datetime(
+            2012, 12, 17, 10, 10, 00
+        )
+        self.assertEqual(expected, h.get_due_date())
+
     def test_get_ticket_url(self):
         h = self._make_one()
         expected = "%s/browse/%s" % (self.config['JIRA_WSDL'],

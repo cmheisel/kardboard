@@ -222,6 +222,20 @@ class JIRAHelper(TicketHelper):
         ticket_type.strip()
         return ticket_type
 
+    def get_service_class(self):
+        service_class = None
+        if not self.card._ticket_system_data:
+            self.card.ticket_system.update(sync=True)
+        service_class = self.card._ticket_system_data.get('service_class', None)
+        return service_class
+
+    def get_due_date(self):
+        due_date = None
+        if not self.card._ticket_system_data:
+            self.card.ticket_system.update(sync=True)
+        due_date = self.card._ticket_system_data.get('due_date', None)
+        return due_date
+
     def issue_to_dictionary(self, obj):
         idic = {}
         keys = ['summary', 'key', 'reporter', 'assignee', 'description',
@@ -232,6 +246,7 @@ class JIRAHelper(TicketHelper):
         idic['type'] = self.resolve_type(idic['type'])
         idic['resolution'] = self.resolve_resolution(idic['resolution'])
         idic['fixVersions'] = [self.object_to_dict(v) for v in idic['fixVersions']]
+
 
         return idic
 
@@ -331,6 +346,24 @@ class JIRAHelper(TicketHelper):
         devs = self._get_custom_field_values(developer_id, custom_fields) or []
         return list(set(devs))
 
+    def id_service_class(self, issue):
+        service_class_id = 10321
+        custom_fields = issue.customFieldValues
+        service_class = self._get_custom_field_values(service_class_id, custom_fields) or []
+        try:
+            return service_class[0]
+        except IndexError:
+            return None
+
+    def id_due_date(self, issue):
+        due_date_id = 10322
+        custom_fields = issue.customFieldValues
+        due_date = self._get_custom_field_values(due_date_id, custom_fields) or []
+        try:
+            return due_date[0]
+        except IndexError:
+            return None
+
     def id_testers(self, issue):
         qa_resource_id = 10133
         custom_fields = issue.customFieldValues
@@ -399,6 +432,8 @@ class JIRAHelper(TicketHelper):
             # TODO: This is super specific to CMG's JIRA setup. Fixme.
             issue_dict['developers'] = self.id_devs(issue)
             issue_dict['testers'] = self.id_testers(issue)
+            issue_dict['service_class'] = self.id_service_class(issue)
+            issue_dict['due_date'] = self.id_due_date(issue)
 
         elif self.card._ticket_system_data:
             return None
