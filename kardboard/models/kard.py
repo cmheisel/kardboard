@@ -276,6 +276,12 @@ class Kard(app.db.Document):
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
+        self._service_class = self.ticket_system_data.get('service_class', None)
+
+        ticket_due_date = self.ticket_system_data.get('due_date', None)
+        if ticket_due_date is not None:
+            self.due_date = ticket_due_date
+
 
         self._auto_state_changes()
         super(Kard, self).save(*args, **kwargs)
