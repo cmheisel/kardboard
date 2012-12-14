@@ -57,15 +57,15 @@ class MockJIRAIssue(Mock):
             values=['cheisel', ]
         ),
         MockRemoteCustomFieldValue(
-         customfieldId = "customfield_10322",
-         key = None,
-         values = [
+            customfieldId="customfield_10322",
+            key=None,
+            values=[
             datetime.datetime(2012, 12, 17, 10, 10, 00), ],
         ),
         MockRemoteCustomFieldValue(
-         customfieldId = "customfield_10321",
-         key = None,
-         values = [
+            customfieldId="customfield_10321",
+            key=None,
+            values=[
             "2 - Fixed Date", ],
         ),
     ]
