@@ -183,9 +183,20 @@ class Kard(app.db.Document):
     @property
     def service_class(self):
         if self._service_class:
-            return {'name': self._service_class}
+            classdef = app.config.get('SERVICE_CLASSES', {}).get(
+                self._service_class, {})
         else:
-            return {}
+            classdef = app.config.get('SERVICE_CLASSES', {}).get(
+                'default', {})
+
+        service_class = {
+            'name': classdef.get('name', None),
+            'upper': classdef.get('upper', None),
+            'lower': classdef.get('lower', None),
+            'wip': classdef.get('wip', None),
+        }
+        return service_class
+
 
     def _convert_dates_to_datetimes(self, date):
         if not date:
@@ -283,7 +294,9 @@ class Kard(app.db.Document):
         self._assignee = self.ticket_system_data.get('assignee', '')
         self.title = self.ticket_system_data.get('summary', '')
         self.key = self.key.upper()
-        self._service_class = self.ticket_system_data.get('service_class', None)
+        ticket_class = self.ticket_system_data.get('service_class', None)
+        if ticket_class:
+            self._service_class = ticket_class
 
         ticket_due_date = self.ticket_system_data.get('due_date', None)
         if ticket_due_date is not None:
@@ -422,12 +435,12 @@ class Kard(app.db.Document):
 
     @property
     def cycle_goal(self):
-        goal_range = app.config.get('CYCLE_TIME_GOAL', ())
-        try:
-            lower, upper = goal_range
-        except ValueError:
-            return None
-        return lower, upper
+        classdef = self.service_class
+        lower = classdef.get('lower')
+        upper = classdef.get('upper')
+        if lower is not None and upper is not None:
+            return lower, upper
+        return None
 
     @property
     def cycle_in_goal(self):

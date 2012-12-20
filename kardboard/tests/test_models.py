@@ -593,12 +593,17 @@ class KardTests(KardTestCase):
         self.assertEqual("CMSCMH-1", k.key)
 
 
+import pytest
+@pytest.mark.warningtest
 class KardWarningTests(KardTestCase):
     def setUp(self):
         super(KardWarningTests, self).setUp()
         lower = 5
         upper = 15
-        self.config['CYCLE_TIME_GOAL'] = (lower, upper)
+        self.config['SERVICE_CLASSES'] = {
+            'Speedy': {'lower': 2, 'upper': 4, 'wip': .05, 'name': 'Speedy'},
+            'default': {'lower': lower, 'upper': upper, 'name': 'default'},
+        }
         self.wip_card.backlog_date = datetime.datetime(
             year=2011, month=5, day=2)
         self.wip_card.start_date = datetime.datetime(
@@ -625,6 +630,33 @@ class KardWarningTests(KardTestCase):
     def test_cycle_vs_goal_double(self):
         self.wip_card.done_date = datetime.datetime(
             year=2011, month=6, day=30)
+        self.wip_card.save()
+        self.assertEqual(2, self.wip_card.cycle_vs_goal)
+
+    def test_speedy_cycle_vs_goal_below(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=9)
+        self.wip_card._service_class = "Speedy"
+        self.assertEqual(-1, self.wip_card.cycle_vs_goal)
+
+    def test_speedy_cycle_vs_goal_even(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=11)
+        self.wip_card._service_class = "Speedy"
+        self.wip_card.save()
+        self.assertEqual(0, self.wip_card.cycle_vs_goal)
+
+    def test_speedy_cycle_vs_goal_above(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=14)
+        self.wip_card._service_class = "Speedy"
+        self.wip_card.save()
+        self.assertEqual(1, self.wip_card.cycle_vs_goal)
+
+    def test_speedy_cycle_vs_goal_double(self):
+        self.wip_card.done_date = datetime.datetime(
+            year=2011, month=5, day=19)
+        self.wip_card._service_class = "Speedy"
         self.wip_card.save()
         self.assertEqual(2, self.wip_card.cycle_vs_goal)
 
