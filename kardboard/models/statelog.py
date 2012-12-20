@@ -21,6 +21,8 @@ class StateLog(app.db.Document):
     # Datetime the card exited this state
     _duration = app.db.IntField(required=False)
     # The duration the card was in this state
+    service_class = app.db.StringField(required=False)
+    # The service class the card was in while in this state
 
     created_at = app.db.DateTimeField(required=True)
     updated_at = app.db.DateTimeField(required=True)
@@ -46,7 +48,7 @@ class StateLog(app.db.Document):
             self.entered,
             self.exited,
             self._duration
-            )
+        )
 
     @classmethod
     def kard_pre_save(cls, sender, document, **kwargs):
@@ -59,18 +61,17 @@ class StateLog(app.db.Document):
         try:
             observed_card.old_state
         except AttributeError:
-            print observed_card
-            print type(observed_card)
-            print dir(observed_card)
-            print 'old_state' in dir(observed_card)
             raise
 
         # If you're here it's because the observed_card's state is changing
         if observed_card.old_state is not None:
             try:
-                slo = cls.objects.get(card=observed_card, state=observed_card.old_state)
+                slo = cls.objects.get(
+                        card=observed_card,
+                        state=observed_card.old_state,
+                        service_class=observed_card.service_class.get('name'))
                 slo.exited = now()
-                slo.save()  #  Close the old state log
+                slo.save() # Close the old state log
             except cls.DoesNotExist:
                 #  For some reason we didn't record the old state, this should only happen when first rolled out
                 pass
@@ -80,7 +81,10 @@ class StateLog(app.db.Document):
         observed_card = document
 
         # This could be a freshly created card, so create a log for it
-        sl, created = cls.objects.get_or_create(auto_save=False, card=observed_card, state=observed_card.state)
+        sl, created = cls.objects.get_or_create(auto_save=False,
+            card=observed_card,
+            state=observed_card.state,
+            service_class=observed_card.service_class.get('name'))
         if created:
             sl.entered = now()
             sl.save()

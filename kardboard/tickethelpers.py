@@ -75,6 +75,10 @@ class NullHelper(TicketHelper):
 
     def update(self, sync=False):
         super(NullHelper, self).update(sync)
+        test_data = {}
+        if self.card._service_class:
+            test_data['service_class'] = self.card._service_class
+        self.card._ticket_system_data = test_data
         return None
 
     def actually_update(self):
@@ -102,6 +106,8 @@ class TestTicketHelper(TicketHelper):
         test_data = {
             'summary': u"""Dummy Title from Dummy Ticket System""",
         }
+        if self.card._service_class:
+            test_data['service_class'] = self.card._service_class
         self.card._ticket_system_data = test_data
 
     def login(self, username, password):
