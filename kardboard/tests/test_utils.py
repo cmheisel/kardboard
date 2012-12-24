@@ -4,18 +4,18 @@ import unittest2
 
 
 class UtilTests(unittest2.TestCase):
-    def test_business_days(self):
-        from kardboard.util import business_days_between
+    def test_days_between(self):
+        from kardboard.util import days_between
 
         wednesday = datetime.datetime(year=2011, month=6, day=1)
         next_wednesday = datetime.datetime(year=2011, month=6, day=8)
-        result = business_days_between(wednesday, next_wednesday)
-        self.assertEqual(result, 5)
+        result = days_between(wednesday, next_wednesday)
+        self.assertEqual(result, 7)
 
         aday = datetime.datetime(year=2011, month=6, day=1)
         manydayslater = datetime.datetime(year=2012, month=6, day=1)
-        result = business_days_between(aday, manydayslater)
-        self.assertEqual(result, 262)
+        result = days_between(aday, manydayslater)
+        self.assertEqual(result, 366)
 
     def test_month_range(self):
         from kardboard.util import month_range

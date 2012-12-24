@@ -102,19 +102,14 @@ def log_exception(exc, msg=""):
     app.logger.critical(log_msg)
 
 
-def business_days_between(date1, date2):
+def days_between(date1, date2):
     if date1 < date2:
         oldest_date, youngest_date = date1, date2
     else:
         oldest_date, youngest_date = date2, date1
 
-    business_days = 0
-    date = oldest_date
-    while date < youngest_date:
-        if date.weekday() != 5 and date.weekday() != 6:
-            business_days += 1
-        date = date + datetime.timedelta(days=1)
-    return business_days
+    delta = youngest_date - oldest_date
+    return delta.days
 
 
 def month_ranges(date, num_months):

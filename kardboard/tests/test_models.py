@@ -401,12 +401,12 @@ class KardTests(KardTestCase):
         self.assertEqual(states[-1], k.state)
 
     def test_done_cycle_time(self):
-        self.assertEquals(25, self.done_card.cycle_time)
-        self.assertEquals(25, self.done_card._cycle_time)
+        self.assertEquals(34, self.done_card.cycle_time)
+        self.assertEquals(34, self.done_card._cycle_time)
 
     def test_done_lead_time(self):
-        self.assertEquals(30, self.done_card.lead_time)
-        self.assertEquals(30, self.done_card._lead_time)
+        self.assertEquals(41, self.done_card.lead_time)
+        self.assertEquals(41, self.done_card._lead_time)
 
     def test_current_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
@@ -419,7 +419,7 @@ class KardTests(KardTestCase):
 
         actual = self.wip_card.current_cycle_time(
                 today=today)
-        self.assertEquals(25, actual)
+        self.assertEquals(34, actual)
 
     def test_current_lead_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
@@ -432,7 +432,7 @@ class KardTests(KardTestCase):
 
         actual = self.wip_card.current_lead_time(
                 today=today)
-        self.assertEquals(30, actual)
+        self.assertEquals(41, actual)
 
     def test_elabo_cycle_time(self):
         today = datetime.datetime(year=2011, month=6, day=12)
