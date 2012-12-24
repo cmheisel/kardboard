@@ -17,7 +17,7 @@ class ServiceClassRecord(app.db.Document):
     """The start date for the records"""
 
     end_date = app.db.DateTimeField(required=True,
-        unique_with=['group', 'end_date'])
+        unique_with=['group', 'start_date'])
     """The start date for the records"""
 
     group = app.db.StringField(required=True, default="all",
@@ -54,16 +54,10 @@ class ServiceClassRecord(app.db.Document):
         report = {}
         for classname, cards in data.items():
             sclass = cards[0].service_class
-            if cards[0].done_date:
-                cycle_time_average = int(round(average(
-                    [c.cycle_time for c in cards])))
-                cards_hit_goal = len([c.key for c in cards
-                    if c.cycle_time <= sclass.get('upper')])
-            else:
-                cycle_time_average = int(round(average(
-                    [c.current_cycle_time() for c in cards])))
-                cards_hit_goal = len([c.key for c in cards
-                    if c.current_cycle_time() <= sclass.get('upper')])
+            cycle_time_average = int(round(average(
+                [c.current_cycle_time() for c in cards])))
+            cards_hit_goal = len([c.key for c in cards
+                if c.current_cycle_time() <= sclass.get('upper')])
 
             report[classname] = {
                 'service_class': sclass.get('name'),
@@ -76,6 +70,32 @@ class ServiceClassRecord(app.db.Document):
 
         return report
 
+    @classmethod
+    def calculate(cls, start_date, end_date, group="all"):
+        from kardboard.models import Kard
+        from kardboard.models import ReportGroup
+
+        try:
+            record = cls.objects.get(
+                group=group,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        except cls.DoesNotExist:
+            record = cls()
+            record.start_date = start_date
+            record.end_date = end_date
+            record.group = group
+
+        kards = ReportGroup(group,
+            Kard.objects.filter(
+                start_date__gte=start_date,
+                start_date__lte=end_date,
+            )
+        )
+        record.data = cls.report_on_cards(kards)
+        record.save()
+        return record
 
     @classmethod
     def calculate_current(cls, group="all"):

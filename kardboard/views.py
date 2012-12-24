@@ -269,9 +269,9 @@ def card_block(key):
         abort(404)
 
     if action == 'block':
-        f = CardBlockForm(request.form, blocked_at=now)
+        f = CardBlockForm(request.form, blocked_at=now())
     if action == 'unblock':
-        f = CardUnblockForm(request.form, unblocked_at=now)
+        f = CardUnblockForm(request.form, unblocked_at=now())
 
     if 'cancel' in request.form.keys():
         return True  # redirect
@@ -479,9 +479,27 @@ def report_service_class(group="all", months=None):
             end_date=end_date,
         )
         time_range = 'current'
+    else:
+        start = now()
+        months_ranges = month_ranges(start, months)
+        start_date = months_ranges[0][0]
+        end_date = months_ranges[-1][1]
+        try:
+            scr = ServiceClassRecord.objects.get(
+                group=group,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        except ServiceClassRecord.DoesNotExist:
+            scr = ServiceClassRecord.calculate(
+                group=group,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        time_range = 'past %s months' % months
 
     context = {
-        'title': "Service classes %s" % time_range,
+        'title': "Service classes: %s" % time_range,
         'service_classes': service_classes,
         'data': scr.data,
         'updated_at': scr.updated_at,
