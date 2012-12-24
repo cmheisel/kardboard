@@ -509,55 +509,6 @@ def report_service_class(group="all", months=None):
     return render_template('report-service-class.html', **context)
 
 
-def report_types(group="all", months=3, start=None):
-    start = start or datetime.datetime.today()
-    months_ranges = month_ranges(start, months)
-    rg = ReportGroup(group, Kard.objects)
-    rg_cards = rg.queryset
-    types = list(rg_cards.distinct('_type'))
-    types.sort()
-
-    datatable = {
-        'headers': ('Month', 'Type', 'Throughput', 'Cycle Time', 'Lead Time'),
-        'rows': [],
-    }
-
-    months = []
-    for arange in months_ranges:
-        for typ in types:
-            row = []
-            start, end = arange
-            filtered_cards = Kard.objects.filter(done_date__gte=start,
-                done_date__lte=end, _type=typ)
-            rg = ReportGroup(group, filtered_cards)
-            cards = rg.queryset
-
-            if cards.count() > 0:
-                month_name = start.strftime("%B")
-                if month_name not in months:
-                    row.append(month_name)
-                    months.append(month_name)
-                else:
-                    row.append('')
-
-                row.append(typ)
-                row.append(cards.count())
-                row.append("%d" % cards.average('_cycle_time'))
-                row.append("%d" % cards.average('_lead_time'))
-            if row:
-                row = tuple(row)
-                datatable['rows'].append(row)
-
-    context = {
-        'title': "By type",
-        'updated_at': datetime.datetime.now(),
-        'datatable': datatable,
-        'version': VERSION,
-    }
-
-    return render_template('report-types.html', **context)
-
-
 def report_throughput(group="all", months=3, start=None):
     start = start or datetime.datetime.today()
     months_ranges = month_ranges(start, months)
@@ -977,8 +928,6 @@ app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
 app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)
-app.add_url_rule('/reports/<group>/types/', 'report_types', report_types)
-app.add_url_rule('/reports/<group>/types/<int:months>/', 'report_types', report_types)
 app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)
 app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)
