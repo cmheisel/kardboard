@@ -20,7 +20,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog, ServiceClassRecord
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -30,6 +30,7 @@ from kardboard.util import (
     month_ranges,
     log_exception,
     standard_deviation,
+    now,
 )
 
 def team(team_slug=None):
@@ -267,7 +268,6 @@ def card_block(key):
     except Kard.DoesNotExist:
         abort(404)
 
-    now = datetime.datetime.now()
     if action == 'block':
         f = CardBlockForm(request.form, blocked_at=now)
     if action == 'unblock':
@@ -459,6 +459,36 @@ def report_leaderboard(group="all", months=3, person=None, start_month=None, sta
         context['title'] = "%s: %s" % (person.name, context['title'])
 
     return render_template('leaderboard.html', **context)
+
+
+def report_service_class(group="all", months=None):
+    from kardboard.app import app
+    service_class_order = app.config['SERVICE_CLASSES'].keys()
+    service_class_order.sort()
+    service_classes = [
+        app.config['SERVICE_CLASSES'][k] for k in service_class_order
+    ]
+
+    if months is None:
+        # We want the current report
+        start_date = make_start_date(date=now())
+        end_date = make_end_date(date=now())
+        scr = ServiceClassRecord.objects.get(
+            group=group,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        time_range = 'current'
+
+    context = {
+        'title': "Service classes %s" % time_range,
+        'service_classes': service_classes,
+        'data': scr.data,
+        'updated_at': scr.updated_at,
+        'version': VERSION,
+    }
+
+    return render_template('report-service-class.html', **context)
 
 
 def report_types(group="all", months=3, start=None):
@@ -927,6 +957,8 @@ app.add_url_rule('/reports/<group>/flow/detail/cards/', 'report_detailed_flow_ca
 app.add_url_rule('/reports/<group>/flow/detail/cards/<int:months>/', 'report_detailed_flow_cards', report_detailed_flow_cards)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/types/', 'report_types', report_types)
 app.add_url_rule('/reports/<group>/types/<int:months>/', 'report_types', report_types)
 app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)

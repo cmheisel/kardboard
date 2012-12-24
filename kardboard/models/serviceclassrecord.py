@@ -49,7 +49,7 @@ class ServiceClassRecord(app.db.Document):
             class_cards.append(k)
             data[k.service_class.get('name')] = class_cards
 
-        total = len(rg.queryset())
+        total = sum([len(v) for k, v in data.items()])
 
         report = {}
         for classname, cards in data.items():

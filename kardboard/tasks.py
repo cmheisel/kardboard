@@ -107,7 +107,7 @@ def queue_updates():
     old_cards = Kard.objects.filter(_ticket_system_updated_at__lte=old_time, done_date=None).order_by('_ticket_system_updated_at')
     old_done_cards = Kard.objects.done().filter(_ticket_system_updated_at__lte=old_time).order_by('_ticket_system_updated_at')
 
-    statsd_conn  = app.statsd.get_client('tasks.queue_updates')
+    statsd_conn = app.statsd.get_client('tasks.queue_updates')
     gauge = statsd_conn.get_client(class_=statsd.Gauge)
 
     [update_ticket.delay(k.id) for k in new_cards]
@@ -169,6 +169,19 @@ def queue_daily_record_updates(days=365):
         target_date = make_end_date(date=target_date)
         for slug in group_slugs:
             update_daily_record.delay(target_date, slug)
+
+
+@celery.task(name="tasks.queue_service_class_reports", ignore_result=True)
+def queue_service_class_reports():
+    from kardboard.app import app
+    from kardboard.models import ServiceClassRecord
+
+    report_groups = app.config.get('REPORT_GROUPS', {})
+    group_slugs = report_groups.keys()
+    group_slugs.append('all')
+
+    for slug in group_slugs:
+        ServiceClassRecord.calculate_current(slug)
 
 
 @celery.task(name="tasks.update_flow_reports", ignore_result=True)
