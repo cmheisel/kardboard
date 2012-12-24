@@ -13,7 +13,7 @@ from kardboard.models.blocker import BlockerRecord
 from kardboard.models.states import States
 from kardboard.util import (
     now,
-    business_days_between,
+    days_between,
     make_end_date,
     make_start_date,
     munge_date,
@@ -397,7 +397,7 @@ class Kard(app.db.Document):
         and its completion. Returns None if the card hasn't completed yet.
         """
         if self.start_date and self.done_date:
-            return business_days_between(self.start_date, self.done_date)
+            return days_between(self.start_date, self.done_date)
 
     @property
     def lead_time(self):
@@ -406,7 +406,7 @@ class Kard(app.db.Document):
         and its completion. Returns None if the card hasn't completed yet.
         """
         if self.done_date:
-            return business_days_between(self.backlog_date, self.done_date)
+            return days_between(self.backlog_date, self.done_date)
 
     def current_cycle_time(self, today=None):
         """
@@ -419,7 +419,7 @@ class Kard(app.db.Document):
 
         if not today:
             today = now()
-        return business_days_between(self.start_date, today)
+        return days_between(self.start_date, today)
 
     def current_lead_time(self, today=None):
         """
@@ -431,7 +431,7 @@ class Kard(app.db.Document):
 
         if not today:
             today = now()
-        return business_days_between(self.backlog_date, today)
+        return days_between(self.backlog_date, today)
 
     @property
     def cycle_goal(self):
