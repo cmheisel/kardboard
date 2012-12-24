@@ -55,13 +55,13 @@ class ServiceClassRecord(app.db.Document):
         for classname, cards in data.items():
             sclass = cards[0].service_class
             if cards[0].done_date:
-                cycle_time_average = average(
-                    [c.cycle_time for c in cards])
+                cycle_time_average = int(round(average(
+                    [c.cycle_time for c in cards])))
                 cards_hit_goal = len([c.key for c in cards
                     if c.cycle_time <= sclass.get('upper')])
             else:
-                cycle_time_average = average(
-                    [c.current_cycle_time() for c in cards])
+                cycle_time_average = int(round(average(
+                    [c.current_cycle_time() for c in cards])))
                 cards_hit_goal = len([c.key for c in cards
                     if c.current_cycle_time() <= sclass.get('upper')])
 
