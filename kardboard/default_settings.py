@@ -93,5 +93,10 @@ CELERYBEAT_SCHEDULE = {
     'update_flow_reports': {
         'task': 'tasks.update_flow_reports',
         'schedule': crontab(minute="*/30"),
+    },
+    # Capture/update the day's service class data
+    'queue_service_class_reports': {
+        'task': 'tasks.queue_service_class_reports',
+        'schedule': crontab(minute="*/1"),
     }
 }

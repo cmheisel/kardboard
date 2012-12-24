@@ -20,7 +20,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog, ServiceClassRecord
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -30,6 +30,7 @@ from kardboard.util import (
     month_ranges,
     log_exception,
     standard_deviation,
+    now,
 )
 
 def team(team_slug=None):
@@ -267,11 +268,10 @@ def card_block(key):
     except Kard.DoesNotExist:
         abort(404)
 
-    now = datetime.datetime.now()
     if action == 'block':
-        f = CardBlockForm(request.form, blocked_at=now)
+        f = CardBlockForm(request.form, blocked_at=now())
     if action == 'unblock':
-        f = CardUnblockForm(request.form, unblocked_at=now)
+        f = CardUnblockForm(request.form, unblocked_at=now())
 
     if 'cancel' in request.form.keys():
         return True  # redirect
@@ -461,53 +461,52 @@ def report_leaderboard(group="all", months=3, person=None, start_month=None, sta
     return render_template('leaderboard.html', **context)
 
 
-def report_types(group="all", months=3, start=None):
-    start = start or datetime.datetime.today()
-    months_ranges = month_ranges(start, months)
-    rg = ReportGroup(group, Kard.objects)
-    rg_cards = rg.queryset
-    types = list(rg_cards.distinct('_type'))
-    types.sort()
+def report_service_class(group="all", months=None):
+    from kardboard.app import app
+    service_class_order = app.config['SERVICE_CLASSES'].keys()
+    service_class_order.sort()
+    service_classes = [
+        app.config['SERVICE_CLASSES'][k] for k in service_class_order
+    ]
 
-    datatable = {
-        'headers': ('Month', 'Type', 'Throughput', 'Cycle Time', 'Lead Time'),
-        'rows': [],
-    }
-
-    months = []
-    for arange in months_ranges:
-        for typ in types:
-            row = []
-            start, end = arange
-            filtered_cards = Kard.objects.filter(done_date__gte=start,
-                done_date__lte=end, _type=typ)
-            rg = ReportGroup(group, filtered_cards)
-            cards = rg.queryset
-
-            if cards.count() > 0:
-                month_name = start.strftime("%B")
-                if month_name not in months:
-                    row.append(month_name)
-                    months.append(month_name)
-                else:
-                    row.append('')
-
-                row.append(typ)
-                row.append(cards.count())
-                row.append("%d" % cards.average('_cycle_time'))
-                row.append("%d" % cards.average('_lead_time'))
-            if row:
-                row = tuple(row)
-                datatable['rows'].append(row)
+    if months is None:
+        # We want the current report
+        start_date = make_start_date(date=now())
+        end_date = make_end_date(date=now())
+        scr = ServiceClassRecord.objects.get(
+            group=group,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        time_range = 'current'
+    else:
+        start = now()
+        months_ranges = month_ranges(start, months)
+        start_date = months_ranges[0][0]
+        end_date = months_ranges[-1][1]
+        try:
+            scr = ServiceClassRecord.objects.get(
+                group=group,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        except ServiceClassRecord.DoesNotExist:
+            scr = ServiceClassRecord.calculate(
+                group=group,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        time_range = 'past %s months' % months
 
     context = {
-        'title': "By type",
-        'updated_at': datetime.datetime.now(),
-        'datatable': datatable,
+        'title': "Service classes: %s" % time_range,
+        'service_classes': service_classes,
+        'data': scr.data,
+        'updated_at': scr.updated_at,
         'version': VERSION,
     }
 
-    return render_template('report-types.html', **context)
+    return render_template('report-service-class.html', **context)
 
 
 def report_throughput(group="all", months=3, start=None):
@@ -927,8 +926,8 @@ app.add_url_rule('/reports/<group>/flow/detail/cards/', 'report_detailed_flow_ca
 app.add_url_rule('/reports/<group>/flow/detail/cards/<int:months>/', 'report_detailed_flow_cards', report_detailed_flow_cards)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
-app.add_url_rule('/reports/<group>/types/', 'report_types', report_types)
-app.add_url_rule('/reports/<group>/types/<int:months>/', 'report_types', report_types)
+app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
+app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)
 app.add_url_rule('/reports/<group>/leaderboard/', 'report_leaderboard', report_leaderboard)
 app.add_url_rule('/reports/<group>/leaderboard/<int:months>/', 'report_leaderboard', report_leaderboard)

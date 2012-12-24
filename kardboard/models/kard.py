@@ -417,8 +417,10 @@ class Kard(app.db.Document):
         if not self.start_date:
             return None
 
-        if not today:
+        if today is None and self.done_date is None:
             today = now()
+        elif today is None and self.done_date is not None:
+            today = self.done_date
         return days_between(self.start_date, today)
 
     def current_lead_time(self, today=None):
@@ -429,8 +431,10 @@ class Kard(app.db.Document):
         if not self.backlog_date:
             return None
 
-        if not today:
+        if today is None and self.done_date is None:
             today = now()
+        elif today is None and self.done_date is not None:
+            today = self.done_date
         return days_between(self.backlog_date, today)
 
     @property

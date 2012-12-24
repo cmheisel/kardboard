@@ -99,7 +99,7 @@ class ChartIndexTests(ReportTests):
             '/all/cycle/distribution/',
             '/all/cycle/',
             '/all/flow/',
-            '/all/types/',
+            '/all/service-class/',
         ]
         for url in expected:
             self.assertIn(url, res.data)
@@ -107,7 +107,7 @@ class ChartIndexTests(ReportTests):
 
 class ServiceClassReport(DashboardTestCase):
     def _get_target_url(self, months=None):
-        base_url = '/reports/all/types/'
+        base_url = '/reports/all/service-class/'
         if months:
             base_url = base_url + "%s/" % months
         return base_url

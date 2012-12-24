@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div id="wip_data">
+<table>
+    <tr>
+        <th>Class</th>
+        <th>WIP</th>
+        <th>Ave. cyle time</th>
+        <th>Vs. goal</th>
+    </tr>
+
+    {% for sclass in service_classes %}
+    {% if not loop.last %} {# note: b/c 5 - Not Prioritized and default are the same #}
+    <tr class="{{ loop.cycle('odd', 'even') }}">
+        <td>{{ sclass['name'] }}</td>
+        {% set sclass_data = data.get(sclass['name'], {}) %}
+        <td>
+            {{ "%.01f%%"|format(sclass_data.get('wip_percent', 0)*100) }}
+            ({{ sclass_data.get('wip', 0) }})
+        </td>
+        <td>
+            {{ sclass_data.get('cycle_time_average', 0) }}
+        </td>
+        <td>
+            {{ "%.01f%%"|format(sclass_data.get('cards_hit_goal_percent', 0)*100) }}
+            ({{ sclass_data.get('cards_hit_goal') }})
+            within {{ sclass['upper'] }} days
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+
+
+{% endblock %}
