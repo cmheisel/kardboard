@@ -158,7 +158,7 @@ class DashboardTestCase(KardboardTestCase):
         from kardboard.models import Kard, DailyRecord
         self.Kard = Kard
         self.DailyRecord = DailyRecord
-        self.year = datetime.datetime.now().year
+        self.year = datetime.datetime.now().year - 1
         self.month = 6
         self.day = 15
 
