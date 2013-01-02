@@ -29,6 +29,7 @@ class MockJIRAIssue(Mock):
     resolution = '1'
     updated = datetime.datetime(2011, 12, 22, 12, 40, 19)
     created = datetime.datetime(2011, 12, 20, 10, 00, 27)
+    duedate = None
     fixVersions = [
         MockFixVersion(
             archived=False,
@@ -60,7 +61,7 @@ class MockJIRAIssue(Mock):
             customfieldId="customfield_10322",
             key=None,
             values=[
-            datetime.datetime(2012, 12, 17, 10, 10, 00), ],
+            "17/Dec/12 10:10 AM", ],
         ),
         MockRemoteCustomFieldValue(
             customfieldId="customfield_10321",

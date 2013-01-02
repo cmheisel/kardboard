@@ -3,6 +3,7 @@ import datetime
 import cPickle as pickle
 
 import statsd
+import dateutil
 
 from kardboard.app import cache
 from kardboard.app import app
@@ -361,14 +362,22 @@ class JIRAHelper(TicketHelper):
         except IndexError:
             return None
 
+    def _parse_date_string(self, datestring):
+        return dateutil.parser.parse(datestring)
+
     def id_due_date(self, issue):
         due_date_id = 10322
         custom_fields = issue.customFieldValues
-        due_date = self._get_custom_field_values(due_date_id, custom_fields) or []
+        due_date_value = self._get_custom_field_values(due_date_id, custom_fields) or []
         try:
-            return due_date[0]
+            due_date_value = due_date_value[0]
         except IndexError:
-            return None
+            due_date_value = None
+
+        if hasattr(due_date_value, "startswith"):
+            # It's a string, thanks JIRA :-/
+            due_date_value = self._parse_date_string(due_date_value)
+        return due_date_value
 
     def id_testers(self, issue):
         qa_resource_id = 10133
