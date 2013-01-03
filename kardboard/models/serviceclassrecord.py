@@ -31,7 +31,6 @@ class ServiceClassRecord(app.db.Document):
     """The report on service classes."""
 
     meta = {
-        'max_documents': 100,
         'indexes': [
             ['start_date', 'end_date', 'group'],
         ]
