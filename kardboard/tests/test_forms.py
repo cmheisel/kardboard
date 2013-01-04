@@ -188,18 +188,6 @@ class CardFormTest(FormTests):
         f.validate()
         self.assertEqual(2, len(f.start_date.errors))
 
-    def test_due_date(self):
-        self.required_data['due_date'] = u'06/12/2011'
-        f = self.Form(self._post_data())
-        f.validate()
-        self.assertEqual(0, len(f.due_date.errors))
-
-        self.required_data['due_date'] = u''
-        f = self.Form(self._post_data())
-        f.validate()
-        self.assertEqual(0, len(f.due_date.errors))
-
-
 if __name__ == "__main__":
     import unittest
     unittest.main()

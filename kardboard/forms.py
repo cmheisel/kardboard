@@ -82,8 +82,6 @@ class CardForm(Form):
     done_date = DateField(u'Done date', display_format="%m/%d/%Y",
                           validators=[done_date_validator, ])
     priority = IntegerField(u'Ordering', validators=[validators.optional()])
-    due_date = DateField(u'Due date', display_format="%m/%d/%Y",
-                         validators=[validators.optional()])
 
     def populate_obj(self, obj):
         super(CardForm, self).populate_obj(obj)
