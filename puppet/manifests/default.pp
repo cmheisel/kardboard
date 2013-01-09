@@ -30,5 +30,10 @@ class { 'kardboard':
     server => 'gunicorn',
 }
 
+
+# TODO
+# option for runserver
 # logrotate for kardboard
-# install nginx to front kardboard
+# celery for kardboard
+# nginx SSL
+#
