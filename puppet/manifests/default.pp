@@ -5,7 +5,7 @@ include git
 include devtools
 include pythondev
 include redis
-
+include memcache
 
 include mongodb
 mongodb::setup { "kardboard": }
