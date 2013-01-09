@@ -11,7 +11,7 @@ include mongodb
 mongodb::setup { "kardboard": }
 logrotate::rule { 'mongodb':
   path         => '/var/log/mongodb/*.log',
-  rotate       => 2,
+  rotate       => 1,
   rotate_every => 'day',
   postrotate   => 'killall -SIGUSR1 mongod',
 }
@@ -36,4 +36,4 @@ class { 'kardboard':
 # logrotate for kardboard
 # celery for kardboard
 # nginx SSL
-#
+# Docs on creating kardboard-local.conf and spinning up vagrant

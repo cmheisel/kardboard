@@ -80,4 +80,11 @@ class kardboard(
             kbuser => $kbuser,
         }
     }
+
+    logrotate::rule { 'kardboard':
+        path         => "/home/$kbuser/logs/*.log",
+        rotate       => 1,
+        rotate_every => 'day',
+        postrotate   => 'supervisorctl restart all',
+    }
 }
