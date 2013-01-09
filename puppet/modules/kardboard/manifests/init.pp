@@ -15,6 +15,7 @@ class kardboard(
     $server) {
     import "filesystem"
     import "user"
+    import "nginx"
 
     class { 'user':
         username => $kbuser,
@@ -73,6 +74,10 @@ class kardboard(
           group => $kbuser,
           content => template("kardboard/gunicorn.py.erb"),
           require => File["/home/$kbuser/$vepath/etc"],
+        }
+
+        class { 'nginx':
+            kbuser => $kbuser,
         }
     }
 }

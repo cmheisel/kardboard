@@ -1,0 +1,37 @@
+upstream app_server {
+  #server unix:/tmp/gunicorn.sock fail_timeout=0;
+  # For a TCP configuration:
+  server 127.0.0.1:4000 fail_timeout=0;
+}
+
+server {
+  listen 80;
+  server_name _;
+  keepalive_timeout 5;
+
+  access_log /home/<%= kbuser %>/logs/kardboard-nginx-access.log;
+  error_log /home/<%= kbuser %>/logs/kardboard-nginx-error.log;
+
+
+
+  location /static/ {
+    root /home/<%= kbuser %>/<%= vepath %>/src/kardboard/kardboard/;
+    access_log     off;
+  }
+
+  location /favicon.ico {
+    return 204;
+    access_log     off;
+    log_not_found  off;
+  }
+
+  location / {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://app_server;
+    proxy_buffers 8 16k;
+    proxy_buffer_size 32k;
+  }
+
+}
