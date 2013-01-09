@@ -4,8 +4,7 @@ import "logrotate"
 include git
 include devtools
 include pythondev
-
-#include redis
+include redis
 
 
 include mongodb
