@@ -8,3 +8,19 @@ autorestart=true
 stdout_logfile=/home/<%= kbuser %>/logs/kardboard-gunicorn.log
 redirect_stderr=true
 <% end %>
+
+[program:kardboard-celery]
+command=runinenv /home/<%= kbuser %>/<%= vepath %> /home/<%= kbuser %>/<%= vepath %>/src/kardboard/kardboard/manage.py celeryd --purge -B
+
+; Set PATH to your virtualenv
+environment=PATH='/bin:/usr/bin:/home/<%= kbuser %>/<%= vepath %>/bin/',KARDBOARD_SETTINGS='<%= conf %>'
+directory=/home/<%= kbuser %>/<%= vepath %>
+user=<%= kbuser %>
+numprocs=1
+stdout_logfile=/home/<%= kbuser %>/logs/kardboard-celeryd.log
+redirect_stderr=true
+autostart=true
+autorestart=true
+startsecs=20
+stopwaitsecs = 600
+priority=998

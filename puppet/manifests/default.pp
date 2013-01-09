@@ -33,7 +33,5 @@ class { 'kardboard':
 
 # TODO
 # option for runserver
-# logrotate for kardboard
-# celery for kardboard
 # nginx SSL
 # Docs on creating kardboard-local.conf and spinning up vagrant
