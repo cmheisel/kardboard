@@ -1,6 +1,12 @@
 # Set global package provider
 Package { provider => 'aptitude' }
 import "logrotate"
+include git
+#include devtools
+#include pythondev
+
+#include redis
+
 
 include mongodb
 mongodb::setup { "kardboard": }
@@ -11,13 +17,6 @@ logrotate::rule { 'mongodb':
   postrotate   => 'killall -SIGUSR1 mongod',
 }
 
-#TODO
-
-#include git
-#include devtools
-#include pythondev
-
-#include redis
 
 #import "kardboard"
 #class { 'kardboard':
