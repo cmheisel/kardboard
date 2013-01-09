@@ -3,7 +3,7 @@ Package { provider => 'aptitude' }
 import "logrotate"
 include git
 include devtools
-#include pythondev
+include pythondev
 
 #include redis
 
