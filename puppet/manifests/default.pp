@@ -19,11 +19,6 @@ logrotate::rule { 'mongodb':
 
 import "kardboard"
 class { 'kardboard':
-# TODO
-#    get runserver working
-#    get celery working
-#    integrate mongo backup script
-#    get supervisor installed
     kbuser => 'vagrant',
     src => '/vagrant',
     conf => '/vagrant/kardboard-local.cfg',
@@ -32,6 +27,6 @@ class { 'kardboard':
 
 
 # TODO
-# option for runserver
-# nginx SSL
 # Docs on creating kardboard-local.conf and spinning up vagrant
+# nginx SSL
+#    integrate mongo backup script

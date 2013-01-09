@@ -16,7 +16,7 @@ def profile_run():
 
 def run():
     app.logger.setLevel(logging.DEBUG)
-    app.run(debug=True, use_reloader=True)
+    app.run(debug=True, use_reloader=True, host= '0.0.0.0')
 
 if __name__ == "__main__":
     if "profile" in sys.argv:

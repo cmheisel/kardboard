@@ -7,8 +7,8 @@ Vagrant::Config.run do |config|
   config.vm.box_url = "http://files.vagrantup.com/lucid64.box"
 
   config.vm.network :hostonly, "33.33.33.33"
-  # Forward host port 4000 to guest port 4000
-  config.vm.forward_port 4000, 4000
+  # Forward host port X to guest port Y
+  config.vm.forward_port 5000, 5000
   config.vm.forward_port 80, 8080
 
   config.vm.provision :puppet do |puppet|
