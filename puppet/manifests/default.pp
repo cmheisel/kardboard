@@ -17,9 +17,18 @@ logrotate::rule { 'mongodb':
 }
 
 
-#import "kardboard"
-#class { 'kardboard':
+import "kardboard"
+class { 'kardboard':
+# TODO
+#    get runserver working
+#    get celery working
 #    integrate mongo backup script
-#    kbuser => 'vagrant',
-#    src => '/vagrant',
-#}
+#    get supervisor installed
+    kbuser => 'vagrant',
+    src => '/vagrant',
+    conf => '/vagrant/kardboard-local.cfg',
+    server => 'gunicorn',
+}
+
+# logrotate for kardboard
+# install nginx to front kardboard

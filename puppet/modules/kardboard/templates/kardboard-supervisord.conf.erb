@@ -1,0 +1,10 @@
+<% if server = 'gunicorn' %>[program:kardboard]
+command=runinenv /home/<%= kbuser %>/<%= vepath %> gunicorn -c /home/<%= kbuser %>/<%= vepath %>/etc/gunicorn.py kardboard.views:app
+environment=PATH='/bin:/usr/bin:/home/<%= kbuser %>/<%= vepath %>/bin/',KARDBOARD_SETTINGS='<%= conf %>'
+directory=/home/<%= kbuser %>/<%= vepath %>
+user=<%= kbuser %>
+autostart=true
+autorestart=true
+stdout_logfile=/home/<%= kbuser %>/logs/kardboard-gunicorn.log
+redirect_stderr=true
+<% end %>
