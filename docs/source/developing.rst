@@ -1,48 +1,64 @@
 Developing kardboard
 =====================
 
-Quickstart
-------------
+Using Vagrant
+----------------
+The way to develop on kardboard is via Vagrant_ , powered by the included Puppet files.
 
-To get a local version of kardboard up and running suitable for developing against, you can follow this quickstart guide.
-
+Default setup
+~~~~~~~~~~~~~~~~~
 .. code-block:: bash
-
-
-    # Install python, virtualenv and mongodb using your favorite system package manager here.
-    # aptitude install gcc python2.6 python2.6-dev python-virtualenv redis-server>=2.4 mongodb>=2.0
-    # These may differ on your local environment. In particular, a different python version
-    # may be present locally. Use of the python and python-dev metapackages on debian is encouraged.
-    # If using OSX, you should at least install mongo and redis. We recommend using Homebrew_.
-.. _Homebrew: https://github.com/mxcl/homebrew
-    # brew install mongodb redis
 
     # Get the source, using your own fork most likely
     git clone git@github.com:cmheisel/kardboard.git
 
-    # Make a virtualenv
     cd kardboard
-    virtualenv .kve
+    vagrant up
+    # ...wait...
+    vagrant ssh
+    touch kardboardve/src/kardboard/kardboard-local.conf
+    source kardboardve/bin/activate
+    cd kardboardve/src/kardboard
+    py.test kardboard
 
-    # Turn it on
-    source ./.kve/bin/activate
 
-    # Install the requirements
-    pip install -r requirements.txt
+You now have a fully functional kardboard application running under production like environment.
 
-    # Start mongo and drop it into the background
-    mkdir var
-    mongod --fork --logpath=./var/mongo.log --dbpath=./var/
+* The application is served by gunicorn_ and nginx_ and is available at http://localhost:8080/ from your host machine. It runs at http://localhost:80/ on the guest.
+* Memcache_ is running and used by the application
+* Redis_ is running and used as the queue for your running celery_ process
+* Both the application and celery_ processes are adminsitered through supervisord_
+* You can restart both the application and the celery_ processes, say to pick up your changes, by doing the following:
 
-    # Start redis (only if you're running celery)
-    redis-server /usr/local/etc/redis.conf
+.. code-block:: bash
 
-    # Ensure the module is on sys.path
-    # Failed to import module kardboard errors occur otherwise.
-    python setup.py develop
+    vagrant ssh
+    sudo supervisorctl restart all
 
-    # Start the celery process
-    python kardboard/manage.py celeryd -B
+* Logs for the application, gunicorn_, nginx_ and celery_ are in /home/vagrant/logs/
 
-    # Start the server
-    python kardboard/runserver.py
+Development server
+~~~~~~~~~~~~~~~~~~
+
+Testing against a production like environment is all well and good for you, like vegetables. But during development you'll likely want something tastier, like cookies, or a auto-reloading web server.
+
+.. code-block:: bash
+
+    vagrant ssh
+    export KARDBOARD_SETTINGS=/vagrant/kardboard-local.cfg
+    cd /home/vagrant/kardboardve/
+    source bin/activate
+    python src/kardboard/kardboard/runserver.py
+
+The application is now available at http://localhost:5000/ from your host machine.
+
+
+
+.. _Vagrant: http://www.vagrantup.com
+.. _Puppet: http://puppetlabs.com
+.. _celery: http://celeryproject.org
+.. _nginx: http://nginx.org
+.. _gunicorn: http://gunicorn.org
+.. _supervisord: http://supervisord.org
+.. _redis: http://redis.io
+.. _memcache: http://memcached.org

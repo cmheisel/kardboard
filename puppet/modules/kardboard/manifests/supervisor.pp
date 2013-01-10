@@ -20,9 +20,9 @@ class supervisor(
     service { 'supervisor':
       enable => true,
       ensure => running,
-      require => [Package["supervisor"], Exec['setup-develop'], Exec['install-requirements'], File['/bin/runinenv']],
       hasrestart => false,
       hasstatus => false,
       provider => init,
+      require => [Package["supervisor"], Exec['setup-develop'], Exec['install-requirements'], File['/bin/runinenv'], Service['redis'], Service['mongodb'], Service['memcached']],
     }
 }
