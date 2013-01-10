@@ -26,7 +26,6 @@ class KardboardTestCase(unittest2.TestCase):
 
         app.config.from_object('kardboard.default_settings')
         app.config['MONGODB_DB'] = 'kardboard_unittest'
-        app.config['DEBUG'] = True
         app.config['TESTING'] = True
         app.config['CELERY_ALWAYS_EAGER'] = True
         connect(app.config['MONGODB_DB'])
@@ -60,7 +59,7 @@ class KardboardTestCase(unittest2.TestCase):
         from mongoengine.connection import _get_db
         db = _get_db()
         #Truncate/wipe the test database
-        names = [name for name in db.collection_names() \
+        names = [name for name in db.collection_names()
             if 'system.' not in name]
         [db.drop_collection(name) for name in names]
 

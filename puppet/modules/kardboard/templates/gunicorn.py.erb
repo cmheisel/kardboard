@@ -1,0 +1,17 @@
+import multiprocessing
+
+bind = "127.0.0.1:4000"
+logfile = "/home/<%= kbuser %>/logs/kardboard-gunicorn.log"
+loglevel = "info"
+workers = multiprocessing.cpu_count() * 2 + 1
+debug = False
+daemon = False
+pidfile = '/tmp/gunicorn.pid'
+worker_class = "sync"
+preload_app = True
+
+backlog = 2048
+timeout = 30
+keepalive = 2
+
+user = "<%= kbuser %>"
