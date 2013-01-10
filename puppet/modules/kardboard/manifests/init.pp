@@ -50,11 +50,22 @@ class kardboard(
       user => $kbuser,
       path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
       cwd => "/home/$kbuser/$vepath/",
-      command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
-      unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep unittest2",
+      command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements-deployment.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
+      unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep Flask",
       logoutput => on_failure,
       timeout => 0, # Run forevers
       require => [Package['gcc'], Package['python2.6-dev'], Package['python-virtualenv'], Exec['kardboard-src'],]
+    }
+
+    exec { 'install-dev-reqs':
+      user => $kbuser,
+      path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
+      cwd => "/home/$kbuser/$vepath/",
+      command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements-development.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
+      unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep unittest2",
+      logoutput => on_failure,
+      timeout => 0, # Run forevers
+      require => Exec['install-requirements']
     }
 
     # Needs runinvenv

@@ -1,0 +1,6 @@
+-r requirements.txt
+
+#Needed for deployment
+gunicorn==0.14.3
+setproctitle==1.1.6
+Fabric==1.2.0

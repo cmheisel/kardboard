@@ -1,0 +1,7 @@
+-r requirements-testing.txt
+
+#Needed for docs
+Pygments==1.4
+Sphinx==1.0.7
+
+Flask-DebugToolbar==0.7.1 #Developing

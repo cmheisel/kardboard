@@ -8,7 +8,11 @@ from flask import Flask
 from flaskext.cache import Cache
 from flask.ext.mongoengine import MongoEngine
 from jinja2 import ModuleLoader
-from flask_debugtoolbar import DebugToolbarExtension
+try:
+    from flask_debugtoolbar import DebugToolbarExtension
+    DEBUG_TOOLBAR = True
+except ImportError:
+    DEBUG_TOOLBAR = False
 
 from kardboard.util import (
     slugify,
@@ -68,4 +72,6 @@ def get_app():
 
 app = get_app()
 cache = Cache(app)
-toolbar = DebugToolbarExtension(app)
+
+if DEBUG_TOOLBAR:
+    toolbar = DebugToolbarExtension(app)
