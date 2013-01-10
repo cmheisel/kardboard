@@ -5,7 +5,7 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install gcc libevent-1.4-2 libevent-dev
 # command to install dependencies
-install: pip install -q -r requirements.txt --use-mirrors
+install: pip install -q -r requirements.txt --use-mirrors --find-links file:///./sdists/
 services:
     - mongodb
     - redis
