@@ -50,7 +50,7 @@ class kardboard(
       user => $kbuser,
       path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
       cwd => "/home/$kbuser/$vepath/",
-      command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements.txt",
+      command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
       unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep unittest2",
       logoutput => on_failure,
       timeout => 0, # Run forevers
