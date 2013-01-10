@@ -40,7 +40,7 @@ def get_app():
     app.jinja_env.globals['newrelic_foot'] = newrelic_foot
 
 
-    if not app.config.get('TEMPLATE_DEBUG', False):
+    if app.config.get('COMPILE_TEMPLATES', False):
         compiled_templates = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'compiled_templates')
         compiled_files = path.path(compiled_templates).files()
         if len(compiled_files) <= 1:

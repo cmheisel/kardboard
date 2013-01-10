@@ -2,6 +2,9 @@ MONGODB_DB = 'kardboard'
 
 MONGODB_PORT = 27017
 
+DEBUG = False
+TEMPLATE_DEBUG = False
+
 SECRET_KEY = 'yougonnawannachangethis'
 
 CACHE_TYPE = 'simple'
