@@ -1,3 +1,5 @@
+--no-deps
+
 #Needed for testing
 mock==0.7.2
 unittest2==0.5.1

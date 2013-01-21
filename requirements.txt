@@ -1,4 +1,5 @@
--i https://simple.crate.io/
+--no-deps
+
 Flask==0.8
 Flask-WTF==0.5.2
 
