@@ -3,5 +3,8 @@
 #Needed for docs
 Pygments==1.4
 Sphinx==1.0.7
+docutils==0.10
+tox==1.4.2
+
 
 Flask-DebugToolbar==0.7.1 #Developing

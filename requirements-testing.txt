@@ -6,3 +6,4 @@ unittest2==0.5.1
 pytest==2.2.3
 pytest-pep8==0.7
 pep8==1.2
+py==1.4.12
