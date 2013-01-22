@@ -3,9 +3,9 @@
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Ticket</th>
-        <th>Type</th>
-        <th>Version</th>
-        <th>Title</th>
+        <th class="type_col">Type</th>
+        <th class="sclass_col">Service Class</th>
+        <th class="title_col">Title</th>
 
 
 
@@ -37,7 +37,7 @@
             {% if card.ticket_system_data %}
                 {% set icon = card.ticket_system_data.get('status', {}).get('icon').replace('http:', 'https:') %}
                 {% set status_label = card.ticket_system_data.get('status', {}).get('name', '') %}
-                {% if icon %}
+                {% if icon and 'status_closed' not in icon %}
                 <img src="{{ icon }}" alt="{{ status_label }}" title="{{ status_label }}" width="16" height="16" />
                 {% endif %}
             {% else %}
@@ -51,7 +51,7 @@
 
         <td>{{ card.type }}</td>
 
-        <td>{{ card.ticket_system.get_version() }}</td>
+        <td>{{ card.service_class['name'] }}</td>
 
         <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>

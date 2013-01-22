@@ -111,8 +111,8 @@ table {
     border-collapse: collapse;
     border-spacing: 0px;
     text-align: left;
-    width: 80%;
-    margin: 0 10% 20px 10%;
+    width: 90%;
+    margin: 0 5% 20px 5%;
 }
 
 table tr.even {
@@ -136,16 +136,8 @@ table a:hover {
     text-decoration: underline;
 }
 
-th.doneon {
-    width: 10%;
-}
-
-table .date_col {
-    width: 11%;
-}
-
-table .key_col {
-    width: 20%;
+table th.key_col, table th.type_col, table th.sclass_col, table th.date_col {
+    width: 12%;
 }
 
 table td.cycle_in_goal {
