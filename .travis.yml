@@ -9,8 +9,8 @@ python:
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install gcc libevent-1.4-2 libevent-dev
-    - pip install -q -r requirements.txt --no-deps --find-links file://./sdists/
-    - pip install -q -r requirements-testing.txt --no-deps --find-links file://./sdists/
+    - pip install -q -r requirements.txt --no-deps --find-links file://$CI_HOME/./sdists/
+    - pip install -q -r requirements-testing.txt --no-deps --find-links file://CI_HOME./sdists/
 # command to install dependencies
 install:
 services:
