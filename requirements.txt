@@ -29,6 +29,5 @@ path.py==2.2.2
 python-statsd==1.5.6
 
 argparse==1.2.1
-blinker==1.2
 importlib==1.0.2
 ordereddict==1.1
