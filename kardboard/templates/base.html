@@ -14,6 +14,7 @@
         </title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?{{ version|slugify }}" type="text/css">
         <link rel="stylesheet" href="{{ url_for('static', filename='bigscreen.css') }}?{{ version|slugify }}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}?{{ version|slugify }}">
 
         {% if config.get('LOGGR_KEY', None) %}
             {% set loggr_key = config['LOGGR_KEY'] %}

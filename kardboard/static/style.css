@@ -323,6 +323,11 @@ table.board div.card_on_board div.card_key {
     border-top-right-radius: 6px;
 }
 
+table.board div.card_on_board div.card_key i {
+    font-weight: normal;
+    font-size: 1em;
+}
+
 table.board div.card_on_board div.card_key span {
     font-weight: bold;
 }
