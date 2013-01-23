@@ -2,9 +2,11 @@ from dateutil.relativedelta import relativedelta
 from kardboard.models import Kard, ReportGroup, FlowReport, DailyRecord
 from kardboard.util import make_start_date, make_end_date
 
+
 def parse_date(datestr):
     from dateutil import parser
     return parser.parse(datestr)
+
 
 def daily_throughput_average(stop, weeks=4):
     start = (stop - relativedelta(days=weeks * 7)) + relativedelta(days=1)
@@ -17,10 +19,11 @@ def daily_throughput_average(stop, weeks=4):
     kards = list(ReportGroup('dev', query).queryset)
     return len(kards) / float(weeks * 7)
 
+
 def find_wip(stop):
     sl = FlowReport.objects.get(
-        date = make_end_date(date=stop),
-        group = 'dev',
+        date=make_end_date(date=stop),
+        group='dev',
     )
 
     exclude = [u'Backlog', u'Done', ]
@@ -31,13 +34,15 @@ def find_wip(stop):
 
     return wip
 
+
 def find_cycle_time_ave(stop):
     dr = DailyRecord.objects.get(
-        date = make_end_date(date=stop),
-        group = 'dev',
+        date=make_end_date(date=stop),
+        group='dev',
     )
 
     return dr.moving_cycle_time
+
 
 def moving_data(start, stop):
     query = Kard.objects.filter(
@@ -65,6 +70,7 @@ def moving_data(start, stop):
     }
     return data
 
+
 def print_data(data):
     print "%s - %s\nF: %s\tB: %s\tL: %s\tC: %s\tW: %s" % (
         data['start'],
@@ -76,6 +82,7 @@ def print_data(data):
         data['wip'],
     )
 
+
 def weekly_moving_data(start):
     start = parse_date(start)
     stop = start + relativedelta(days=6)
@@ -83,6 +90,7 @@ def weekly_moving_data(start):
     start = make_start_date(date=start)
     stop = make_end_date(date=stop)
     return moving_data(start, stop)
+
 
 if __name__ == "__main__":
     import sys
