@@ -25,9 +25,9 @@ class States(object):
         Find all states, in order, that come after after backlog
         but before done.
         """
-        pre_done = [s for s in self.states if self.states.index(s) < self.states.index(self.done)]
-        last_state_before_start = self.pre_start[-1]
-        in_progress = [s for s in pre_done if self.states.index(s) > self.states.index(last_state_before_start)]
+        in_progress = [s for s in self.states
+            if self.states.index(s) > self.states.index(self.backlog) and
+            self.states.index(s) < self.states.index(self.done)]
         return in_progress
 
     def _find_done(self):
@@ -55,7 +55,7 @@ class States(object):
     def __str__(self):
         return str(self.states)
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self.states[key]
 
     def index(self, *args, **kwargs):

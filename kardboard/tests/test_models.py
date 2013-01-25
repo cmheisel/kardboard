@@ -199,7 +199,7 @@ class StatesTests(KardboardTestCase):
         expected = 'In Progress'
         self.assertEqual(expected, states.start)
 
-        expected = ['In Progress', 'Testing', 'Deploy']
+        expected = ['Planning', 'In Progress', 'Testing', 'Deploy']
         self.assertEqual(expected, states.in_progress)
 
         expected = 'Done'
