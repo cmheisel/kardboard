@@ -11,6 +11,7 @@ from flask.ext.mongoengine import QuerySet
 
 from kardboard.models.blocker import BlockerRecord
 from kardboard.models.states import States
+from kardboard.services import ticketdatasync
 from kardboard.util import (
     now,
     days_between,
@@ -298,10 +299,7 @@ class Kard(app.db.Document):
         if ticket_class:
             self._service_class = ticket_class
 
-        ticket_due_date = self.ticket_system_data.get('due_date', None)
-        if ticket_due_date is not None:
-            self.due_date = ticket_due_date
-
+        ticketdatasync.set_due_date_from_ticket(self, self.ticket_system_data)
 
         self._auto_state_changes()
         super(Kard, self).save(*args, **kwargs)
