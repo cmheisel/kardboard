@@ -2,6 +2,7 @@ env:
   global:
     - REPO="cmheisel/kardboard"
     - CI_HOME=`pwd`/$REPO
+    - SDISTS=file://$CI_HOME/sdists/
 
 language: python
 python:
@@ -10,8 +11,8 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install gcc libevent-1.4-2 libevent-dev
     - echo $CI_HOME
-    - pip install -q -r requirements.txt --no-index --no-deps --find-links file://$CI_HOME/sdists/
-    - pip install -q -r requirements-testing.txt --no-index --no-deps --find-links file://$CI_HOME/sdists/
+    - pip install -q -r requirements.txt --no-index --no-deps --find-links $SDISTS
+    - pip install -q -r requirements-testing.txt --no-index --no-deps --find-links $SDISTS
 # command to install dependencies
 install:
 services:
