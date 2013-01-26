@@ -1,6 +1,6 @@
 env:
   global:
-    - REPO="cmheisel/"
+    - REPO="cmheisel/kardboard"
     - CI_HOME=`pwd`/$REPO
 
 language: python
