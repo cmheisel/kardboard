@@ -20,7 +20,7 @@ from flask import (
 import kardboard.auth
 from kardboard.version import VERSION
 from kardboard.app import app
-from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog, ServiceClassRecord
+from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog, ServiceClassRecord, ServiceClassSnapshot
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.util import (
@@ -470,13 +470,14 @@ def report_service_class(group="all", months=None):
 
     if months is None:
         # We want the current report
-        start_date = make_start_date(date=now())
-        end_date = make_end_date(date=now())
-        scr = ServiceClassRecord.objects.get(
-            group=group,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        try:
+            scr = ServiceClassSnapshot.objects.get(
+                group=group,
+            )
+        except ServiceClassSnapshot.DoesNotExist:
+            scr = ServiceClassSnapshot.calculate(
+                group=group,
+            )
         time_range = 'current'
     else:
         start = now()

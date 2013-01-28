@@ -9,4 +9,4 @@ from kardboard.models.boards import DisplayBoard
 from kardboard.models.personcardset import PersonCardSet
 from kardboard.models.flowreport import FlowReport
 from kardboard.models.statelog import StateLog
-from kardboard.models.serviceclassrecord import ServiceClassRecord
+from kardboard.models.serviceclassrecord import ServiceClassRecord, ServiceClassSnapshot
