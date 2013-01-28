@@ -56,7 +56,7 @@ TICKET_AUTH = False
 TICKET_UPDATE_THRESHOLD = 60 * 5
 
 from celery.schedules import crontab
-CELERYBEAT_SCHEDULE = {
+ZCELERYBEAT_SCHEDULE = {
     # How often should we look for old tickets and queue them for updates
     'load-update-queue': {
         'task': 'tasks.queue_updates',
@@ -97,6 +97,14 @@ CELERYBEAT_SCHEDULE = {
         'task': 'tasks.update_flow_reports',
         'schedule': crontab(minute="*/30"),
     },
+    # Capture/update the day's service class data
+    'queue_service_class_reports': {
+        'task': 'tasks.queue_service_class_reports',
+        'schedule': crontab(minute="*/1"),
+    }
+}
+
+CELERYBEAT_SCHEDULE = {
     # Capture/update the day's service class data
     'queue_service_class_reports': {
         'task': 'tasks.queue_service_class_reports',

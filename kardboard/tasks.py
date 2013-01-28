@@ -174,30 +174,33 @@ def queue_daily_record_updates(days=365):
 @celery.task(name="tasks.queue_service_class_reports", ignore_result=True)
 def queue_service_class_reports():
     from kardboard.app import app
-    from kardboard.models import ServiceClassRecord
+    from kardboard.models import ServiceClassRecord, ServiceClassSnapshot
     from kardboard.util import now, month_ranges
 
+    logger = queue_service_class_reports.get_logger()
     report_groups = app.config.get('REPORT_GROUPS', {})
     group_slugs = report_groups.keys()
     group_slugs.append('all')
 
     for slug in group_slugs:
-        ServiceClassRecord.calculate_current(slug)
+        logger.info("ServiceClassSnapshot: %s" % slug)
+        ServiceClassSnapshot.calculate(slug)
         for x in [1, 3, 6, 9, 12]:
             start = now()
             months_ranges = month_ranges(start, x)
             start_date = months_ranges[0][0]
             end_date = months_ranges[-1][1]
             try:
+                logger.info("ServiceClassRecord: %s %s - %s" % (slug, start_date, end_date))
                 ServiceClassRecord.calculate(
                     start_date=start_date,
                     end_date=end_date,
                     group=slug,
                 )
-            except Exception:
-                print "ERROR: Couldn't calc record: %s / %s / %s" % \
+            except Exception, e:
+                msg = "ERROR: Couldn't calc record: %s / %s / %s" % \
                     (slug, start_date, end_date)
-                raise
+                log_exception(e, msg)
 
 
 @celery.task(name="tasks.update_flow_reports", ignore_result=True)
