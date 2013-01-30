@@ -664,13 +664,13 @@ def report_cycle_distribution(group="all", months=3, limit=None):
         defects_only = True
 
     ranges = (
-        (0, 4, "Less than 5 days"),
-        (5, 10, "5-10 days"),
-        (11, 15, "11-15 days"),
-        (16, 20, "16-20 days"),
-        (21, 25, "21-25 days"),
-        (26, 30, "26-30 days",),
-        (31, 9999, "> 30 days"),
+        (0, 6, "Less than 7 days"),
+        (7, 14, "7-14 days"),
+        (15, 21, "15-21 days"),
+        (22, 28, "22-28 days"),
+        (29, 35, "29-35 days"),
+        (36, 42, "36-42 days",),
+        (43, 99999, "> 42 days"),
     )
     today = datetime.datetime.today()
     start_day = today - relativedelta.relativedelta(months=months)
