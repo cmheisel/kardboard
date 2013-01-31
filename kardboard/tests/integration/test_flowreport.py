@@ -1,4 +1,4 @@
-from core import KardboardTestCase
+from kardboard.tests.core import KardboardTestCase
 
 
 class FlowReportTestCase(KardboardTestCase):
