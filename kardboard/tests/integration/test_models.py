@@ -17,7 +17,7 @@ class DisplayBoardTests(KardboardTestCase):
 
         from kardboard.models import States
         self.states = States()
-        self.teams = self.config.get('CARD_TEAMS')
+        self.teams = ['Team 1', 'Team 2']
         self._set_up_cards()
 
     def _set_up_cards(self):

@@ -161,8 +161,8 @@ class DashboardTestCase(KardboardTestCase):
         self.month = 6
         self.day = 15
 
-        self.team1 = self.config['CARD_TEAMS'][0]
-        self.team2 = self.config['CARD_TEAMS'][1]
+        self.team1 = 'Team 1'
+        self.team2 = 'Team 2'
 
         self.backlogged_date = datetime.datetime(
             year=self.year, month=self.month, day=12)

@@ -14,7 +14,7 @@ class FlowReportTestCase(KardboardTestCase):
         start_date = self._date('start', days=-5)
         done_date = self._date('end')
 
-        self.teams = self.config.get('CARD_TEAMS')
+        self.teams = ['Team 1', 'Team 2']
         team1 = self.teams[0]
         team2 = self.teams[1]
 
