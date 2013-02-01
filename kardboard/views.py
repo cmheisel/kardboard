@@ -57,14 +57,25 @@ def team(team_slug=None):
     three_months_ago = date - relativedelta.relativedelta(months=3)
     done_past_three_months = Kard.objects.filter(team=target_team,
         done_date__exists=True, done_date__gte=three_months_ago)
-    std_dev = standard_deviation([k.cycle_time for k in done_past_three_months])
+    try:
+        std_dev = standard_deviation([k.cycle_time for k in done_past_three_months])
+    except TypeError, e:
+        std_dev = None
+        bad_cards = [k.key for k in done_past_three_months if k.cycle_time is None]
+        message = "Can't derive std_dev because of: %s" % bad_cards
+        log_exception(e, message)
+
     ave_cycle_time = Kard.objects.filter(team=target_team).moving_cycle_time(
         year=date.year, month=date.month, day=date.day)
-    confidence_cycle = round(ave_cycle_time + std_dev + std_dev)
-    try:
-        confidence_cycle = int(confidence_cycle)
-    except ValueError:
-        pass
+
+    if std_dev is not None:
+        confidence_cycle = round(ave_cycle_time + std_dev + std_dev)
+        try:
+            confidence_cycle = int(confidence_cycle)
+        except ValueError:
+            pass
+    else:
+        confidence_cycle = "Error"
 
 
     metrics = [
