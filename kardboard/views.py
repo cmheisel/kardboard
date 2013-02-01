@@ -97,6 +97,7 @@ def team(team_slug=None):
         'title': title,
         'team_slug': team_slug,
         'target_team': target_team,
+        'team': teams.find_by_name(target_team),
         'metrics': metrics,
         'report_config': report_config,
         'board': board,

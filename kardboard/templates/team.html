@@ -12,7 +12,12 @@
     <div class="metric">
       {% for name, value in m.items() %}
           <h2>{{ name }}</h2>
-          <p class="value">{{ value }}</p>
+          <p class="value">
+            {{ value }}
+            {% if name == "WIP" and team and team.wip_limit %}
+            / {{ team.wip_limit }}
+            {% endif %}
+          </p>
       {% endfor %}
     </div>
     {% endfor %}
