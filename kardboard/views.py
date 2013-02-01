@@ -23,8 +23,8 @@ from kardboard.app import app
 from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, DisplayBoard, PersonCardSet, FlowReport, StateLog, ServiceClassRecord, ServiceClassSnapshot
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
+from kardboard.services import teams as teams_service
 from kardboard.util import (
-    slugify,
     make_start_date,
     make_end_date,
     month_ranges,
@@ -36,13 +36,12 @@ from kardboard.util import (
 def team(team_slug=None):
     date = datetime.datetime.now()
     date = make_end_date(date=date)
-    teams = app.config.get('CARD_TEAMS', [])
+    teams = teams_service.setup_teams(
+        app.config
+    )
     states = States()
 
-    team_mapping = {}
-    for team in teams:
-        team_mapping[slugify(team)] = team
-
+    team_mapping = teams.slug_name_mapping
     target_team = None
     if team_slug:
         target_team = team_mapping.get(team_slug, None)
@@ -158,9 +157,11 @@ def _init_card_form(*args, **kwargs):
     if states:
         f.state.choices = states.for_forms
 
-    teams = app.config.get('CARD_TEAMS')
+    teams = teams_service.setup_teams(
+        app.config
+    )
     if teams:
-        f.team.choices = _make_choice_field_ready(teams)
+        f.team.choices = _make_choice_field_ready(teams.names)
 
     return f
 

@@ -14,6 +14,7 @@ from kardboard.models import Kard, States
 
 def _make_choice_field_ready(choice_list):
     choices = [(choice, choice) for choice in choice_list]
+    choices.insert(0, ('', ''))
     return tuple(choices)
 
 
