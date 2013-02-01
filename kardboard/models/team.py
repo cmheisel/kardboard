@@ -25,3 +25,7 @@ class TeamList(list):
         return dict(
             [(t.slug, t.name) for t in self.teams]
         )
+
+    def find_by_name(self, name):
+        index = self.names.index(name)
+        return self.teams[index]

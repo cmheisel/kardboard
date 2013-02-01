@@ -68,3 +68,8 @@ class TeamListTests(unittest2.TestCase):
         }
         actual = self.teams.slug_name_mapping
         assert expected == actual
+
+    def test_find_by_name(self):
+        expected = self.teams[1]
+        actual = self.teams.find_by_name('Team 2')
+        assert expected == actual
