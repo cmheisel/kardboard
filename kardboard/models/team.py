@@ -2,8 +2,9 @@ from kardboard.util import slugify
 
 
 class Team(object):
-    def __init__(self, name):
+    def __init__(self, name, wip_limit=0):
         self.name = name.strip()
+        self.wip_limit = wip_limit
 
     @property
     def slug(self):

@@ -108,9 +108,9 @@ The list of states, or columns, that a card could be in. **The last state should
 
 CARD_TEAMS
 ^^^^^^^^^^^^
-Default: ``[ 'Team 1', 'Team 2', ]``
+Default: ``[  ('Team 1', ), ('Team 2', 10), ]``
 
-The list of teams or individuals working on cards. This allows you to have "mini-boards" for each team/person while still seeing a "meta-board" that shows you cards across all states from all teams.
+The list of teams, and optionally their work-in-progress limits working on cards. This allows you to have "mini-boards" for each team/person while still seeing a "meta-board" that shows you cards across all states from all teams.
 
 CYCLE_TIME_GOAL
 ^^^^^^^^^^^^^^^^

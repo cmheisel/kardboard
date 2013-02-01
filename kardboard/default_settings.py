@@ -22,8 +22,8 @@ START_STATE = 1
 DONE_STATE = -1
 
 CARD_TEAMS = [
-    'Team 1',
-    'Team 2',
+    ('Team 1', ),
+    ('Team 2', 10),
 ]
 
 REPORT_GROUPS = {
