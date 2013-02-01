@@ -102,6 +102,7 @@ def team(team_slug=None):
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
+        'teams': teams,
         'version': VERSION,
     }
 
@@ -130,12 +131,17 @@ def state():
         {'Done this week': len(done_this_week)},
     ]
 
+    teams = teams_service.setup_teams(
+        app.config
+    )
+
     context = {
         'title': title,
         'board': board,
         'states': states,
         'metrics': metrics,
         'date': date,
+        'teams': teams,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
