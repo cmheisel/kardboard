@@ -12,7 +12,12 @@
     <div class="metric">
       {% for name, value in m.items() %}
           <h2>{{ name }}</h2>
-          <p class="value">{{ value }}</p>
+          <p class="value">
+            {{ value }}
+            {% if name == "WIP" and team and team.wip_limit %}
+            / {{ team.wip_limit }}
+            {% endif %}
+          </p>
       {% endfor %}
     </div>
     {% endfor %}
@@ -27,10 +32,8 @@
 {% endif %}
 
 <p class="nav">
-{% for team in config.get('CARD_TEAMS', []) %}
-    {% if team %}
-    <a href="{{ url_for('team', team_slug=team|slugify) }}">{{ team }}</a>{% if not loop.last %} / {% endif %}
-    {% endif %}
+{% for team in teams %}
+    <a href="{{ url_for('team', team_slug=team.slug) }}">{{ team.name }}</a>{% if not loop.last %} / {% endif %}
 {% endfor %}
 </p>
 

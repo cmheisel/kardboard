@@ -10,3 +10,4 @@ from kardboard.models.personcardset import PersonCardSet
 from kardboard.models.flowreport import FlowReport
 from kardboard.models.statelog import StateLog
 from kardboard.models.serviceclassrecord import ServiceClassRecord, ServiceClassSnapshot
+from kardboard.models.team import Team, TeamList

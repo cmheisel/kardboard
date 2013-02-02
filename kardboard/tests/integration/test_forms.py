@@ -42,10 +42,6 @@ class CardFormTest(FormTests):
             'Done',
         ]
 
-        self.config['CARD_TEAMS'] = [
-            'Team 1',
-            'Team 2',
-        ]
         self.Form = self._get_target_class()
         self.required_data = {
             'key': u'CMSIF-199',
