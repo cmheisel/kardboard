@@ -30,9 +30,36 @@ class TeamStatsTest(unittest2.TestCase):
                 done_date__lte=end_expected,
             )
 
+    def test_wip(self):
+        from kardboard.models import States
+        states = States()
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            self.service.wip()
+            mock_Kard.objects.filter.assert_called_with(
+                team=self.team,
+                done_date=None,
+                state__in=states.in_progress,
+            )
+
+    def test_wip_count(self):
+        with mock.patch.object(self.service, 'wip') as mock_wip:
+            mock_wip.return_value = [i for i in range(9)]
+            assert 9 == self.service.wip_count()
+
     def test_weekly_throughput_ave(self):
         return_value = [i for i in range(8)]
         with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
             mock_done_in_range.return_value = return_value
             result = self.service.weekly_throughput_ave()
-            assert result == 2.0
+            assert result == 2
+
+    def test_lead_time(self):
+        expected = 32
+        with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
+            mock_wip_count.return_value = 9
+            with mock.patch.object(self.service, 'weekly_throughput_ave') as mock_weekly_throughput_ave:
+                mock_weekly_throughput_ave.return_value = 2
+                assert expected == self.service.lead_time()
+
+
+

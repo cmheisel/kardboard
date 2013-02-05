@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
-from kardboard.models import Kard
+from kardboard.models import Kard, States
 from kardboard.models.team import Team, TeamList
 from kardboard.util import make_start_date, make_end_date
 
@@ -17,7 +17,6 @@ class TeamStats(object):
         self.team_name = team_name
 
     def done_in_range(self, start_date, end_date):
-
         end_date = make_end_date(date=end_date)
         start_date = make_start_date(date=start_date)
 
@@ -28,6 +27,18 @@ class TeamStats(object):
         )
         return done
 
+    def wip(self):
+        states = States()
+        wip = Kard.objects.filter(
+            team=self.team_name,
+            done_date=None,
+            state__in=states.in_progress,
+        )
+        return wip
+
+    def wip_count(self):
+        return len(self.wip())
+
     def weekly_throughput_ave(self, weeks=4):
         end_date = datetime.now()
         start_date = end_date - relativedelta(weeks=weeks)
@@ -35,4 +46,8 @@ class TeamStats(object):
         done = len(self.done_in_range(
             start_date, end_date))
 
-        return done / float(weeks)
+        return round(done / float(weeks))
+
+    def lead_time(self):
+        throughput = self.weekly_throughput_ave() / 7.0
+        return round(self.wip_count() / throughput)
