@@ -29,7 +29,6 @@ from kardboard.util import (
     make_end_date,
     month_ranges,
     log_exception,
-    standard_deviation,
     now,
 )
 
@@ -45,42 +44,20 @@ def team(team_slug=None):
     target_team = None
     if team_slug:
         target_team = team_mapping.get(team_slug, None)
-        if not team:
+        if not target_team:
             abort(404)
+        team = teams.find_by_name(target_team)
 
     board = DisplayBoard(teams=[target_team, ])
 
-    wip_cards = [k for k in board.cards if k.state in states.in_progress]
     done_this_week = [k for k in board.cards if k.state == states.done]
 
-    three_months_ago = date - relativedelta.relativedelta(months=3)
-    done_past_three_months = Kard.objects.filter(team=target_team,
-        done_date__exists=True, done_date__gte=three_months_ago)
-    try:
-        std_dev = standard_deviation([k.cycle_time for k in done_past_three_months])
-    except TypeError, e:
-        std_dev = None
-        bad_cards = [k.key for k in done_past_three_months if k.cycle_time is None]
-        message = "Can't derive std_dev because of: %s" % bad_cards
-        log_exception(e, message)
-
-    ave_cycle_time = Kard.objects.filter(team=target_team).moving_cycle_time(
-        year=date.year, month=date.month, day=date.day)
-
-    if std_dev is not None:
-        confidence_cycle = round(ave_cycle_time + std_dev + std_dev)
-        try:
-            confidence_cycle = int(confidence_cycle)
-        except ValueError:
-            pass
-    else:
-        confidence_cycle = "Error"
-
+    team_stats = teams_service.TeamStats(target_team)
 
     metrics = [
-        {'WIP': len(wip_cards)},
-        {'Ave. Cycle Time': ave_cycle_time},
-        {'95% confidence level': confidence_cycle},
+        {'WIP': team_stats.wip_count()},
+        {'Weekly throughput': team_stats.weekly_throughput_ave()},
+        {'Lead time': team_stats.lead_time()},
         {'Done this week': len(done_this_week)},
     ]
 
@@ -97,7 +74,7 @@ def team(team_slug=None):
         'title': title,
         'team_slug': team_slug,
         'target_team': target_team,
-        'team': teams.find_by_name(target_team),
+        'team': team,
         'metrics': metrics,
         'report_config': report_config,
         'board': board,
@@ -121,16 +98,7 @@ def state():
 
     title = app.config.get('SITE_NAME')
 
-    wip_cards = [k for k in board.cards if k.state in states.in_progress]
-    done_this_week = [k for k in board.cards if k.state == states.done]
-
-    blocked = [k for k in wip_cards if k.blocked]
-
-    metrics = [
-        {'WIP': len(wip_cards)},
-        {'Blocked': len(blocked)},
-        {'Done this week': len(done_this_week)},
-    ]
+    metrics = []
 
     teams = teams_service.setup_teams(
         app.config

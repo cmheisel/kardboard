@@ -9,13 +9,13 @@
 <!-- Reference date: {{ date }} -->
 
 {% for m in metrics %}
-    <div class="metric">
+    <div class="metric metric_{{ m.keys()[0]|slugify }}">
       {% for name, value in m.items() %}
           <h2>{{ name }}</h2>
           <p class="value">
             {{ value }}
             {% if name == "WIP" and team and team.wip_limit %}
-            / {{ team.wip_limit }}
+            <span>/</span> {{ team.wip_limit }}
             {% endif %}
           </p>
       {% endfor %}

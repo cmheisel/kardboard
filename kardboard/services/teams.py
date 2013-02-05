@@ -46,8 +46,8 @@ class TeamStats(object):
         done = len(self.done_in_range(
             start_date, end_date))
 
-        return round(done / float(weeks))
+        return int(round(done / float(weeks)))
 
     def lead_time(self):
         throughput = self.weekly_throughput_ave() / 7.0
-        return round(self.wip_count() / throughput)
+        return int(round(self.wip_count() / throughput))

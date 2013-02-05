@@ -32,12 +32,22 @@ caption {
 }
 
 div.metric {
-    width: 250px;
+    width: 150px;
     border: 1px #92CC47 solid;
     margin: 15px;
     border-radius: 8px;
     background-color: #E5F6F6;
     display: inline-block;
+}
+
+body div.metric_wip {
+    width: 250px;
+}
+
+body div.metric_wip p.value span {
+    font-family: helvetica;
+    font-weight: normal;
+    color: #333;
 }
 
 div.metric h2 {
