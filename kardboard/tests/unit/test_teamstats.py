@@ -53,6 +53,13 @@ class TeamStatsTest(unittest2.TestCase):
             result = self.service.weekly_throughput_ave()
             assert result == 2
 
+    def test_monthly_throughput_ave(self):
+        return_value = [i for i in range(8)]
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+            mock_done_in_range.return_value = return_value
+            result = self.service.monthly_throughput_ave()
+            assert result == 8
+
     def test_lead_time(self):
         expected = 32
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:

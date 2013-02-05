@@ -1,7 +1,8 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
-from kardboard.models import Kard, States
+from kardboard.models.kard import Kard
+from kardboard.models.states import States
 from kardboard.models.team import Team, TeamList
 from kardboard.util import make_start_date, make_end_date
 
@@ -47,6 +48,15 @@ class TeamStats(object):
             start_date, end_date))
 
         return int(round(done / float(weeks)))
+
+    def monthly_throughput_ave(self, months=1):
+        end_date = datetime.now()
+        start_date = end_date - relativedelta(weeks=months * 4)
+
+        done = len(self.done_in_range(
+            start_date, end_date))
+
+        return int(round(done / float(months)))
 
     def lead_time(self):
         throughput = self.weekly_throughput_ave() / 7.0

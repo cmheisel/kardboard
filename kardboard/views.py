@@ -50,15 +50,13 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[target_team, ])
 
-    done_this_week = [k for k in board.cards if k.state == states.done]
-
     team_stats = teams_service.TeamStats(target_team)
 
     metrics = [
         {'WIP': team_stats.wip_count()},
         {'Weekly throughput': team_stats.weekly_throughput_ave()},
         {'Lead time': team_stats.lead_time()},
-        {'Done this week': len(done_this_week)},
+        {'Done: Last 4 weeks': team_stats.monthly_throughput_ave()},
     ]
 
     title = "%s cards" % target_team
