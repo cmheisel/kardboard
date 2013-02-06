@@ -6,6 +6,8 @@ import mock
 
 from kardboard.services.teams import TeamStats
 
+from kardboard.util import isnan
+
 
 @pytest.mark.teamstats
 class TeamStatsTest(unittest2.TestCase):
@@ -68,5 +70,10 @@ class TeamStatsTest(unittest2.TestCase):
                 mock_weekly_throughput_ave.return_value = 2
                 assert expected == self.service.lead_time()
 
-
+    def test_lead_time_with_zero_throughput(self):
+        with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
+            mock_wip_count.return_value = 9
+            with mock.patch.object(self.service, 'weekly_throughput_ave') as mock_weekly_throughput_ave:
+                mock_weekly_throughput_ave.return_value = 0
+                assert isnan(self.service.lead_time())
 

@@ -30,6 +30,7 @@ from kardboard.util import (
     month_ranges,
     log_exception,
     now,
+    isnan,
 )
 
 def team(team_slug=None):
@@ -71,16 +72,16 @@ def team(team_slug=None):
     )
 
     backlog_markers = []
-    counter = 0
-    week_counter = 0
-    start = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time)
-    for k in board.rows[0][0]['cards']:
-        if counter % weekly_throughput == 0:
-            week_counter += 1
-            est_due_date = start + relativedelta.relativedelta(weeks=week_counter)
-            backlog_markers.append(est_due_date)
-        counter +=1
-    #raise Exception
+    if not isnan(lead_time):
+        counter = 0
+        week_counter = 0
+        start = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time)
+        for k in board.rows[0][0]['cards']:
+            if counter % weekly_throughput == 0:
+                week_counter += 1
+                est_due_date = start + relativedelta.relativedelta(weeks=week_counter)
+                backlog_markers.append(est_due_date)
+            counter +=1
 
     context = {
         'title': title,

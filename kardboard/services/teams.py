@@ -13,6 +13,7 @@ def setup_teams(config):
     team_list = TeamList(*teams)
     return team_list
 
+
 class TeamStats(object):
     def __init__(self, team_name):
         self.team_name = team_name
@@ -60,4 +61,6 @@ class TeamStats(object):
 
     def lead_time(self):
         throughput = self.weekly_throughput_ave() / 7.0
+        if throughput == 0:
+            return float('nan')
         return int(round(self.wip_count() / throughput))
