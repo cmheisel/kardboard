@@ -73,5 +73,5 @@ def get_app():
 app = get_app()
 cache = Cache(app)
 
-if DEBUG_TOOLBAR:
+if DEBUG_TOOLBAR and app.config.get('DEBUG_TOOLBAR', False):
     toolbar = DebugToolbarExtension(app)
