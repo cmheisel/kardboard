@@ -46,7 +46,7 @@
 {% else %}
     {% set repeat_headers = False %}
 {% endif %}
-{{ board_macros.board(board, request, repeat_headers) }}
+{{ board_macros.board(board, request, repeat_headers, weekly_throughput, backlog_markers) }}
 </div>
 
 

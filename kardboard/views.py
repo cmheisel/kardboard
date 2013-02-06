@@ -38,7 +38,6 @@ def team(team_slug=None):
     teams = teams_service.setup_teams(
         app.config
     )
-    states = States()
 
     team_mapping = teams.slug_name_mapping
     target_team = None
@@ -52,10 +51,13 @@ def team(team_slug=None):
 
     team_stats = teams_service.TeamStats(target_team)
 
+    lead_time = team_stats.lead_time()
+    weekly_throughput = team_stats.weekly_throughput_ave()
+
     metrics = [
         {'WIP': team_stats.wip_count()},
-        {'Weekly throughput': team_stats.weekly_throughput_ave()},
-        {'Lead time': team_stats.lead_time()},
+        {'Weekly throughput': weekly_throughput},
+        {'Lead time': lead_time},
         {'Done: Last 4 weeks': team_stats.monthly_throughput_ave()},
     ]
 
@@ -68,13 +70,27 @@ def team(team_slug=None):
         {'slug': 'done', 'name': 'Done'}
     )
 
+    backlog_markers = []
+    counter = 0
+    week_counter = 0
+    start = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time)
+    for k in board.rows[0][0]['cards']:
+        if counter % weekly_throughput == 0:
+            week_counter += 1
+            est_due_date = start + relativedelta.relativedelta(weeks=week_counter)
+            backlog_markers.append(est_due_date)
+        counter +=1
+    #raise Exception
+
     context = {
         'title': title,
         'team_slug': team_slug,
         'target_team': target_team,
         'team': team,
+        'weekly_throughput': weekly_throughput,
         'metrics': metrics,
         'report_config': report_config,
+        'backlog_markers': backlog_markers,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
