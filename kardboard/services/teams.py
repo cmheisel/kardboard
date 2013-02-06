@@ -15,8 +15,9 @@ def setup_teams(config):
 
 
 class TeamStats(object):
-    def __init__(self, team_name):
+    def __init__(self, team_name, exclude_classes=[]):
         self.team_name = team_name
+        self.exclude_classes = exclude_classes
 
     def done_in_range(self, start_date, end_date):
         end_date = make_end_date(date=end_date)
@@ -26,6 +27,7 @@ class TeamStats(object):
             team=self.team_name,
             done_date__gte=start_date,
             done_date__lte=end_date,
+            _service_class__nin=self.exclude_classes,
         )
         return done
 

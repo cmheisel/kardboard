@@ -50,7 +50,12 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[target_team, ])
 
-    team_stats = teams_service.TeamStats(target_team)
+    service_class_conf = app.config.get('SERVICE_CLASSES', {})
+    exclude_classes = []
+    for sclass, sclass_data in service_class_conf.items():
+        if sclass_data.get('unplanned', False):
+            exclude_classes.append(sclass_data['name'])
+    team_stats = teams_service.TeamStats(target_team, exclude_classes)
 
     lead_time = team_stats.lead_time()
     weekly_throughput = team_stats.weekly_throughput_ave()

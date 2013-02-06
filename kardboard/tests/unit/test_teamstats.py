@@ -30,6 +30,25 @@ class TeamStatsTest(unittest2.TestCase):
                 team=self.team,
                 done_date__gte=start_expected,
                 done_date__lte=end_expected,
+                _service_class__nin=[],
+            )
+
+    def test_done_in_range_when_exculing_classes(self):
+        service = TeamStats('Team 1', ['Urgent', 'Intangible'])
+
+        start_date = datetime(2012, 1, 1)
+        end_date = datetime(2012, 12, 31)
+
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            service.done_in_range(start_date, end_date)
+            start_expected = datetime(2012, 1, 1, 0, 0, 0)
+            end_expected = datetime(2012, 12, 31, 23, 59, 59)
+
+            mock_Kard.objects.filter.assert_called_with(
+                team=self.team,
+                done_date__gte=start_expected,
+                done_date__lte=end_expected,
+                _service_class__nin=['Urgent', 'Intangible'],
             )
 
     def test_wip(self):
