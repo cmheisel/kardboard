@@ -17,6 +17,7 @@ import translitcodec
 assert translitcodec
 from dateutil.relativedelta import relativedelta
 
+from math import isnan
 
 def average(values):
     """Computes the arithmetic mean of a list of numbers.

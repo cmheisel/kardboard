@@ -43,7 +43,7 @@
     </div>
 {%- endmacro %}
 
-{% macro board(board, request, repeat_headers=False) -%}
+{% macro board(board, request, repeat_headers=False, weekly_throughput=None, backlog_markers=None) -%}
 <table class="board">
 <tr>
   {% for header in board.headers %}
@@ -89,6 +89,19 @@
 {% for cell in row %}
     {% if cell.get('label') %}
         <td class="team">{{ cell['label'] }}</td>
+    {% elif cell.get('state', '') == "Backlog" %}
+        <td class="cards cards_{{ cell.get('state')|slugify }}">
+            {% for card in cell['cards'] %}
+                {% if backlog_markers %}
+                    {%- if loop.index0 % weekly_throughput == 0 %}
+                        <div class="split_cell_header">
+                            Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+                {{ card_detail(card, request) }}
+            {% endfor %}
+        </td>
     {% elif cell.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
         <td class="cards cards_{{ cell.get('state')|slugify }}">
         {% for card in cell['cards'] %}

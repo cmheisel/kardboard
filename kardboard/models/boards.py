@@ -5,7 +5,6 @@ from mongoengine.queryset import Q
 from kardboard.app import app
 from kardboard.models.states import States
 from kardboard.models.kard import Kard
-from kardboard.services import teams as teams_service
 from kardboard.util import (
     now,
     log_exception
@@ -19,6 +18,7 @@ class DisplayBoard(object):
         self._cards = None
         self._rows = []
 
+        from kardboard.services import teams as teams_service
         if teams is None:
             teams = teams_service.setup_teams(app.config).names
         self.teams = teams
