@@ -31,6 +31,7 @@ from kardboard.util import (
     log_exception,
     now,
     isnan,
+    week_range,
 )
 
 def team(team_slug=None):
@@ -57,8 +58,8 @@ def team(team_slug=None):
             exclude_classes.append(sclass)
     team_stats = teams_service.TeamStats(target_team, exclude_classes)
 
-    lead_time = team_stats.lead_time()
-    weekly_throughput = team_stats.weekly_throughput_ave()
+    lead_time = team_stats.lead_time(weeks=4)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks=4)
 
     metrics = [
         {'WIP': team_stats.wip_count()},
@@ -70,17 +71,17 @@ def team(team_slug=None):
     title = "%s cards" % target_team
 
     report_config = (
-        {'slug': 'assignee', 'name': 'Assignee breakdown'},
         {'slug': 'service-class', 'name': 'Service class'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
         {'slug': 'done', 'name': 'Done'}
     )
 
     backlog_markers = []
-    if not isnan(lead_time):
+    if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
         counter = 0
         week_counter = 0
-        start = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time)
+        start_date, end_date = week_range(datetime.datetime.now())
+        start = start_date + relativedelta.relativedelta(days=lead_time)
         for k in board.rows[0][0]['cards']:
             if counter % weekly_throughput == 0:
                 week_counter += 1
