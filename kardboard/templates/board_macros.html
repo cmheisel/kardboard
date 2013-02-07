@@ -95,7 +95,7 @@
                 {% if backlog_markers %}
                     {%- if loop.index0 % weekly_throughput == 0 %}
                         <div class="split_cell_header">
-                            Around {{ backlog_markers.pop(0).strftime("%m/%d/%Y") }}
+                            Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
                         </div>
                     {% endif %}
                 {% endif %}
