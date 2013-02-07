@@ -61,8 +61,8 @@ class TeamStats(object):
 
         return int(round(done / float(months)))
 
-    def lead_time(self):
-        throughput = self.weekly_throughput_ave() / 7.0
+    def lead_time(self, weeks=4):
+        throughput = self.weekly_throughput_ave(weeks) / 7.0
         if throughput == 0:
             return float('nan')
         return int(round(self.wip_count() / throughput))
