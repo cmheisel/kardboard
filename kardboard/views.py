@@ -79,14 +79,14 @@ def team(team_slug=None):
     backlog_markers = []
     if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
         counter = 0
-        week_counter = 0
-        start_date, end_date = week_range(datetime.datetime.now())
-        start = start_date + relativedelta.relativedelta(days=lead_time)
+        batch_counter = 0
         for k in board.rows[0][0]['cards']:
             if counter % weekly_throughput == 0:
-                week_counter += 1
-                est_due_date = start + relativedelta.relativedelta(weeks=week_counter)
-                backlog_markers.append(est_due_date)
+                batch_counter += 1
+                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
+                start_date, end_date = week_range(est_done_date)
+                est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
+                backlog_markers.append(est_done_monday)
             counter +=1
 
     context = {
