@@ -94,7 +94,7 @@
             {% for card in cell['cards'] %}
                 {% if backlog_markers %}
                     {%- if loop.index0 % weekly_throughput == 0 %}
-                        <div class="split_cell_header">
+                        <div class="split_cell_header ui-state-default ui-state-disabled">
                             Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
                         </div>
                     {% endif %}

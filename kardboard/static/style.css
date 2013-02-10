@@ -324,6 +324,10 @@ table.board div.card_on_board p.assignee {
     margin: 0;
 }
 
+table.board div.card_on_board {
+    background-color: #fff;
+}
+
 table.board div.card_on_board div.card_key {
     font-size: .8em;
     text-align: left;
