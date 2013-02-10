@@ -63,17 +63,23 @@ class TeamStats(object):
 
         if oldest_card_date and start_date < oldest_card_date:
             start_date = oldest_card_date
-        return (start_date, end_date)
+
+        diff = end_date - start_date
+        weeks = int(round(diff.days / 7.0))
+
+        return (start_date, end_date, weeks)
 
     def weekly_throughput_ave(self, weeks=4):
-        start_date, end_date = self.throughput_date_range(weeks)
+        start_date, end_date, weeks = self.throughput_date_range(weeks)
         done = len(self.done_in_range(
             start_date, end_date))
 
         return int(round(done / float(weeks)))
 
     def monthly_throughput_ave(self, months=1):
-        start_date, end_date = self.throughput_date_range(months * 4)
+        start_date, end_date, weeks = self.throughput_date_range(months * 4)
+
+        months = int(round(weeks / 4.0))
         done = len(self.done_in_range(
             start_date, end_date))
 

@@ -133,6 +133,12 @@ class TeamStatsTest(unittest2.TestCase):
             actual = self.service.throughput_date_range(weeks=4)
             self.assertAlmostEqual(return_value, actual[0], delta=delta)
 
+    def test_throughput_date_range_with_team_less_than_returns_weeks(self):
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            mock_oldest_card_date.return_value = datetime.now() - relativedelta(weeks=2)
+            actual = self.service.throughput_date_range(weeks=4)
+            assert 2 == actual[2]
+
     def test_throughput_date_range_with_team_greater_than(self):
         delta = timedelta(seconds=10)
         with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
@@ -150,3 +156,21 @@ class TeamStatsTest(unittest2.TestCase):
             actual = self.service.throughput_date_range(weeks=4)
             expected = datetime.now() - relativedelta(weeks=4)
             self.assertAlmostEqual(expected, actual[0], delta=delta)
+
+    def test_throughput_date_range_less_than(self):
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            mock_oldest_card_date.return_value = datetime.now() - relativedelta(weeks=2)
+            with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                return_value = [i for i in range(8)]
+                mock_done_in_range.return_value = return_value
+                result = self.service.weekly_throughput_ave()
+                assert result == 4
+
+    def test_monthly_throughput_date_range_less_than(self):
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            mock_oldest_card_date.return_value = datetime.now() - relativedelta(weeks=6)
+            with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                return_value = [i for i in range(8)]
+                mock_done_in_range.return_value = return_value
+                result = self.service.monthly_throughput_ave(months=3)
+                assert result == 4
