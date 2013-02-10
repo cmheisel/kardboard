@@ -21,6 +21,7 @@ def login_required(func):
             return redirect(url)
     return login_checking_func
 
+
 def is_authenticated():
     from kardboard.app import app
 
