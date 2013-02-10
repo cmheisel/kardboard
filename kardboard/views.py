@@ -58,8 +58,8 @@ def team(team_slug=None):
             exclude_classes.append(sclass)
     team_stats = teams_service.TeamStats(target_team, exclude_classes)
 
-    lead_time = team_stats.lead_time(weeks=4)
-    weekly_throughput = team_stats.weekly_throughput_ave(weeks=4)
+    lead_time = team_stats.lead_time(weeks=12)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
 
     metrics = [
         {'WIP': team_stats.wip_count()},
