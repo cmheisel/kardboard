@@ -32,7 +32,6 @@ class TeamStats(object):
         else:
             return oldest_card
 
-
     def done_in_range(self, start_date, end_date):
         end_date = make_end_date(date=end_date)
         start_date = make_start_date(date=start_date)
