@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block extrajs %}
+{% if authenticated %}
 <script type="text/javascript">
 var drag_and_drop_handler = function(event,ui) {
     var sorted_cards = $('td.cards_backlog').sortable('serialize', {
@@ -9,14 +10,25 @@ var drag_and_drop_handler = function(event,ui) {
     $.ajax({
         type: "POST",
         data: sorted_cards,
-        url: "/team/" + '{{ team_slug }}' + "/backlog/"
+        url: "/team/" + '{{ team_slug }}' + "/backlog/",
+        error: function(jqXHR, textStatus, errorThrown) {
+            window.alert(textStatus + ": " + errorThrown);
+        },
+        success: function(data, textStatus, jqXHR) {
+            var response = $.parseJSON(data);
+            if (window.console) {
+                console.log(textStatus + ": " + data['message']);
+            }
+        }
     });
 }
 
 $(document).ready(function() {
     $('td.cards_backlog').on('sortupdate', drag_and_drop_handler);
+    $('td.cards_backlog').sortable('enable');
 });
 </script>
+{% endif %}
 {% endblock extrajs %}
 
 {% block content %}

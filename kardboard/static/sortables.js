@@ -6,4 +6,6 @@ $(function() {
     });
 
     $( "td.cards_backlog div.card_on_board" ).disableSelection();
+
+    $( "td.cards_backlog" ).sortable( "disable" ); // Disable by default
 });
