@@ -4,6 +4,7 @@
 {% if authenticated %}
 <script type="text/javascript">
 var drag_and_drop_handler = function(event,ui) {
+    $('td.cards_backlog').sortable('disable');
     var sorted_cards = $('td.cards_backlog').sortable('serialize', {
         expression: /(.+)[_](.+)/
     });
@@ -15,6 +16,7 @@ var drag_and_drop_handler = function(event,ui) {
             window.alert(textStatus + ": " + errorThrown);
         },
         success: function(data, textStatus, jqXHR) {
+            $('td.cards_backlog').sortable('enable');
             var response = $.parseJSON(data);
             if (window.console) {
                 console.log(textStatus + ": " + data['message']);
