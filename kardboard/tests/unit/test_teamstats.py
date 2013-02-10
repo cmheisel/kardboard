@@ -15,9 +15,11 @@ class TeamStatsTest(unittest2.TestCase):
     def setUp(self):
         super(TeamStatsTest, self).setUp()
 
-        self.service = TeamStats('Team 1')
-        self.team = 'Team 1'
-        mock.patch('kardboard.services.teams.Kard') # We don't want actual DB access
+        self.service = TeamStats('Team Foo')
+        self.team = 'Team Foo'
+
+    def tearDown(self):
+        super(TeamStatsTest, self).tearDown()
 
     def test_done_in_range(self):
         start_date = datetime(2012, 1, 1)
@@ -47,7 +49,7 @@ class TeamStatsTest(unittest2.TestCase):
             end_expected = datetime(2012, 12, 31, 23, 59, 59)
 
             mock_Kard.objects.filter.assert_called_with(
-                team=self.team,
+                team='Team 1',
                 done_date__gte=start_expected,
                 done_date__lte=end_expected,
                 _service_class__nin=['Urgent', 'Intangible'],
