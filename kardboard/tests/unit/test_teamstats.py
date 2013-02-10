@@ -1,11 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import unittest2
 import pytest
 import mock
 
-from kardboard.services.teams import TeamStats
+from dateutil.relativedelta import relativedelta
 
+from kardboard.services.teams import TeamStats
 from kardboard.util import isnan
 
 
@@ -16,6 +17,7 @@ class TeamStatsTest(unittest2.TestCase):
 
         self.service = TeamStats('Team 1')
         self.team = 'Team 1'
+        mock.patch('kardboard.services.teams.Kard') # We don't want actual DB access
 
     def test_done_in_range(self):
         start_date = datetime(2012, 1, 1)
@@ -96,3 +98,53 @@ class TeamStatsTest(unittest2.TestCase):
                 mock_weekly_throughput_ave.return_value = 0
                 assert isnan(self.service.lead_time())
 
+    def test_oldest_card_query(self):
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            self.service.oldest_card_date()
+            mock_Kard.objects.filter.assert_called_with(
+                team=self.team,
+                _service_class__nin=[],
+                done_date__exists=True,
+            )
+
+    def test_oldest_card_with_no_results(self):
+        with mock.patch('kardboard.services.teams.Kard.objects.first') as mock_first:
+            mock_first.return_value = None
+            result = self.service.oldest_card_date()
+            assert None == result
+
+    def test_throughput_date_range_defaults(self):
+        end_date = datetime.now()
+        start_date = end_date - relativedelta(weeks=4)
+
+        actual = self.service.throughput_date_range()
+        delta = timedelta(seconds=10)
+
+        self.assertAlmostEqual(start_date, actual[0], delta=delta)
+        self.assertAlmostEqual(end_date, actual[1], delta=delta)
+
+    def test_throughput_date_range_with_team_less_than(self):
+        delta = timedelta(seconds=10)
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            return_value = datetime.now() - relativedelta(weeks=2)
+            mock_oldest_card_date.return_value = return_value
+            actual = self.service.throughput_date_range(weeks=4)
+            self.assertAlmostEqual(return_value, actual[0], delta=delta)
+
+    def test_throughput_date_range_with_team_greater_than(self):
+        delta = timedelta(seconds=10)
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            return_value = datetime.now() - relativedelta(weeks=6)
+            mock_oldest_card_date.return_value = return_value
+            actual = self.service.throughput_date_range(weeks=4)
+            expected = datetime.now() - relativedelta(weeks=4)
+            self.assertAlmostEqual(expected, actual[0], delta=delta)
+
+    def test_throughput_date_range_with_team_equal(self):
+        delta = timedelta(seconds=10)
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            return_value = datetime.now() - relativedelta(weeks=4)
+            mock_oldest_card_date.return_value = return_value
+            actual = self.service.throughput_date_range(weeks=4)
+            expected = datetime.now() - relativedelta(weeks=4)
+            self.assertAlmostEqual(expected, actual[0], delta=delta)
