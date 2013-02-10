@@ -1,4 +1,24 @@
 {% extends "base.html" %}
+
+{% block extrajs %}
+<script type="text/javascript">
+var drag_and_drop_handler = function(event,ui) {
+    var sorted_cards = $('td.cards_backlog').sortable('serialize', {
+        expression: /(.+)[_](.+)/
+    });
+    $.ajax({
+        type: "POST",
+        data: sorted_cards,
+        url: "/team/" + '{{ team_slug }}' + "/backlog/"
+    });
+}
+
+$(document).ready(function() {
+    $('td.cards_backlog').on('sortupdate', drag_and_drop_handler);
+});
+</script>
+{% endblock extrajs %}
+
 {% block content %}
 
 {% import "card_macros.html" as card_macros %}
