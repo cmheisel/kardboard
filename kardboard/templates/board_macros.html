@@ -6,10 +6,6 @@
                 - {{ card.cycle_time }}d
             {% elif card.start_date %}
                 - {{ card.current_cycle_time() }}d
-            {% elif card.backlog_date %}
-                {% if card.priority %}
-                - #{{ card.priority }}
-                {% endif %}
             {% endif %}
             {% if not card.is_card %}<i class="icon-plus-sign-alt" title="{{ card.type }}"></i>{% endif %}
             {% if 'Expedite' in card.service_class['name'] %}<i class="icon-forward" title="{{ card.service_class['name'] }}"></i>
@@ -31,7 +27,7 @@
 
         {% set assignee = card.assignee %}
         <p class="assignee">
-            {% if card.due_date %}Due: {{ card.due_date|timeuntil }}{% endif %}
+            {% if card.due_date %}Due: {{ card.due_date.strftime("%m/%d") }}{% endif %}
             {% if card.service_class['name'] in ['Intangible', 'Not Prioritized'] %}
                 {{ card.service_class.get('name') }}
                 {% if assignee %} &ndash; {% endif %}
@@ -94,7 +90,7 @@
             {% for card in cell['cards'] %}
                 {% if backlog_markers %}
                     {%- if loop.index0 % weekly_throughput == 0 %}
-                        <div class="split_cell_header">
+                        <div class="split_cell_header ui-state-default ui-state-disabled">
                             Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
                         </div>
                     {% endif %}

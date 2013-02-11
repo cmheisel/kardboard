@@ -3,6 +3,7 @@ import cStringIO
 import datetime
 import importlib
 import os
+import time
 
 from dateutil import relativedelta
 from flask import (
@@ -15,6 +16,7 @@ from flask import (
     flash,
     abort,
     send_from_directory,
+    jsonify,
 )
 
 import kardboard.auth
@@ -103,10 +105,26 @@ def team(team_slug=None):
         'updated_at': datetime.datetime.now(),
         'teams': teams,
         'version': VERSION,
+        'authenticated': kardboard.auth.is_authenticated(),
     }
 
     return render_template('team.html', **context)
 
+def team_backlog(team_slug=None):
+    if kardboard.auth.is_authenticated() is False:
+        abort(403)
+
+    start = time.time()
+    card_key_list = request.form.getlist('card[]')
+    counter = 1
+    for card_key in card_key_list:
+        Kard.objects(
+            key=card_key.strip()
+        ).only('priority').update_one(set__priority=counter)
+        counter +=1
+
+    elapsed = (time.time() - start)
+    return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
 
 def state():
     date = datetime.datetime.now()
@@ -948,4 +966,5 @@ app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)

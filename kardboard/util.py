@@ -194,7 +194,7 @@ def slugify(text, delim=u'-'):
         word = word.encode('translit/long')
         if word:
             result.append(word)
-    return unicode(delim.join(result))
+    return unicode(delim.join(result)).strip()
 
 
 def timesince(dt, default="just now"):
