@@ -51,8 +51,6 @@ def team(team_slug=None):
             abort(404)
         team = teams.find_by_name(target_team)
 
-    board = DisplayBoard(teams=[target_team, ])
-
     service_class_conf = app.config.get('SERVICE_CLASSES', {})
     exclude_classes = []
     for sclass, sclass_data in service_class_conf.items():
@@ -62,12 +60,13 @@ def team(team_slug=None):
 
     lead_time = team_stats.lead_time(weeks=12)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
+    monthly_throughput = team_stats.monthly_throughput_ave()
 
     metrics = [
         {'WIP': team_stats.wip_count()},
         {'Weekly throughput': weekly_throughput},
         {'Lead time': lead_time},
-        {'Done: Last 4 weeks': team_stats.monthly_throughput_ave()},
+        {'Done: Last 4 weeks': monthly_throughput},
     ]
 
     title = "%s cards" % target_team
@@ -77,6 +76,8 @@ def team(team_slug=None):
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
         {'slug': 'done', 'name': 'Done'}
     )
+
+    board = DisplayBoard(teams=[target_team, ], backlog_limit=monthly_throughput)
 
     backlog_markers = []
     if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
@@ -131,7 +132,7 @@ def state():
     date = make_end_date(date=date)
     states = States()
 
-    board = DisplayBoard()  # defaults to all teams, 7 days of done
+    board = DisplayBoard(backlog_limit=0)  # defaults to all teams, 7 days of done
     board.cards  # force the card calculation
     board.rows
 

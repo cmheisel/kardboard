@@ -1,11 +1,12 @@
 import datetime
 from copy import deepcopy
 
+import pytest
 from dateutil.relativedelta import relativedelta
 
 from kardboard.tests.core import KardboardTestCase
 
-
+@pytest.mark.displayboard
 class DisplayBoardTests(KardboardTestCase):
     def setUp(self):
         super(DisplayBoardTests, self).setUp()
@@ -99,8 +100,19 @@ class DisplayBoardTests(KardboardTestCase):
             {'state': 'Done', 'count': 6},
         )
         actual = board.headers
-        import pprint
-        pprint.pprint(actual)
+        self.assertEqual(actual, expected)
+
+    def test_column_counts_limited(self):
+        board = self._make_one()
+        board.backlog_limit = 2
+
+        expected = (
+            {'label': 'Team', 'count': None},
+            {'state': 'Todo', 'count': 2},
+            {'state': 'Doing', 'count': 6},
+            {'state': 'Done', 'count': 6},
+        )
+        actual = board.headers
         self.assertEqual(actual, expected)
 
     def test_backlog_sorting(self):
