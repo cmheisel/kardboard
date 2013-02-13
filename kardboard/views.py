@@ -36,27 +36,53 @@ from kardboard.util import (
     week_range,
 )
 
-def team(team_slug=None):
+def _get_date():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
+    return date
+
+def _get_teams():
     teams = teams_service.setup_teams(
         app.config
     )
+    return teams
 
+def _find_team_by_slug(team_slug, teams):
     team_mapping = teams.slug_name_mapping
-    target_team = None
-    if team_slug:
-        target_team = team_mapping.get(team_slug, None)
-        if not target_team:
-            abort(404)
-        team = teams.find_by_name(target_team)
+    target_team = team_mapping.get(team_slug, None)
+    team = teams.find_by_name(target_team)
+    return team
 
+def _get_excluded_classes():
     service_class_conf = app.config.get('SERVICE_CLASSES', {})
     exclude_classes = []
     for sclass, sclass_data in service_class_conf.items():
         if sclass_data.get('unplanned', False):
             exclude_classes.append(sclass)
-    team_stats = teams_service.TeamStats(target_team, exclude_classes)
+    return exclude_classes
+
+def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
+    backlog_markers = []
+    if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
+        counter = 0
+        batch_counter = 0
+        for k in backlog_cards:
+            if counter % weekly_throughput == 0:
+                batch_counter += 1
+                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
+                start_date, end_date = week_range(est_done_date)
+                est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
+                backlog_markers.append(est_done_monday)
+            counter +=1
+    return backlog_markers
+
+def team(team_slug=None):
+    date = _get_date()
+    teams = _get_teams()
+    team = _find_team_by_slug(team_slug, teams)
+    exclude_classes = _get_excluded_classes()
+
+    team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
     lead_time = team_stats.lead_time(weeks=12)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
@@ -69,7 +95,7 @@ def team(team_slug=None):
         {'Done: Last 4 weeks': monthly_throughput},
     ]
 
-    title = "%s cards" % target_team
+    title = "%s cards" % team.name
 
     report_config = (
         {'slug': 'service-class', 'name': 'Service class'},
@@ -77,25 +103,17 @@ def team(team_slug=None):
         {'slug': 'done', 'name': 'Done'}
     )
 
-    board = DisplayBoard(teams=[target_team, ], backlog_limit=monthly_throughput)
+    board = DisplayBoard(teams=[team.name, ], backlog_limit=monthly_throughput)
+    backlog_markers = _make_backlog_markers(
+        lead_time,
+        weekly_throughput,
+        board.rows[0][0]['cards']
+    )
 
-    backlog_markers = []
-    if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
-        counter = 0
-        batch_counter = 0
-        for k in board.rows[0][0]['cards']:
-            if counter % weekly_throughput == 0:
-                batch_counter += 1
-                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
-                start_date, end_date = week_range(est_done_date)
-                est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
-                backlog_markers.append(est_done_monday)
-            counter +=1
 
     context = {
         'title': title,
         'team_slug': team_slug,
-        'target_team': target_team,
         'team': team,
         'weekly_throughput': weekly_throughput,
         'metrics': metrics,
@@ -112,20 +130,56 @@ def team(team_slug=None):
     return render_template('team.html', **context)
 
 def team_backlog(team_slug=None):
-    if kardboard.auth.is_authenticated() is False:
-        abort(403)
+    if request.method == "POST":
+        if kardboard.auth.is_authenticated() is False:
+            abort(403)
 
-    start = time.time()
-    card_key_list = request.form.getlist('card[]')
-    counter = 1
-    for card_key in card_key_list:
-        Kard.objects(
-            key=card_key.strip()
-        ).only('priority').update_one(set__priority=counter)
-        counter +=1
+        start = time.time()
+        card_key_list = request.form.getlist('card[]')
+        counter = 1
+        for card_key in card_key_list:
+            Kard.objects(
+                key=card_key.strip()
+            ).only('priority').update_one(set__priority=counter)
+            counter +=1
 
-    elapsed = (time.time() - start)
-    return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
+        elapsed = (time.time() - start)
+        return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
+
+    teams = _get_teams()
+    team = _find_team_by_slug(team_slug, teams)
+    exclude_classes = _get_excluded_classes()
+    team_stats = teams_service.TeamStats(team.name, exclude_classes)
+    lead_time = team_stats.lead_time(weeks=12)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
+
+    backlog = Kard.objects.filter(
+        team=team.name,
+        state=States().backlog,
+    ).exclude('_ticket_system_data').order_by('priority')
+
+    backlog_markers = _make_backlog_markers(
+        lead_time,
+        weekly_throughput,
+        backlog
+    )
+
+    title = "%s backlog" % team.name
+
+    context = {
+        'title': title,
+        'team_slug': team_slug,
+        'team': team,
+        'backlog': backlog,
+        'backlog_markers': backlog_markers,
+        'weekly_throughput': weekly_throughput,
+        'updated_at': datetime.datetime.now(),
+        'teams': teams,
+        'version': VERSION,
+        'authenticated': kardboard.auth.is_authenticated(),
+    }
+
+    return render_template('team-backlog.html', **context)
 
 def state():
     date = datetime.datetime.now()
@@ -967,5 +1021,5 @@ app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
-app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["POST"])
+app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)

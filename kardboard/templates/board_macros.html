@@ -97,6 +97,8 @@
                 {% endif %}
                 {{ card_detail(card, request) }}
             {% endfor %}
+
+            <h3><a href="./backlog/">Full backlog &raquo;</a></h3>
         </td>
     {% elif cell.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
         <td class="cards cards_{{ cell.get('state')|slugify }}">
