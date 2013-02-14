@@ -12,11 +12,12 @@ from kardboard.util import (
 
 
 class DisplayBoard(object):
-    def __init__(self, teams=None, done_days=7):
+    def __init__(self, teams=None, done_days=7, backlog_limit=None):
         self.states = States()
         self.done_days = done_days
         self._cards = None
         self._rows = []
+        self.backlog_limit = backlog_limit
 
         from kardboard.services import teams as teams_service
         if teams is None:
@@ -95,13 +96,17 @@ class DisplayBoard(object):
             state__in=self.states.in_progress,
             team__in=self.teams)
         backlog_q = Q(
-            state__in=self.states.pre_start,
+            state=self.states.backlog,
             team__in=self.teams)
         done_q = Q(done_date__gte=now() - relativedelta(days=self.done_days),
             team__in=self.teams)
-        cards_query = backlog_q | in_progress_q | done_q
+        if self.backlog_limit:
+            backlog_cards = Kard.objects.filter(backlog_q).exclude('_ticket_system_data').limit(self.backlog_limit)
+            cards_query = in_progress_q | done_q
+            cards = list(Kard.objects.filter(cards_query).exclude('_ticket_system_data'))
+            self._cards = list(backlog_cards) + cards
+        else:
+            cards_query = backlog_q | in_progress_q | done_q
+            self._cards = list(Kard.objects.filter(cards_query).exclude('_ticket_system_data'))
 
-        self._cards = list(
-            Kard.objects.filter(cards_query).exclude('_ticket_system_data')
-        )
         return self._cards

@@ -421,3 +421,31 @@ table.board div.split_cell_header {
 .card_detail caption {
     color: #000;
 }
+
+
+table.extended_backlog .reorder_col {
+    width: 3%;
+}
+
+table.extended_backlog .due_col {
+    width: 10%;
+}
+
+table.extended_backlog .key_col {
+    width: 15%;
+}
+
+table.extended_backlog .reorder i {
+    display: none;
+}
+
+table.extended_backlog .reorder:hover i {
+    display: inline;
+}
+
+table.extended_backlog tr.backlog_marker {
+    text-align: center;
+    background-color: #92CC47;
+    font-weight: bold;
+    border: 1px solid black;
+}
