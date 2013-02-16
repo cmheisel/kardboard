@@ -12,6 +12,7 @@ from kardboard.models.states import States
 from kardboard.services import teams as team_service
 from kardboard.util import make_start_date, make_end_date, average
 
+
 def _get_team(team_name):
     teams = team_service.setup_teams(app.config)
     try:
@@ -21,6 +22,7 @@ def _get_team(team_name):
         raise
     return team
 
+
 def _get_time_range(weeks):
     end = make_end_date(
         date=datetime.now()
@@ -29,6 +31,7 @@ def _get_time_range(weeks):
         date=end - relativedelta(weeks=weeks)
     )
     return start, end
+
 
 def _get_cards(team, start, end):
     # We need cards that are done
@@ -46,8 +49,10 @@ def _get_cards(team, start, end):
     )
     return list(wip_cards) + done_cards
 
+
 def _get_card_logs(card):
     return StateLog.objects.filter(card=card)
+
 
 def _sum_card_history(history):
     data = {}
