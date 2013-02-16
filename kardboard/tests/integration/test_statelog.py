@@ -58,6 +58,10 @@ class StatelogTests(KardboardTestCase):
 class StatelogKardTests(StatelogTests):
     def setUp(self):
         super(StatelogKardTests, self).setUp()
+        self.config['SERVICE_CLASSES'] = {
+            'Speedy': {'lower': 2, 'upper': 4, 'wip': .05, 'name': 'Speedy'},
+            'default': {'lower': 5, 'upper': 15, 'name': 'default'},
+        }
 
     def tearDown(self):
         self._get_target_class().objects.all().delete()
@@ -88,7 +92,6 @@ class StatelogKardTests(StatelogTests):
         # Created a new card 10 days ago in Todo
         mocked_now.return_value = datetime.now() - relativedelta(days=10)
         card = self.make_card(state=self.states[0])
-        print "CARD UNDER TEST IS %s" % card.key
         self.assertEqual(None, card.id)
         card.save()
         sln = StateLog.objects.get(card=card, state=self.states[0])
@@ -110,7 +113,6 @@ class StatelogKardTests(StatelogTests):
         mocked_now.return_value = datetime.now() - relativedelta(days=1)
         card.state = self.states[2]
         card.save()
-        print StateLog.objects.filter(card=card).order_by('created_at')
         slo = StateLog.objects.get(card=card, state=self.states[1])
         self.assertEqualDateTimes(slo.exited, mocked_now.return_value)
         self.assertEqual(7 * 24, slo.duration)
@@ -118,3 +120,24 @@ class StatelogKardTests(StatelogTests):
         sln = StateLog.objects.get(card=card, state=self.states[2])
         self.assertEqualDateTimes(sln.entered, mocked_now.return_value)
         self.assertEqual(0, sln.duration)
+
+    @mock.patch('kardboard.models.statelog.now')
+    def test_service_class_changes_sets_exited_at(self, mocked_now):
+        StateLog = self._get_target_class()
+
+        # Created a new card 10 days ago in Todo
+        original_entered = datetime.now() - relativedelta(days=10)
+        mocked_now.return_value = original_entered
+        card = self.make_card(state=self.states[0], _service_class="default")
+        self.assertEqual(None, card.id)
+        card.save()
+        sln = StateLog.objects.get(card=card, state=self.states[0])
+        self.assertEqualDateTimes(sln.entered, mocked_now.return_value)
+
+        # Upgraded that card's service class 8 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=8)
+        card._service_class = "Speedy"
+        card.save()
+        card.ticket_system.actually_update()
+        slo = StateLog.objects.get(card=card)
+        self.assertEqualDateTimes(slo.entered, original_entered)

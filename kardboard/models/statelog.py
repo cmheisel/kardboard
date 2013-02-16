@@ -83,11 +83,12 @@ class StateLog(app.db.Document):
         # This could be a freshly created card, so create a log for it
         sl, created = cls.objects.get_or_create(auto_save=False,
             card=observed_card,
-            state=observed_card.state,
-            service_class=observed_card.service_class.get('name'))
+            state=observed_card.state)
         if created:
             sl.entered = now()
-            sl.save()
+
+        sl.service_class=observed_card.service_class.get('name')
+        sl.save()
 
     @property
     def duration(self):
