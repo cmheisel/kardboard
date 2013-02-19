@@ -36,10 +36,14 @@ def find_wip(stop):
 
 
 def find_cycle_time_ave(stop):
-    dr = DailyRecord.objects.get(
-        date=make_end_date(date=stop),
-        group='dev',
-    )
+    try:
+        dr = DailyRecord.objects.get(
+            date=make_end_date(date=stop),
+            group='dev',
+        )
+    except DailyRecord.DoesNotExist:
+        print "No Daily Record: %s %s" % ('dev', make_end_date(date=stop))
+        raise
 
     return dr.moving_cycle_time
 
