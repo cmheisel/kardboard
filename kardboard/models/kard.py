@@ -20,6 +20,7 @@ from kardboard.util import (
     munge_date,
     month_range,
     week_range,
+    average,
 )
 
 class KardQuerySet(QuerySet):
@@ -39,13 +40,8 @@ class KardQuerySet(QuerySet):
         return results
 
     def average(self, field_str):
-        count = self.count()
-        the_sum = sum([getattr(k, field_str) for k in self.filter().only(field_str)])
-
-        if count == 0:
-            return float('nan')
-
-        return the_sum / float(count)
+        values = [getattr(k, field_str) for k in self.filter().only(field_str)]
+        return average(values)
 
     def distinct(self, field_str):
         return super(KardQuerySet, self).distinct(field_str)
