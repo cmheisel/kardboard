@@ -4,6 +4,7 @@ import datetime
 import importlib
 import os
 import time
+from math import isnan
 
 from dateutil import relativedelta
 from flask import (
@@ -32,7 +33,6 @@ from kardboard.util import (
     month_ranges,
     log_exception,
     now,
-    isnan,
     week_range,
 )
 
@@ -87,11 +87,17 @@ def team(team_slug=None):
     lead_time = team_stats.lead_time(weeks=12)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
     monthly_throughput = team_stats.monthly_throughput_ave()
+    stdev = team_stats.standard_deviation(weeks=12)
+    confidence_70 = lead_time + stdev
+    confidence_95 = lead_time + stdev + stdev
+
 
     metrics = [
         {'WIP': team_stats.wip_count()},
         {'Weekly throughput': weekly_throughput},
         {'Lead time': lead_time},
+        {"70% confidence": confidence_70},
+        {"95% confidence": confidence_95},
         {'Done: Last 4 weeks': monthly_throughput},
     ]
 
@@ -105,7 +111,7 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[team.name, ], backlog_limit=monthly_throughput)
     backlog_markers = _make_backlog_markers(
-        lead_time,
+        confidence_95,
         weekly_throughput,
         board.rows[0][0]['cards']
     )

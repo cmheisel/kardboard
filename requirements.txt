@@ -15,6 +15,7 @@ Flask-Cache==0.3.3
 celery==2.5.5
 amqplib==1.0.2
 anyjson==0.3.3
+statlib==1.1
 
 
 kombu==2.1.8

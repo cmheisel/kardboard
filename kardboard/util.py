@@ -16,8 +16,7 @@ from werkzeug.contrib.cache import RedisCache
 import translitcodec
 assert translitcodec
 from dateutil.relativedelta import relativedelta
-
-from math import isnan
+from statlib import stats
 
 def average(values):
     """Computes the arithmetic mean of a list of numbers.
@@ -25,12 +24,11 @@ def average(values):
     >>> print average([20, 30, 70])
     40.0
     """
-    if len(values) == 0:
-        return float('nan')
-    return sum(values, 0.0) / len(values)
+    return stats.mean(values)
 
 
 def standard_deviation(values):
+    return stats.stdev(values)
     avg = average(values)
     variance = map(lambda x: (x - avg)**2, values)
     standard_deviation = math.sqrt(average(variance))

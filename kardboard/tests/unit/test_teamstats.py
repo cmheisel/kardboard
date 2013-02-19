@@ -93,6 +93,37 @@ class TeamStatsTest(unittest2.TestCase):
                 mock_weekly_throughput_ave.return_value = 2
                 assert expected == self.service.lead_time()
 
+    def test_cycle_times_selects_the_right_range(self):
+        weeks = 4
+        delta = timedelta(seconds=10)
+        start_date, end_date, weeks = self.service.throughput_date_range(weeks)
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = []
+                self.service.cycle_times(weeks)
+                assert mock_done_in_range.called
+                args, kwargs = mock_done_in_range.call_args
+                self.assertAlmostEqual(start_date, args[0], delta=delta)
+                self.assertAlmostEqual(end_date, args[1], delta=delta)
+
+    def test_cycle_times_returns_scalar(self):
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = []
+                self.service.cycle_times()
+                mock_done_in_range.return_value.values_list.assert_called_with(
+                    '_cycle_time',
+                )
+
+    def test_cycle_times_returns_only_numbers(self):
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = [1, 2, 3, None, 4]
+                result = self.service.cycle_times()
+                assert [1, 2, 3, 4] == result
+
+    def test_standard_deviation(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
+            assert 10 == self.service.standard_deviation()
+
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
             mock_wip_count.return_value = 9

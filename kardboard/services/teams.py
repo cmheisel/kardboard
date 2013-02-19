@@ -4,7 +4,7 @@ from datetime import datetime
 from kardboard.models.kard import Kard
 from kardboard.models.states import States
 from kardboard.models.team import Team, TeamList
-from kardboard.util import make_start_date, make_end_date
+from kardboard.util import make_start_date, make_end_date, standard_deviation
 
 
 def setup_teams(config):
@@ -43,6 +43,11 @@ class TeamStats(object):
             _service_class__nin=self.exclude_classes,
         )
         return done
+
+    def cycle_times(self, weeks=4):
+        start_date, end_date, weeks = self.throughput_date_range(weeks)
+        cycle_time_list = self.done_in_range(start_date, end_date).values_list('_cycle_time')
+        return [c for c in cycle_time_list if c is not None]
 
     def wip(self):
         states = States()
@@ -90,3 +95,6 @@ class TeamStats(object):
         if throughput == 0:
             return float('nan')
         return int(round(self.wip_count() / throughput))
+
+    def standard_deviation(self, weeks=4):
+        return int(round(standard_deviation(self.cycle_times(weeks))))
