@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from math import isnan
 
 import unittest2
 import pytest
@@ -7,7 +8,6 @@ import mock
 from dateutil.relativedelta import relativedelta
 
 from kardboard.services.teams import TeamStats
-from kardboard.util import isnan
 
 
 @pytest.mark.teamstats
@@ -123,6 +123,34 @@ class TeamStatsTest(unittest2.TestCase):
         with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
             mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
             assert 10 == self.service.standard_deviation()
+
+    def test_histogram(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [1, 0, 2, 4, 10, 4, 3, 3, 7, 7, 7]
+            expected = {
+                0: 1,
+                1: 1,
+                2: 1,
+                3: 2,
+                4: 2,
+                7: 3,
+                10: 1,
+            }
+            assert expected == self.service.histogram()
+
+    def test_percentile(self):
+        with mock.patch.object(self.service, 'histogram') as mock_histogram:
+            mock_histogram.return_value = {
+                0: 1,
+                1: 1,
+                2: 1,
+                3: 2,
+                4: 2,
+                7: 3,
+                10: 1,
+            }
+            actual = self.service.percentile(.7)
+            assert 7 == actual
 
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:

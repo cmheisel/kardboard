@@ -63,7 +63,7 @@ def _get_excluded_classes():
 
 def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
     backlog_markers = []
-    if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
+    if not isnan(lead_time) and weekly_throughput >0 and app.config.get('BACKLOG_MARKERS', False):
         counter = 0
         batch_counter = 0
         for k in backlog_cards:
@@ -84,12 +84,13 @@ def team(team_slug=None):
 
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
-    lead_time = team_stats.lead_time(weeks=12)
-    weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
-    monthly_throughput = team_stats.monthly_throughput_ave()
-    stdev = team_stats.standard_deviation(weeks=12)
-    confidence_70 = lead_time + stdev
-    confidence_95 = lead_time + stdev + stdev
+    weeks=12
+    lead_time = team_stats.lead_time(weeks)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+    monthly_throughput = team_stats.monthly_throughput_ave(3)
+    confidence_70 = team_stats.percentile(.7, weeks)
+    confidence_80 = team_stats.percentile(.8, weeks)
+    confidence_90 = team_stats.percentile(.90, weeks)
 
 
     metrics = [
@@ -97,7 +98,8 @@ def team(team_slug=None):
         {'Weekly throughput': weekly_throughput},
         {'Lead time': lead_time},
         {"70% confidence": confidence_70},
-        {"95% confidence": confidence_95},
+        {"80% confidence": confidence_80},
+        {"90% confidence": confidence_90},
         {'Done: Last 4 weeks': monthly_throughput},
     ]
 
@@ -111,7 +113,7 @@ def team(team_slug=None):
 
     board = DisplayBoard(teams=[team.name, ], backlog_limit=monthly_throughput)
     backlog_markers = _make_backlog_markers(
-        confidence_95,
+        confidence_90,
         weekly_throughput,
         board.rows[0][0]['cards']
     )

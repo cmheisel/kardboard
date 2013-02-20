@@ -1,5 +1,6 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
+from collections import defaultdict
 
 from kardboard.models.kard import Kard
 from kardboard.models.states import States
@@ -98,3 +99,21 @@ class TeamStats(object):
 
     def standard_deviation(self, weeks=4):
         return int(round(standard_deviation(self.cycle_times(weeks))))
+
+    def histogram(self, weeks=4):
+        times = self.cycle_times(weeks)
+        d = defaultdict(int)
+        for t in times:
+            d[t] += 1
+        return dict(d)
+
+    def percentile(self, target_pct, weeks=4):
+        hist = self.histogram(weeks)
+        total = sum(hist.values())
+        pct_threshold = target_pct * total
+
+        card_total = 0
+        for cycle_time, card_count in hist.items():
+            card_total += card_count
+            if card_total >= pct_threshold:
+                return cycle_time
