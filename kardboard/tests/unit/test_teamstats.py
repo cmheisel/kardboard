@@ -185,6 +185,12 @@ class TeamStatsTest(unittest2.TestCase):
             actual = self.service.percentile(.7)
             assert 7 == actual
 
+    def test_percentile_with_an_unsorted_histogram(self):
+        with mock.patch.object(self.service, 'histogram') as mock_histogram:
+            mock_histogram.return_value = {17: 1, 10: 1, 12: 1, 48: 1, 81: 1, 19: 1, 25: 1, 26: 1}
+            actual = self.service.percentile(.7)
+            assert 26 == actual
+
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
             mock_wip_count.return_value = 9

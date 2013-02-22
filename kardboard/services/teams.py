@@ -130,7 +130,11 @@ class TeamStats(object):
         pct_threshold = target_pct * total
 
         card_total = 0
-        for cycle_time, card_count in hist.items():
+        sorted_keys = hist.keys()
+        sorted_keys.sort()
+        for key in sorted_keys:
+            cycle_time = key
+            card_count = hist[key]
             card_total += card_count
             if card_total >= pct_threshold:
                 return cycle_time
