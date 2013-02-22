@@ -94,6 +94,10 @@ def team(team_slug=None):
     metrics_cards = sorted(metrics_cards, key=lambda c: c['cycle_time'])
     metrics_cards.reverse()
 
+    metrics_histogram = team_stats.histogram(weeks)
+    metrics_histogram_keys = metrics_histogram.keys()
+    metrics_histogram_keys.sort()
+
     metrics = [
         {'WIP': team_stats.wip_count()},
         {'Weekly throughput': weekly_throughput},
@@ -126,6 +130,8 @@ def team(team_slug=None):
         'report_config': report_config,
         'backlog_markers': backlog_markers,
         'metrics_cards': metrics_cards,
+        'metrics_histogram': metrics_histogram,
+        'metrics_histogram_keys': metrics_histogram_keys,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),

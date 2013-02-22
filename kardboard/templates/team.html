@@ -60,6 +60,15 @@ $(document).ready(function() {
 <!--
 Metrics based on {{ metrics_cards|count }} cards
 
+Histogram
+==========
+Cycle time        Card count
+{% for key in metrics_histogram_keys %}
+{{ key }}        {{ metrics_histogram[key] }}
+{% endfor %}
+
+Raw Data
+============
 key        service_class        cycle_time        done_date
 {% for card in metrics_cards %}
 {{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
