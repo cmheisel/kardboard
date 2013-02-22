@@ -63,17 +63,19 @@ def _get_excluded_classes():
 
 def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
     backlog_markers = []
-    if not isnan(lead_time) and weekly_throughput >0 and app.config.get('BACKLOG_MARKERS', False):
-        counter = 0
-        batch_counter = 0
-        for k in backlog_cards:
-            if counter % weekly_throughput == 0:
-                batch_counter += 1
-                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
-                start_date, end_date = week_range(est_done_date)
-                est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
-                backlog_markers.append(est_done_monday)
-            counter +=1
+    if lead_time is None or isnan(lead_time) and weekly_throughput <= 0:
+        return backlog_markers
+
+    counter = 0
+    batch_counter = 0
+    for k in backlog_cards:
+        if counter % weekly_throughput == 0:
+            batch_counter += 1
+            est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
+            start_date, end_date = week_range(est_done_date)
+            est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
+            backlog_markers.append(est_done_monday)
+        counter +=1
     return backlog_markers
 
 def team(team_slug=None):

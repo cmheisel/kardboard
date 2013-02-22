@@ -41,6 +41,8 @@ class KardQuerySet(QuerySet):
 
     def average(self, field_str):
         values = [getattr(k, field_str) for k in self.filter().only(field_str)]
+        if len(values) == 0:
+            return 0
         return average(values)
 
     def distinct(self, field_str):
