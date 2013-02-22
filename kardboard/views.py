@@ -87,20 +87,16 @@ def team(team_slug=None):
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
     weeks=12
-    lead_time = team_stats.lead_time(weeks)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
     monthly_throughput = team_stats.monthly_throughput_ave(3)
-    confidence_70 = team_stats.percentile(.7, weeks)
-    confidence_80 = team_stats.percentile(.8, weeks)
     confidence_90 = team_stats.percentile(.90, weeks)
-
+    metrics_cards = team_stats.card_info
+    metrics_cards = sorted(metrics_cards, key=lambda c: c['cycle_time'])
+    metrics_cards.reverse()
 
     metrics = [
         {'WIP': team_stats.wip_count()},
         {'Weekly throughput': weekly_throughput},
-        {'Lead time': lead_time},
-        {"70% confidence": confidence_70},
-        {"80% confidence": confidence_80},
         {"90% confidence": confidence_90},
         {'Done: Last 4 weeks': monthly_throughput},
     ]
@@ -129,6 +125,7 @@ def team(team_slug=None):
         'metrics': metrics,
         'report_config': report_config,
         'backlog_markers': backlog_markers,
+        'metrics_cards': metrics_cards,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),

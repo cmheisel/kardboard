@@ -57,6 +57,16 @@ $(document).ready(function() {
     {% endfor %}
 {% endif %}
 
+<!--
+Metrics based on {{ metrics_cards|count }} cards
+
+key        service_class        cycle_time        done_date
+{% for card in metrics_cards %}
+{{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
+{% endfor %}
+
+-->
+
 {% if team_slug %}
     <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
     {% for report in report_config %}

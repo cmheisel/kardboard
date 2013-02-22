@@ -19,6 +19,7 @@ class TeamStats(object):
     def __init__(self, team_name, exclude_classes=[]):
         self.team_name = team_name
         self.exclude_classes = exclude_classes
+        self.card_info = []
 
     def oldest_card_date(self):
         query = Kard.objects.filter(
@@ -33,6 +34,20 @@ class TeamStats(object):
         else:
             return oldest_card
 
+    def _card_info(self, card_qs):
+        info = []
+        if not hasattr(card_qs, '__iter__'):
+            return info
+        for card in card_qs:
+            data = {}
+            data['key'] = card.key
+            data['cycle_time'] = card.cycle_time
+            data['done_date'] = card.done_date
+            data['service_class'] = card.service_class
+            info.append(data)
+        self.card_info = info
+        return info
+
     def done_in_range(self, start_date, end_date):
         end_date = make_end_date(date=end_date)
         start_date = make_start_date(date=start_date)
@@ -43,6 +58,8 @@ class TeamStats(object):
             done_date__lte=end_date,
             _service_class__nin=self.exclude_classes,
         )
+
+        self._card_info(done)
         return done
 
     def cycle_times(self, weeks=4):

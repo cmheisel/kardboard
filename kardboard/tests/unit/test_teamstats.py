@@ -55,6 +55,39 @@ class TeamStatsTest(unittest2.TestCase):
                 _service_class__nin=['Urgent', 'Intangible'],
             )
 
+    def test_done_in_range_feeds_card_info(self):
+        start_date = datetime(2012, 1, 1)
+        end_date = datetime(2012, 12, 31)
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            with mock.patch_object(self.service, '_card_info') as mock_card_info:
+                return_value = [mock.Mock(), mock.Mock()]
+                mock_Kard.objects.filter.return_value = return_value
+                self.service.done_in_range(start_date, end_date)
+                mock_card_info.assert_called_with(return_value)
+
+    def test_card_info_returns(self):
+        start_date = datetime(2012, 1, 1)
+        end_date = datetime(2012, 12, 31)
+
+        mock_card = mock.Mock()
+        mock_card.key = "CMSCI-1"
+        mock_card.done_date = datetime(2012, 12, 30)
+        mock_card.service_class = {'name': "Normal", }
+        mock_card.cycle_time = 23
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            return_value = [mock_card, ]
+            mock_Kard.objects.filter.return_value = return_value
+            self.service.done_in_range(start_date, end_date)
+            expected = [{
+                'key': mock_card.key,
+                'done_date': mock_card.done_date,
+                'cycle_time': mock_card.cycle_time,
+                'service_class': mock_card.service_class,
+            }]
+
+            actual = self.service.card_info
+            assert expected == actual
+
     def test_wip(self):
         from kardboard.models import States
         states = States()
