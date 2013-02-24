@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from math import isnan
 
 import unittest2
 import pytest
@@ -7,7 +8,6 @@ import mock
 from dateutil.relativedelta import relativedelta
 
 from kardboard.services.teams import TeamStats
-from kardboard.util import isnan
 
 
 @pytest.mark.teamstats
@@ -55,6 +55,39 @@ class TeamStatsTest(unittest2.TestCase):
                 _service_class__nin=['Urgent', 'Intangible'],
             )
 
+    def test_done_in_range_feeds_card_info(self):
+        start_date = datetime(2012, 1, 1)
+        end_date = datetime(2012, 12, 31)
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            with mock.patch_object(self.service, '_card_info') as mock_card_info:
+                return_value = [mock.Mock(), mock.Mock()]
+                mock_Kard.objects.filter.return_value = return_value
+                self.service.done_in_range(start_date, end_date)
+                mock_card_info.assert_called_with(return_value)
+
+    def test_card_info_returns(self):
+        start_date = datetime(2012, 1, 1)
+        end_date = datetime(2012, 12, 31)
+
+        mock_card = mock.Mock()
+        mock_card.key = "CMSCI-1"
+        mock_card.done_date = datetime(2012, 12, 30)
+        mock_card.service_class = {'name': "Normal", }
+        mock_card.cycle_time = 23
+        with mock.patch('kardboard.services.teams.Kard') as mock_Kard:
+            return_value = [mock_card, ]
+            mock_Kard.objects.filter.return_value = return_value
+            self.service.done_in_range(start_date, end_date)
+            expected = [{
+                'key': mock_card.key,
+                'done_date': mock_card.done_date,
+                'cycle_time': mock_card.cycle_time,
+                'service_class': mock_card.service_class,
+            }]
+
+            actual = self.service.card_info
+            assert expected == actual
+
     def test_wip(self):
         from kardboard.models import States
         states = States()
@@ -92,6 +125,92 @@ class TeamStatsTest(unittest2.TestCase):
             with mock.patch.object(self.service, 'weekly_throughput_ave') as mock_weekly_throughput_ave:
                 mock_weekly_throughput_ave.return_value = 2
                 assert expected == self.service.lead_time()
+
+    def test_cycle_times_selects_the_right_range(self):
+        weeks = 4
+        delta = timedelta(seconds=10)
+        start_date, end_date, weeks = self.service.throughput_date_range(weeks)
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = []
+                self.service.cycle_times(weeks)
+                assert mock_done_in_range.called
+                args, kwargs = mock_done_in_range.call_args
+                self.assertAlmostEqual(start_date, args[0], delta=delta)
+                self.assertAlmostEqual(end_date, args[1], delta=delta)
+
+    def test_cycle_times_returns_scalar(self):
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = []
+                self.service.cycle_times()
+                mock_done_in_range.return_value.values_list.assert_called_with(
+                    '_cycle_time',
+                )
+
+    def test_cycle_times_returns_only_numbers(self):
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+                mock_done_in_range.return_value.values_list.return_value = [1, 2, 3, None, 4]
+                result = self.service.cycle_times()
+                assert [1, 2, 3, 4] == result
+
+    def test_standard_deviation(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
+            assert 10 == self.service.standard_deviation()
+
+    def test_standard_deviation_nan(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [4, ]
+            assert self.service.standard_deviation() is None
+
+    def test_average(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
+            assert 11 == self.service.average()
+
+    def test_average_with_one_data(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, ]
+            assert 13 == self.service.average()
+
+    def test_average_with_no_data(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = []
+            assert self.service.average() is None
+
+
+    def test_histogram(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [1, 0, 2, 4, 10, 4, 3, 3, 7, 7, 7]
+            expected = {
+                0: 1,
+                1: 1,
+                2: 1,
+                3: 2,
+                4: 2,
+                7: 3,
+                10: 1,
+            }
+            assert expected == self.service.histogram()
+
+    def test_percentile(self):
+        with mock.patch.object(self.service, 'histogram') as mock_histogram:
+            mock_histogram.return_value = {
+                0: 1,
+                1: 1,
+                2: 1,
+                3: 2,
+                4: 2,
+                7: 3,
+                10: 1,
+            }
+            actual = self.service.percentile(.7)
+            assert 7 == actual
+
+    def test_percentile_with_an_unsorted_histogram(self):
+        with mock.patch.object(self.service, 'histogram') as mock_histogram:
+            mock_histogram.return_value = {17: 1, 10: 1, 12: 1, 48: 1, 81: 1, 19: 1, 25: 1, 26: 1}
+            actual = self.service.percentile(.7)
+            assert 26 == actual
 
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:

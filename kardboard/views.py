@@ -4,6 +4,7 @@ import datetime
 import importlib
 import os
 import time
+from math import isnan
 
 from dateutil import relativedelta
 from flask import (
@@ -32,7 +33,6 @@ from kardboard.util import (
     month_ranges,
     log_exception,
     now,
-    isnan,
     week_range,
 )
 
@@ -63,17 +63,19 @@ def _get_excluded_classes():
 
 def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
     backlog_markers = []
-    if not isnan(lead_time) and app.config.get('BACKLOG_MARKERS', False):
-        counter = 0
-        batch_counter = 0
-        for k in backlog_cards:
-            if counter % weekly_throughput == 0:
-                batch_counter += 1
-                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
-                start_date, end_date = week_range(est_done_date)
-                est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
-                backlog_markers.append(est_done_monday)
-            counter +=1
+    if lead_time is None or isnan(lead_time) or weekly_throughput <= 0:
+        return backlog_markers
+
+    counter = 0
+    batch_counter = 0
+    for k in backlog_cards:
+        if counter % weekly_throughput == 0:
+            batch_counter += 1
+            est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
+            start_date, end_date = week_range(est_done_date)
+            est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
+            backlog_markers.append(est_done_monday)
+        counter +=1
     return backlog_markers
 
 def team(team_slug=None):
@@ -84,16 +86,28 @@ def team(team_slug=None):
 
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
-    lead_time = team_stats.lead_time(weeks=12)
-    weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
-    monthly_throughput = team_stats.monthly_throughput_ave()
+    weeks=12
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+    confidence_90 = team_stats.percentile(.90, weeks)
+    metrics_cards = team_stats.card_info
+    metrics_cards = sorted(metrics_cards, key=lambda c: c['cycle_time'])
+    metrics_cards.reverse()
+
+    metrics_histogram = team_stats.histogram(weeks)
+    metrics_histogram_keys = metrics_histogram.keys()
+    metrics_histogram_keys.sort()
 
     metrics = [
         {'WIP': team_stats.wip_count()},
-        {'Weekly throughput': weekly_throughput},
-        {'Lead time': lead_time},
-        {'Done: Last 4 weeks': monthly_throughput},
+        {'Weekly throughput': team_stats.weekly_throughput_ave(4)},
     ]
+    ave = team_stats.average(4)
+    if ave:
+        metrics.append({'Cycle time ave.': team_stats.average(4)})
+
+    stdev = team_stats.standard_deviation(4)
+    if stdev:
+        metrics.append({'Standard deviation': stdev},)
 
     title = "%s cards" % team.name
 
@@ -103,12 +117,21 @@ def team(team_slug=None):
         {'slug': 'done', 'name': 'Done'}
     )
 
-    board = DisplayBoard(teams=[team.name, ], backlog_limit=monthly_throughput)
+    board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput*4)
     backlog_markers = _make_backlog_markers(
-        lead_time,
+        confidence_90,
         weekly_throughput,
         board.rows[0][0]['cards']
     )
+
+    backlog_marker_data = {
+        'weeks': weeks,
+        'exclude_classes': exclude_classes,
+        'histogram': metrics_histogram,
+        'histogram_keys': metrics_histogram_keys,
+        'cards': metrics_cards,
+        'weekly_throughput': weekly_throughput
+    }
 
 
     context = {
@@ -119,6 +142,7 @@ def team(team_slug=None):
         'metrics': metrics,
         'report_config': report_config,
         'backlog_markers': backlog_markers,
+        'backlog_marker_data': backlog_marker_data,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),
