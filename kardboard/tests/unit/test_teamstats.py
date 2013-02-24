@@ -157,6 +157,27 @@ class TeamStatsTest(unittest2.TestCase):
             mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
             assert 10 == self.service.standard_deviation()
 
+    def test_standard_deviation_nan(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [4, ]
+            assert self.service.standard_deviation() is None
+
+    def test_average(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, 13, 5, 18, 0, 0, 28, 28, 2, 0, 5, 8, 5, 25]
+            assert 11 == self.service.average()
+
+    def test_average_with_one_data(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [13, ]
+            assert 13 == self.service.average()
+
+    def test_average_with_no_data(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = []
+            assert self.service.average() is None
+
+
     def test_histogram(self):
         with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
             mock_cycle_times.return_value = [1, 0, 2, 4, 10, 4, 3, 3, 7, 7, 7]

@@ -4,7 +4,6 @@ import traceback
 import logging
 import os
 import functools
-import math
 
 from logging.handlers import RotatingFileHandler
 
@@ -24,15 +23,17 @@ def average(values):
     >>> print average([20, 30, 70])
     40.0
     """
-    return stats.mean(values)
+    try:
+        return stats.mean(values)
+    except ZeroDivisionError:
+        return None
 
 
 def standard_deviation(values):
-    return stats.stdev(values)
-    avg = average(values)
-    variance = map(lambda x: (x - avg)**2, values)
-    standard_deviation = math.sqrt(average(variance))
-    return standard_deviation
+    try:
+        return stats.stdev(values)
+    except ZeroDivisionError:
+        return None
 
 
 def delta_in_hours(delta):

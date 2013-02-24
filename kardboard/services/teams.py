@@ -1,11 +1,12 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from collections import defaultdict
+from math import isnan
 
 from kardboard.models.kard import Kard
 from kardboard.models.states import States
 from kardboard.models.team import Team, TeamList
-from kardboard.util import make_start_date, make_end_date, standard_deviation
+from kardboard.util import make_start_date, make_end_date, standard_deviation, average
 
 
 def setup_teams(config):
@@ -115,7 +116,16 @@ class TeamStats(object):
         return int(round(self.wip_count() / throughput))
 
     def standard_deviation(self, weeks=4):
-        return int(round(standard_deviation(self.cycle_times(weeks))))
+        stdev = standard_deviation(self.cycle_times(weeks))
+        if stdev is not None:
+            stdev = int(round(stdev))
+        return stdev
+
+    def average(self, weeks=4):
+        ave = average(self.cycle_times(weeks))
+        if ave is not None:
+            ave = int(round(ave))
+        return ave
 
     def histogram(self, weeks=4):
         times = self.cycle_times(weeks)
