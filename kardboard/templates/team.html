@@ -57,24 +57,30 @@ $(document).ready(function() {
     {% endfor %}
 {% endif %}
 
+{% if backlog_marker_data %}
 <!--
-Metrics based on {{ metrics_cards|count }} cards
+Metrics based on:
+* Up to {{ backlog_marker_data['weeks'] }} weeks
+* Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
+* Cards: {{ backlog_marker_data['cards']|count }}
+* Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
 
 Histogram
 ==========
 Cycle time        Card count
-{% for key in metrics_histogram_keys %}
-{{ key }}        {{ metrics_histogram[key] }}
+{% for key in backlog_marker_data['histogram_keys'] %}
+{{ key }}        {{ backlog_marker_data['histogram'][key] }}
 {% endfor %}
 
 Raw Data
 ============
 key        service_class        cycle_time        done_date
-{% for card in metrics_cards %}
+{% for card in backlog_marker_data['cards'] %}
 {{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
 {% endfor %}
 
 -->
+{% endif %}
 
 {% if team_slug %}
     <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
