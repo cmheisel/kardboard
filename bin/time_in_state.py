@@ -46,6 +46,7 @@ def _get_cards(team, start, end):
     )
     return list(wip_cards) + done_cards
 
+
 def _get_cards_by_report_group(rg_slug, start, end):
     # We need cards that are done
     # Plus cards that are in progress
@@ -62,6 +63,7 @@ def _get_cards_by_report_group(rg_slug, start, end):
     wip_cards = ReportGroup(rg_slug, wip_cards).queryset
     wip_cards = list(wip_cards)
     return wip_cards + done_cards
+
 
 def _get_card_logs(card):
     return StateLog.objects.filter(card=card)
@@ -103,12 +105,14 @@ def card_state_averages(card_state_time):
         averages[state] = average(day_data)
     return averages
 
+
 def _verify_rg(name):
     try:
         app.config.get('REPORT_GROUPS', {})[name]
     except KeyError:
         print "No team or report group with name %s" % name
         raise
+
 
 def report_suite(name, weeks=6):
     start, end = _get_time_range(weeks)
