@@ -6,6 +6,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from kardboard.app import app
+from kardboard.models.reportgroup import ReportGroup
 from kardboard.models.kard import Kard
 from kardboard.models.statelog import StateLog
 from kardboard.models.states import States
@@ -15,11 +16,7 @@ from kardboard.util import make_start_date, make_end_date, average
 
 def _get_team(team_name):
     teams = team_service.setup_teams(app.config)
-    try:
-        team = teams.find_by_name(team_name)
-    except ValueError:
-        print "%s not in %s" % (team_name, teams)
-        raise
+    team = teams.find_by_name(team_name)
     return team
 
 
@@ -49,6 +46,22 @@ def _get_cards(team, start, end):
     )
     return list(wip_cards) + done_cards
 
+def _get_cards_by_report_group(rg_slug, start, end):
+    # We need cards that are done
+    # Plus cards that are in progress
+    done_cards = Kard.objects.filter(
+        done_date__gte=start,
+        done_date__lte=end,
+    )
+    done_cards = ReportGroup(rg_slug, done_cards).queryset
+    done_cards = list(done_cards)
+    wip_cards = Kard.objects.filter(
+        start_date__exists=True,
+        done_date__exists=False,
+    )
+    wip_cards = ReportGroup(rg_slug, wip_cards).queryset
+    wip_cards = list(wip_cards)
+    return wip_cards + done_cards
 
 def _get_card_logs(card):
     return StateLog.objects.filter(card=card)
@@ -90,11 +103,22 @@ def card_state_averages(card_state_time):
         averages[state] = average(day_data)
     return averages
 
+def _verify_rg(name):
+    try:
+        app.config.get('REPORT_GROUPS', {})[name]
+    except KeyError:
+        print "No team or report group with name %s" % name
+        raise
 
-def report_suite(team_name, weeks=6):
-    team = _get_team(team_name)
+def report_suite(name, weeks=6):
     start, end = _get_time_range(weeks)
-    cards = _get_cards(team, start, end)
+    try:
+        team = _get_team(name)
+        cards = _get_cards(team, start, end)
+    except ValueError:
+        rg_slug = _verify_rg(name)
+        cards = _get_cards_by_report_group(rg_slug, start, end)
+
     card_state_time = collect_card_state_time(cards)
     averages = card_state_averages(card_state_time)
 
@@ -122,4 +146,5 @@ def report_suite(team_name, weeks=6):
 if __name__ == "__main__":
     import sys
     team_name = sys.argv[1]
+    weeks = int(sys.argv[2])
     report_suite(team_name)
