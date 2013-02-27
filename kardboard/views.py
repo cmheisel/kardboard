@@ -96,6 +96,8 @@ def team(team_slug=None):
     metrics_histogram = team_stats.histogram(weeks)
     metrics_histogram_keys = metrics_histogram.keys()
     metrics_histogram_keys.sort()
+    average = team_stats.average(weeks)
+    median = team_stats.median(weeks)
 
     metrics = [
         {'WIP': team_stats.wip_count()},
@@ -130,7 +132,9 @@ def team(team_slug=None):
         'histogram': metrics_histogram,
         'histogram_keys': metrics_histogram_keys,
         'cards': metrics_cards,
-        'weekly_throughput': weekly_throughput
+        'weekly_throughput': weekly_throughput,
+        'average': average,
+        'median': median,
     }
 
 

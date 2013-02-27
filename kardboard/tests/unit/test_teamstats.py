@@ -177,6 +177,15 @@ class TeamStatsTest(unittest2.TestCase):
             mock_cycle_times.return_value = []
             assert self.service.average() is None
 
+    def test_median(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = [1, 0, 2, 4, 10, 4, 3, 3, 7, 7, 7]
+            assert 4 == self.service.median()
+
+    def test_median_with_no_data(self):
+        with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:
+            mock_cycle_times.return_value = []
+            assert self.service.median() is None
 
     def test_histogram(self):
         with mock.patch.object(self.service, 'cycle_times') as mock_cycle_times:

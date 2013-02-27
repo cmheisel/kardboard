@@ -1,12 +1,11 @@
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from collections import defaultdict
-from math import isnan
 
 from kardboard.models.kard import Kard
 from kardboard.models.states import States
 from kardboard.models.team import Team, TeamList
-from kardboard.util import make_start_date, make_end_date, standard_deviation, average
+from kardboard.util import make_start_date, make_end_date, standard_deviation, average, median
 
 
 def setup_teams(config):
@@ -126,6 +125,12 @@ class TeamStats(object):
         if ave is not None:
             ave = int(round(ave))
         return ave
+
+    def median(self, weeks=4):
+        med = median(self.cycle_times(weeks))
+        if med is not None:
+            med = int(round(med))
+        return med
 
     def histogram(self, weeks=4):
         times = self.cycle_times(weeks)

@@ -17,6 +17,12 @@ assert translitcodec
 from dateutil.relativedelta import relativedelta
 from statlib import stats
 
+def median(values):
+    try:
+        return stats.median(values)
+    except (ValueError, UnboundLocalError):
+        return None
+
 def average(values):
     """Computes the arithmetic mean of a list of numbers.
 
