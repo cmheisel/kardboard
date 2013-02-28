@@ -104,6 +104,8 @@ def _team_backlog_markers(team, cards, weeks=12):
         'weekly_throughput': weekly_throughput,
         'average': average,
         'median': median,
+        'confidence_90': confidence_90,
+        'standard_deviation': team_stats.standard_deviation(weeks),
     }
 
     backlog_markers = _make_backlog_markers(

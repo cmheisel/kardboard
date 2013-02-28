@@ -64,8 +64,13 @@ Backlog markers based on:
 * Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
 * Cards: {{ backlog_marker_data['cards']|count }}
 * Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
+* 90% confidence: {{ backlog_marker_data['confidence_90'] }}
+
+Other data for comparison
 * Median: {{ backlog_marker_data['median'] }}
 * Average: {{ backlog_marker_data['average'] }}
+* Std Dev: {{ backlog_marker_data['standard_deviation'] }}
+* Statistical 95%: {{ backlog_marker_data['average'] }} - {{ backlog_marker_data['average'] + backlog_marker_data['standard_deviation']*2 }}
 
 Histogram
 ==========
@@ -107,7 +112,11 @@ key        service_class        cycle_time        done_date
 {% else %}
     {% set repeat_headers = False %}
 {% endif %}
-{{ board_macros.board(board, request, repeat_headers, backlog_marker_data['weekly_throughput'], backlog_markers) }}
+{% if backlog_markers %}
+{{ board_macros.board(board, request, repeat_headers, backlog_marker_data.get('weekly_throughput', 0), backlog_markers) }}
+{% else %}
+{{ board_macros.board(board, request, repeat_headers) }}
+{% endif %}
 </div>
 
 
