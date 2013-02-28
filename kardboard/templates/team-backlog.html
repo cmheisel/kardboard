@@ -41,6 +41,33 @@ $(document).ready(function() {
 {% endfor %}
 </p>
 
+{% if backlog_marker_data %}
+<!--
+Backlog markers based on:
+* Up to {{ backlog_marker_data['weeks'] }} weeks
+* Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
+* Cards: {{ backlog_marker_data['cards']|count }}
+* Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
+* Median: {{ backlog_marker_data['median'] }}
+* Average: {{ backlog_marker_data['average'] }}
+
+Histogram
+==========
+Cycle time        Card count
+{% for key in backlog_marker_data['histogram_keys'] %}
+{{ key }}        {{ backlog_marker_data['histogram'][key] }}
+{% endfor %}
+
+Raw Data
+============
+key        service_class        cycle_time        done_date
+{% for card in backlog_marker_data['cards'] %}
+{{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
+{% endfor %}
+
+-->
+{% endif %}
+
 <table class="extended_backlog">
 <thead>
     <caption>Backlog</caption>
@@ -57,7 +84,7 @@ $(document).ready(function() {
 <tbody class="sortable_table">
  {% for card in backlog %}
      {% if backlog_markers %}
-        {%- if loop.index0 % weekly_throughput == 0 %}
+        {%- if loop.index0 % backlog_marker_data['weekly_throughput'] == 0 %}
             <tr class="backlog_marker ui-state-disabled">
                 <td colspan="6">
                     Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}

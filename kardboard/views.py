@@ -78,15 +78,11 @@ def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
         counter +=1
     return backlog_markers
 
-def team(team_slug=None):
-    date = _get_date()
-    teams = _get_teams()
-    team = _find_team_by_slug(team_slug, teams)
+def _team_backlog_markers(team, cards, weeks=12):
     exclude_classes = _get_excluded_classes()
 
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
-    weeks=12
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
     confidence_90 = team_stats.percentile(.90, weeks)
     metrics_cards = team_stats.card_info
@@ -98,6 +94,36 @@ def team(team_slug=None):
     metrics_histogram_keys.sort()
     average = team_stats.average(weeks)
     median = team_stats.median(weeks)
+
+    backlog_marker_data = {
+        'weeks': weeks,
+        'exclude_classes': exclude_classes,
+        'histogram': metrics_histogram,
+        'histogram_keys': metrics_histogram_keys,
+        'cards': metrics_cards,
+        'weekly_throughput': weekly_throughput,
+        'average': average,
+        'median': median,
+    }
+
+    backlog_markers = _make_backlog_markers(
+        confidence_90,
+        weekly_throughput,
+        cards,
+    )
+
+    return backlog_marker_data, backlog_markers
+
+
+def team(team_slug=None):
+    date = _get_date()
+    teams = _get_teams()
+    team = _find_team_by_slug(team_slug, teams)
+
+    weeks=12
+    exclude_classes = _get_excluded_classes()
+    team_stats = teams_service.TeamStats(team.name, exclude_classes)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
 
     metrics = [
         {'WIP': team_stats.wip_count()},
@@ -120,23 +146,7 @@ def team(team_slug=None):
     )
 
     board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput*4)
-    backlog_markers = _make_backlog_markers(
-        confidence_90,
-        weekly_throughput,
-        board.rows[0][0]['cards']
-    )
-
-    backlog_marker_data = {
-        'weeks': weeks,
-        'exclude_classes': exclude_classes,
-        'histogram': metrics_histogram,
-        'histogram_keys': metrics_histogram_keys,
-        'cards': metrics_cards,
-        'weekly_throughput': weekly_throughput,
-        'average': average,
-        'median': median,
-    }
-
+    backlog_marker_data, backlog_markers = _team_backlog_markers(team, board.rows[0][0]['cards'], weeks)
 
     context = {
         'title': title,
@@ -176,21 +186,15 @@ def team_backlog(team_slug=None):
 
     teams = _get_teams()
     team = _find_team_by_slug(team_slug, teams)
-    exclude_classes = _get_excluded_classes()
-    team_stats = teams_service.TeamStats(team.name, exclude_classes)
-    lead_time = team_stats.lead_time(weeks=12)
-    weekly_throughput = team_stats.weekly_throughput_ave(weeks=12)
+    weeks=12
 
     backlog = Kard.objects.filter(
         team=team.name,
         state=States().backlog,
     ).exclude('_ticket_system_data').order_by('priority')
 
-    backlog_markers = _make_backlog_markers(
-        lead_time,
-        weekly_throughput,
-        backlog
-    )
+
+    backlog_marker_data, backlog_markers = _team_backlog_markers(team, backlog, weeks)
 
     title = "%s backlog" % team.name
 
@@ -200,7 +204,7 @@ def team_backlog(team_slug=None):
         'team': team,
         'backlog': backlog,
         'backlog_markers': backlog_markers,
-        'weekly_throughput': weekly_throughput,
+        'backlog_marker_data': backlog_marker_data,
         'updated_at': datetime.datetime.now(),
         'teams': teams,
         'version': VERSION,

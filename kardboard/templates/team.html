@@ -107,7 +107,7 @@ key        service_class        cycle_time        done_date
 {% else %}
     {% set repeat_headers = False %}
 {% endif %}
-{{ board_macros.board(board, request, repeat_headers, weekly_throughput, backlog_markers) }}
+{{ board_macros.board(board, request, repeat_headers, backlog_marker_data['weekly_throughput'], backlog_markers) }}
 </div>
 
 
