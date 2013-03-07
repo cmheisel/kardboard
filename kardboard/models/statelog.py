@@ -80,12 +80,17 @@ class StateLog(app.db.Document):
     def kard_post_save(cls, sender, document, **kwargs):
         observed_card = document
 
-        # This could be a freshly created card, so create a log for it
-        sl, created = cls.objects.get_or_create(auto_save=False,
-            card=observed_card,
-            state=observed_card.state)
-        if created:
-            sl.entered = now()
+        try:
+            # This could be a freshly created card, so create a log for it
+            sl, created = cls.objects.get_or_create(auto_save=False,
+                card=observed_card,
+                state=observed_card.state)
+            if created:
+                sl.entered = now()
+        except cls.MultipleObjectsReturned:
+            sl = cls.objects.filter(
+                card=observed_card,
+                state=observed_card.state)[0]
 
         sl.service_class=observed_card.service_class.get('name')
         sl.save()
