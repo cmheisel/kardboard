@@ -27,6 +27,7 @@ def _get_time_range(weeks, start=None, end=None):
         start = end - relativedelta(weeks=weeks)
     return make_start_date(date=start), make_end_date(date=end)
 
+
 def _get_cards(team, start, end):
     # We need cards that are done
     # Plus cards that are in progress
@@ -37,6 +38,7 @@ def _get_cards(team, start, end):
     )
     done_cards = list(done_cards)
     return done_cards
+
 
 def _get_cards_by_report_group(rg_slug, start, end):
     # We need cards that are done
@@ -98,6 +100,7 @@ def _verify_rg(name):
     except KeyError:
         print "No team or report group with name %s" % name
         raise
+
 
 def parse_date(datestr):
     from dateutil import parser
