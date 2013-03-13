@@ -20,15 +20,12 @@ def _get_team(team_name):
     return team
 
 
-def _get_time_range(weeks):
-    end = make_end_date(
-        date=datetime.now()
-    )
-    start = make_start_date(
-        date=end - relativedelta(weeks=weeks)
-    )
-    return start, end
-
+def _get_time_range(weeks, start=None, end=None):
+    if end is None:
+        end = datetime.now()
+    if start is None:
+        start = end - relativedelta(weeks=weeks)
+    return make_start_date(date=start), make_end_date(date=end)
 
 def _get_cards(team, start, end):
     # We need cards that are done
@@ -39,13 +36,7 @@ def _get_cards(team, start, end):
         team=team.name,
     )
     done_cards = list(done_cards)
-    wip_cards = Kard.objects.filter(
-        start_date__exists=True,
-        done_date__exists=False,
-        team=team.name,
-    )
-    return list(wip_cards) + done_cards
-
+    return done_cards
 
 def _get_cards_by_report_group(rg_slug, start, end):
     # We need cards that are done
@@ -56,13 +47,7 @@ def _get_cards_by_report_group(rg_slug, start, end):
     )
     done_cards = ReportGroup(rg_slug, done_cards).queryset
     done_cards = list(done_cards)
-    wip_cards = Kard.objects.filter(
-        start_date__exists=True,
-        done_date__exists=False,
-    )
-    wip_cards = ReportGroup(rg_slug, wip_cards).queryset
-    wip_cards = list(wip_cards)
-    return wip_cards + done_cards
+    return done_cards
 
 
 def _get_card_logs(card):
@@ -109,13 +94,18 @@ def card_state_averages(card_state_time):
 def _verify_rg(name):
     try:
         app.config.get('REPORT_GROUPS', {})[name]
+        return name
     except KeyError:
         print "No team or report group with name %s" % name
         raise
 
+def parse_date(datestr):
+    from dateutil import parser
+    return parser.parse(datestr)
 
-def report_suite(name, weeks=6):
-    start, end = _get_time_range(weeks)
+
+def report_suite(name, weeks=None, start=None, end=None):
+    start, end = _get_time_range(weeks, start, end)
     try:
         team = _get_team(name)
         cards = _get_cards(team, start, end)
@@ -150,5 +140,6 @@ def report_suite(name, weeks=6):
 if __name__ == "__main__":
     import sys
     team_name = sys.argv[1]
-    weeks = int(sys.argv[2])
-    report_suite(team_name)
+    start_date = parse_date(sys.argv[2])
+    end_date = parse_date(sys.argv[3])
+    report_suite(team_name, None, start_date, end_date)
