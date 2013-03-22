@@ -144,11 +144,7 @@ def started_after_report(team_or_rg_name, start_date):
     )
     writer.writerows(rows)
 
-"""
-* SLA report
-* Fixed-date hit/miss ratio
-* Include WIP
-"""
+
 if __name__ == "__main__":
     import sys
     start_date = parse_date(sys.argv[1])
