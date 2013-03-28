@@ -7,6 +7,8 @@ from kardboard.models.reportgroup import ReportGroup
 from kardboard.services import teams as team_service
 from kardboard.util import make_start_date, make_end_date, slugify, now
 
+from time_in_state import collect_card_state_time
+
 
 def parse_date(datestr):
     from dateutil import parser
@@ -96,6 +98,23 @@ def _card_type(card):
         return 'Bug'
 
 
+def _get_state_time(name, card):
+    card_times = collect_card_state_time([card, ])
+    state_time = card_times.get(name, ['', ])[0]
+    return state_time
+
+def _time_in_otis(card):
+    return _get_state_time('Build to OTIS', card)
+
+def _time_wait_qa(card):
+    return _get_state_time('Ready: Testing', card)
+
+def _time_in_qa(card):
+    return _get_state_time('Testing', card)
+
+def _time_building(card):
+    return _get_state_time('Building', card)
+
 def started_after_report(team_or_rg_name, start_date):
     start_date = make_start_date(date=start_date)
     cards = _get_cards(team_or_rg_name, start_date)
@@ -111,7 +130,11 @@ def started_after_report(team_or_rg_name, start_date):
         'cycle_time',
         'is_wip',
         'hit_due_date',
-        'hit_sla'
+        'hit_sla',
+        'time_in_otis',
+        'time_wait_qa',
+        'time_in_qa',
+        'time_building',
     )
 
     Row = namedtuple('Row', ' '.join(columns))
@@ -128,7 +151,11 @@ def started_after_report(team_or_rg_name, start_date):
             cycle_time = c.cycle_time or c.current_cycle_time(),
             is_wip = (c.done_date is None),
             hit_due_date = _hit_due_date(c),
-            hit_sla = _hit_sla(c)
+            hit_sla = _hit_sla(c),
+            time_in_otis = _time_in_otis(c),
+            time_wait_qa = _time_wait_qa(c),
+            time_in_qa = _time_in_qa(c),
+            time_building = _time_building(c),
         )
         rows.append(row)
 
