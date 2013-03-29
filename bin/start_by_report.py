@@ -103,17 +103,22 @@ def _get_state_time(name, card):
     state_time = card_times.get(name, ['', ])[0]
     return state_time
 
+
 def _time_in_otis(card):
     return _get_state_time('Build to OTIS', card)
+
 
 def _time_wait_qa(card):
     return _get_state_time('Ready: Testing', card)
 
+
 def _time_in_qa(card):
     return _get_state_time('Testing', card)
 
+
 def _time_building(card):
     return _get_state_time('Building', card)
+
 
 def started_after_report(team_or_rg_name, start_date):
     start_date = make_start_date(date=start_date)
@@ -141,21 +146,21 @@ def started_after_report(team_or_rg_name, start_date):
     rows = []
     for c in cards:
         row = Row(
-            key = c.key,
-            team = c.team,
-            service_class = c.service_class['name'],
-            type = _card_type(c),
-            start_date = _format_date_or_empty(c.start_date),
-            done_date = _format_date_or_empty(c.done_date),
-            due_date = _format_date_or_empty(c.due_date),
-            cycle_time = c.cycle_time or c.current_cycle_time(),
-            is_wip = (c.done_date is None),
-            hit_due_date = _hit_due_date(c),
-            hit_sla = _hit_sla(c),
-            time_in_otis = _time_in_otis(c),
-            time_wait_qa = _time_wait_qa(c),
-            time_in_qa = _time_in_qa(c),
-            time_building = _time_building(c),
+            key=c.key,
+            team=c.team,
+            service_class=c.service_class['name'],
+            type=_card_type(c),
+            start_date=_format_date_or_empty(c.start_date),
+            done_date=_format_date_or_empty(c.done_date),
+            due_date=_format_date_or_empty(c.due_date),
+            cycle_time=c.cycle_time or c.current_cycle_time(),
+            is_wip=(c.done_date is None),
+            hit_due_date=_hit_due_date(c),
+            hit_sla=_hit_sla(c),
+            time_in_otis=_time_in_otis(c),
+            time_wait_qa=_time_wait_qa(c),
+            time_in_qa=_time_in_qa(c),
+            time_building=_time_building(c),
         )
         rows.append(row)
 
