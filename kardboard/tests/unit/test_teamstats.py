@@ -261,6 +261,17 @@ class TeamStatsTest(unittest2.TestCase):
             actual = self.service.throughput_date_range(weeks=4)
             self.assertAlmostEqual(return_value, actual[0], delta=delta)
 
+    def test_throughput_date_range_with_one_same_day_card(self):
+        """
+        If there's only one done card, and it's done today, don't
+        return 0 weeks.
+        """
+        with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
+            return_value = datetime.now()
+            mock_oldest_card_date.return_value = return_value
+            actual = self.service.throughput_date_range(weeks=4)
+            self.assertEqual(1, actual[2])
+
     def test_throughput_date_range_with_team_less_than_returns_weeks(self):
         with mock.patch.object(self.service, 'oldest_card_date') as mock_oldest_card_date:
             mock_oldest_card_date.return_value = datetime.now() - relativedelta(weeks=2)

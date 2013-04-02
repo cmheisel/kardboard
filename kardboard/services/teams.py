@@ -89,6 +89,8 @@ class TeamStats(object):
 
         diff = end_date - start_date
         weeks = int(round(diff.days / 7.0))
+        if weeks <= 0:
+            weeks = 1
 
         return (start_date, end_date, weeks)
 
