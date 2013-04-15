@@ -11,7 +11,7 @@ from kardboard.models.kard import Kard
 from kardboard.models.statelog import StateLog
 from kardboard.models.states import States
 from kardboard.services import teams as team_service
-from kardboard.util import make_start_date, make_end_date, average
+from kardboard.util import make_start_date, make_end_date, average, standard_deviation
 
 
 def _get_team(team_name):
@@ -93,6 +93,25 @@ def card_state_averages(card_state_time):
     return averages
 
 
+def median(an_array):
+    from statlib import stats
+    return stats.median(an_array)
+
+
+def card_state_medians(card_state_time):
+    medians = {}
+    for state, day_data in card_state_time.items():
+        medians[state] = median(day_data)
+    return medians
+
+
+def card_state_stdevs(card_state_time):
+    stdevs = {}
+    for state, day_data in card_state_time.items():
+        stdevs[state] = standard_deviation(day_data)
+    return stdevs
+
+
 def _verify_rg(name):
     try:
         app.config.get('REPORT_GROUPS', {})[name]
@@ -118,13 +137,17 @@ def report_suite(name, weeks=None, start=None, end=None):
 
     card_state_time = collect_card_state_time(cards)
     averages = card_state_averages(card_state_time)
+    medians = card_state_medians(card_state_time)
+    stdevs = card_state_stdevs(card_state_time)
 
     states = States()
     unknown_states = [s for s in averages.keys() if s not in states]
     for state in states:
-        print "%s\t%s" % (
+        print "%s,%s,%s,%s" % (
             state,
-            averages.get(state, "N/A")
+            averages.get(state, "N/A"),
+            medians.get(state, "N/A"),
+            stdevs.get(state, "N/A"),
         )
     for state in unknown_states:
         print "UNUSED %s\t %s" % (
@@ -132,10 +155,10 @@ def report_suite(name, weeks=None, start=None, end=None):
             averages.get(state, "N/A")
         )
 
-    print "Cards\t %s" % (
+    print "Cards,%s" % (
         len([c for c in cards if c.is_card])
     )
-    print "Defects\t %s" % (
+    print "Defects,%s" % (
         len([c for c in cards if c.is_card is False])
     )
 
