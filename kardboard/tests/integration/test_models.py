@@ -1,4 +1,5 @@
 import datetime
+import random
 from copy import deepcopy
 
 import pytest
@@ -114,6 +115,68 @@ class DisplayBoardTests(KardboardTestCase):
         )
         actual = board.headers
         self.assertEqual(actual, expected)
+
+    def test_card_ordering(self):
+        backlog_date = self._date('start', days=-10)
+        team = "Team 3"
+
+        priorities = [i+1 for i in xrange(0, 3)]
+
+        for i in xrange(0, 3):
+            # Make one card with no order
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team,
+                state=self.states.backlog,
+            )
+            c.save()
+
+            # Make one card with order
+            priority = random.choice(priorities)
+            priorities.remove(priority)
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team,
+                state=self.states.backlog,
+                priority=priority
+            )
+            c.save()
+        board = self._get_target_class()(teams=("Team 3", ))
+
+        expected = [1, 2, 3, None, None, None]
+        actual = [c.priority for c in board.rows[0][0]['cards']]
+        assert expected == actual
+
+    def test_card_ordering_with_limit(self):
+        backlog_date = self._date('start', days=-10)
+        team = "Team 3"
+
+        priorities = [i+1 for i in xrange(0, 3)]
+
+        for i in xrange(0, 3):
+            # Make one card with no order
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team,
+                state=self.states.backlog,
+            )
+            c.save()
+
+            # Make one card with order
+            priority = random.choice(priorities)
+            priorities.remove(priority)
+            c = self.make_card(
+                backlog_date=backlog_date,
+                team=team,
+                state=self.states.backlog,
+                priority=priority
+            )
+            c.save()
+        board = self._get_target_class()(teams=("Team 3", ), backlog_limit=2)
+
+        expected = [1, 2]
+        actual = [c.priority for c in board.rows[0][0]['cards']]
+        assert expected == actual
 
     def test_backlog_sorting(self):
         self.delete_all_cards()

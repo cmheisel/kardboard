@@ -92,18 +92,35 @@ class DisplayBoard(object):
         in_progress_q = Q(
             state__in=self.states.in_progress,
             team__in=self.teams)
-        backlog_q = Q(
+        ordered_backlog_q = Q(
+            state=self.states.backlog,
+            team__in=self.teams,
+            priority__exists=True)
+        unordered_backlog_q = Q(
+            state=self.states.backlog,
+            team__in=self.teams,
+            priority__exists=False)
+        total_backlog_q = Q(
             state=self.states.backlog,
             team__in=self.teams)
         done_q = Q(done_date__gte=now() - relativedelta(days=self.done_days),
             team__in=self.teams)
         if self.backlog_limit:
-            backlog_cards = Kard.objects.filter(backlog_q).exclude('_ticket_system_data').limit(self.backlog_limit)
+            ordered_backlog_cards = Kard.objects.filter(ordered_backlog_q).order_by('priority', 'created_at')
+            ordered_backlog_cards = ordered_backlog_cards.limit(self.backlog_limit).exclude('_ticket_system_data')
+            unordered_backlog_cards = []
+            if len(ordered_backlog_cards) < self.backlog_limit:
+                unordered_backlog_cards = Kard.objects.filter(unordered_backlog_q).order_by('created_at')
+                unordered_backlog_cards = unordered_backlog_cards.limit(self.backlog_limit).exclude('_ticket_system_data')
+
+            backlog_cards = list(ordered_backlog_cards) + list(unordered_backlog_cards)
+            backlog_cards = backlog_cards[:self.backlog_limit]
+
             cards_query = in_progress_q | done_q
             cards = list(Kard.objects.filter(cards_query).exclude('_ticket_system_data'))
-            self._cards = list(backlog_cards) + cards
+            self._cards = backlog_cards + cards
         else:
-            cards_query = backlog_q | in_progress_q | done_q
+            cards_query = total_backlog_q | in_progress_q | done_q
             self._cards = list(Kard.objects.filter(cards_query).exclude('_ticket_system_data'))
 
         return self._cards

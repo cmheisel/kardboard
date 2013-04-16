@@ -148,6 +148,8 @@ def team(team_slug=None):
     )
 
     board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput*4)
+
+    #raise Exception
     backlog_marker_data, backlog_markers = _team_backlog_markers(team, board.rows[0][0]['cards'], weeks)
 
     context = {
