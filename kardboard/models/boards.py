@@ -63,13 +63,10 @@ class DisplayBoard(object):
                 if state in self.states.pre_start:
                     pri_cards = [c for c in cards if c.priority is not None]
                     pri_cards = sorted(pri_cards, key=lambda c: c.priority)
-                    versioned = [c for c in cards if c.priority is None and c._version is not None]
-                    versioned.sort(key=lambda c: c._version)
-                    non_versioned = [c for c in cards if c.priority is None and c._version is None]
-                    non_versioned.sort(key=lambda c: c.created_at)
-                    non_versioned.reverse()
-
-                    cards = pri_cards + versioned + non_versioned
+                    non_pri = [c for c in cards if c not in pri_cards]
+                    non_pri.sort(key=lambda c: c.created_at)
+                    non_pri.reverse()
+                    cards = pri_cards + non_pri
                 elif state in self.states.in_progress:
                     cards = sorted(cards, key=lambda c: c.current_cycle_time())
                     cards.reverse()
