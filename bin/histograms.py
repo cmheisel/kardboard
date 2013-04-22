@@ -18,6 +18,7 @@ def histogram(data):
         d[data_point] += 1
     return dict(d)
 
+
 def _get_cards(team, start, end):
     # We need cards that are done
     # Plus cards that are in progress
@@ -37,6 +38,7 @@ def _get_cards(team, start, end):
     )
     wip_cards = list(wip_cards)
     return (done_cards, wip_cards)
+
 
 def _get_cards_by_report_group(rg_slug, start, end):
     # We need cards that are done
@@ -60,6 +62,7 @@ def _get_cards_by_report_group(rg_slug, start, end):
     wip_cards = list(wip_cards)
 
     return (done_cards, wip_cards)
+
 
 def report_suite(name, start, end):
     start, end = _get_time_range(None, start, end)
