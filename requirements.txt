@@ -4,7 +4,7 @@ Flask-WTF==0.5.2
 Jinja2==2.5.5
 WTForms==1.0.1
 Werkzeug==0.7
-mongoengine==0.7.5
+mongoengine==0.7.9
 blinker==1.2
 pymongo==2.2
 flask-mongoengine==0.6
