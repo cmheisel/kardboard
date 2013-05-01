@@ -14,8 +14,8 @@ for unexited_log in unexited_logs:
             print "APPLYING %s - %s - %s" % (log.card.key, log.state, log.entered)
             print "\t %s - %s - %s - %s" % (unexited_log.card.key, unexited_log.state, unexited_log.entered, log.exited)
             fix_count +=1
-#                    l.exited = log.entered
-#                   l.save()
+            unexited_log.exited = log.entered
+            unexited_log.save()
 
 
 print "Fixed: %s" % (fix_count)
