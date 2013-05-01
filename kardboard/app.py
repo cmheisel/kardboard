@@ -14,6 +14,12 @@ try:
 except ImportError:
     DEBUG_TOOLBAR = False
 
+try:
+    from raven.contrib.flask import Sentry
+    SENTRY_SUPPORT = True
+except ImportError:
+    SENTRY_SUPPORT = False
+
 from kardboard.util import (
     slugify,
     timesince,
@@ -67,6 +73,11 @@ def get_app():
     environment_name = app.config.get('ENV_MAPPING', {}).get(machine_name, 'default')
     prefix_name = '%s.%s.kardboard' % (environment_name, machine_name)
     app.statsd = statsd.Client(prefix_name, statsd_connection)
+
+    if SENTRY_SUPPORT and 'SENTRY_DSN' in app.config.keys():
+        raise Exception
+        sentry = Sentry(app)
+        sentry
 
     return app
 
