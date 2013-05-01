@@ -75,7 +75,6 @@ def get_app():
     app.statsd = statsd.Client(prefix_name, statsd_connection)
 
     if SENTRY_SUPPORT and 'SENTRY_DSN' in app.config.keys():
-        raise Exception
         sentry = Sentry(app)
         sentry
 
