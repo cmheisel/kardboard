@@ -1,7 +1,7 @@
 from kardboard.models.kard import Kard
 from kardboard.models.statelog import StateLog
 
-unexited_logs = StateLog.objects.filter(exited__exists=False, state__nin=["Done", ])
+unexited_logs = StateLog.objects.filter(exited__exists=False, state__nin=["Done", "Backlog", ])
 
 fix_count = 0
 for unexited_log in unexited_logs:
@@ -10,15 +10,12 @@ for unexited_log in unexited_logs:
     except AttributeError:
         print "MISSING CARD"
         pass
-    logs = StateLog.objects.filter(card=k)
-    for l in logs:
-        if l.exited is None:
-            for log in StateLog.objects.filter(card=k):
-                if log.state == l.state and log.entered > l.entered:
-                    #print "%s" % l.card.key
-                    fix_count +=1
-                    l.exited = log.entered
-                    l.save()
+    for log in StateLog.objects.filter(card=k, entered__gt=unexited_log.entered).order_by('entered').limit(1):
+            print "APPLYING %s - %s - %s" % (log.card.key, log.state, log.entered)
+            print "\t %s - %s - %s - %s" % (unexited_log.card.key, unexited_log.state, unexited_log.entered, log.exited)
+            fix_count +=1
+#                    l.exited = log.entered
+#                   l.save()
 
 
 print "Fixed: %s" % (fix_count)
