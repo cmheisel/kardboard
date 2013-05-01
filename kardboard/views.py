@@ -928,6 +928,7 @@ def report_detailed_flow(group="all", months=3, cards_only=False):
         seri = {'name': state, 'data': []}
         series.append(seri)
 
+    done_starting_point = 0
     for report in reports:
         chart['categories'].append(report.date.strftime("%m/%d"))
         for seri in series:
@@ -935,6 +936,14 @@ def report_detailed_flow(group="all", months=3, cards_only=False):
                 daily_seri_data = report.state_card_counts.get(seri['name'], 0)
             else:
                 daily_seri_data = report.state_counts.get(seri['name'], 0)
+
+            if seri['name'] == "Done":
+                if len(seri['data']) == 0:
+                    done_starting_point = daily_seri_data
+                    daily_seri_data = 0
+                else:
+                    daily_seri_data = daily_seri_data - done_starting_point
+
             seri['data'].append(daily_seri_data)
     chart['series'] = series
 
