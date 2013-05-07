@@ -10,8 +10,6 @@ from kardboard.util import (
 )
 
 
-
-
 def _get_team(team_name):
     teams = team_service.setup_teams(app.config)
     team = teams.find_by_name(team_name)
