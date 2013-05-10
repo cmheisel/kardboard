@@ -449,3 +449,33 @@ table.extended_backlog tr.backlog_marker {
     font-weight: bold;
     border: 1px solid black;
 }
+
+
+/*** FUNNEL View ***/
+table.funnel  {
+    margin: 0 1% 0 1%;
+    width: 98%;
+}
+
+table.funnel tr th.reorder_col {
+    width: 3%;
+}
+
+table.funnel tr th.ordering_col {
+    width: 2%;
+}
+
+table.funnel td.reorder i {
+    display: none;
+}
+
+table.funnel td.reorder:hover i {
+    display: inline;
+}
+
+table.funnel tr.backlog_marker {
+    text-align: center;
+    background-color: #92CC47;
+    font-weight: bold;
+    border: 1px solid black;
+}

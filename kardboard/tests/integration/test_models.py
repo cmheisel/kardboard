@@ -230,6 +230,18 @@ class StatesTests(KardboardTestCase):
         from kardboard.models import States
         return States
 
+    def test_orderable(self):
+        states = self._make_one()
+        expected = ['Backlog']
+        actual = states.orderable
+        assert expected == actual
+
+    def test_find_by_slug(self):
+        states = self._make_one()
+        expected = 'Deploy'
+        actual = states.find_by_slug('deploy')
+        assert expected == actual
+
     def test_iteration(self):
         states = self._make_one()
         expected = [state for state in self.config['CARD_STATES']]
@@ -642,23 +654,6 @@ class KardTests(KardTestCase):
         actual = [(c.key, c.priority) for c in klass.backlogged()]
 
         self.assertEqual(expected, actual)
-
-    def test_unsetting_priority(self):
-        klass = self._get_target_class()
-        klass.objects.all().delete()
-
-        now = datetime.datetime.now()
-        older = now - datetime.timedelta(days=1)
-        k = self._make_one(key="K-0", priority=1,
-            backlog_date=older, start_date=None)
-
-        self.assertEqual(k.priority, 1)
-        k.save()
-        self.assertEqual(k.priority, 1)
-        k.priority = None
-        self.assertEqual(k.priority, None)
-        k.save()
-        self.assertEqual(k.priority, None)
 
     def test_key_uppercase(self):
         k = self._make_one()

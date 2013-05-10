@@ -1,5 +1,5 @@
 from kardboard.app import app
-
+from kardboard.util import slugify
 
 class States(object):
     def __init__(self, config=None):
@@ -60,6 +60,20 @@ class States(object):
 
     def index(self, *args, **kwargs):
         return self.states.index(*args, **kwargs)
+
+    def find_by_slug(self, slug):
+        by_slug = {}
+        for state in self:
+            by_slug[slugify(state)] = state
+        return by_slug[slug]
+
+    @property
+    def orderable(self):
+        orderable = [self._find_backlog(), ]
+        for state in self.config.get('FUNNEL_VIEWS', {}).keys():
+            if state in self.states:
+                orderable.append(state)
+        return list(set(orderable))
 
     @property
     def for_forms(self):
