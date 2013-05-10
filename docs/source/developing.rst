@@ -16,7 +16,7 @@ Default setup
     vagrant up
     # ...wait...
     vagrant ssh
-    touch kardboardve/src/kardboard/kardboard-local.conf
+    touch kardboardve/src/kardboard/kardboard-local.cfg
     source kardboardve/bin/activate
     cd kardboardve/src/kardboard
     py.test kardboard
