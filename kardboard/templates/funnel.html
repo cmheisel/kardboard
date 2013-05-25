@@ -74,7 +74,7 @@ key        service_class        cycle_time        done_date
 
 <table class="extended_backlog">
 <thead>
-    <caption>{{ state }}</caption>
+    <caption>{{ state }}: {{ cards|length }}</caption>
     <tr>
         <th class="reorder_col">&nbsp;</th>
         <th class="key_col">Ticket</th>
@@ -87,7 +87,7 @@ key        service_class        cycle_time        done_date
 </thead>
 
 <tbody class="sortable_table">
- {% for card in backlog %}
+ {% for card in cards %}
      {% if backlog_markers %}
         {%- if loop.index0 % backlog_marker_data['weekly_throughput'] == 0 %}
             <tr class="backlog_marker ui-state-disabled">

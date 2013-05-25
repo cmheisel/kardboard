@@ -226,12 +226,16 @@ def funnel(state_slug):
     except KeyError:
         abort(404)
 
+    cards = Kard.objects.filter(
+        state=state,
+    ).exclude('_ticket_system_data')
 
     title = "%s: All boards" % state
 
     context = {
         'title': title,
         'state': state,
+        'cards': cards,
         'funnel_throughput': funnel_throughput,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
