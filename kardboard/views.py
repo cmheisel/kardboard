@@ -220,13 +220,19 @@ def team_backlog(team_slug=None):
 
 def funnel(state_slug):
     states = States()
-    state = states.find_by_slug(state_slug)
+    try:
+        state = states.find_by_slug(state_slug)
+        funnel_throughput = app.config.get('FUNNEL_VIEWS', {})[state]
+    except KeyError:
+        abort(404)
+
 
     title = "%s: All boards" % state
 
     context = {
         'title': title,
         'state': state,
+        'funnel_throughput': funnel_throughput,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
         'authenticated': kardboard.auth.is_authenticated(),

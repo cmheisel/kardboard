@@ -38,6 +38,10 @@ class FunnelTests(DashboardTestCase):
             'Done',
         )
 
+        self.config['FUNNEL_VIEWS'] = {
+            'Deploy': 2,
+        }
+
         nondefault_keys = [
             'BACKLOG_STATE',
             'START_STATE',
@@ -58,6 +62,13 @@ class FunnelTests(DashboardTestCase):
         res = self.app.get(self._get_target_url('Deploy'))
         self.assertEqual(200, res.status_code)
 
+    def test_funnel_404(self):
+        res = self.app.get(self._get_target_url('In Progress'))
+        self.assertEqual(404, res.status_code)
+
+    def test_funnel_404_if_unknown_state(self):
+        res = self.app.get(self._get_target_url('Foo Bar'))
+        self.assertEqual(404, res.status_code)
 
 class DetailPageTests(DashboardTestCase):
     def _get_target_url(self):
