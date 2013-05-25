@@ -217,6 +217,18 @@ def team_backlog(team_slug=None):
 
     return render_template('team-backlog.html', **context)
 
+def _funnel_markers(daily_batch_size, cards):
+    funnel_markers = []
+    if daily_batch_size:
+        counter = 0
+        batch_counter = 0
+        for k in cards:
+            if counter % daily_batch_size == 0:
+                est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=batch_counter)
+                funnel_markers.append(est_done_date)
+                batch_counter += 1
+            counter +=1
+    return funnel_markers
 
 def funnel(state_slug):
     states = States()
@@ -266,6 +278,8 @@ def funnel(state_slug):
 
     title = "%s: All boards" % state
 
+    funnel_markers = _funnel_markers(funnel_throughput, cards)
+
     context = {
         'title': title,
         'state': state,
@@ -273,6 +287,7 @@ def funnel(state_slug):
         'cards': cards,
         'times_in_state': times_in_state,
         'funnel_throughput': funnel_throughput,
+        'funnel_markers': funnel_markers,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
         'authenticated': kardboard.auth.is_authenticated(),
