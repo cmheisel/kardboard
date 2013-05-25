@@ -11,7 +11,7 @@ var drag_and_drop_handler = function(event,ui) {
     $.ajax({
         type: "POST",
         data: sorted_cards,
-        url: "/team/" + '{{ team_slug }}' + "/backlog/",
+        url: "/funnel/" + '{{ state_slug }}' + "/",
         error: function(jqXHR, textStatus, errorThrown) {
             window.alert(textStatus + ": " + errorThrown);
         },
@@ -81,11 +81,11 @@ key        service_class        cycle_time        done_date
         <th class="reorder_col">&nbsp;</th>
         <th class="ordering_col">#</th>
         <th class="key_col">Ticket</th>
-        <th class="type_col">Type</th>
-        <th class="title_col">Title</th>
         <th class="cycle_col">In State</th>
+        <th class="title_col">Title</th>
         <th class="sclass_col">Service Class</th>
         <th class="due_col">Due date</th>
+        <th class="type_col">Type</th>
     </tr>
 </thead>
 
@@ -110,17 +110,17 @@ key        service_class        cycle_time        done_date
             <a href="{{ card.ticket_system.get_ticket_url() }}">{{ card.key }}</a>
         </td>
 
-        <td>{{ card.type }}</td>
+        <td>{{ card_macros.hours_to_days(times_in_state[card.key]) }}</td>
 
         <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
         </td>
 
-        <td>{{ card_macros.hours_to_days(times_in_state[card.key]) }}</td>
-
         <td>{{ card.service_class['name'] }}</td>
 
         <td>{% if card.due_date %}{{ card.due_date.strftime("%m/%d") }}{% endif %}</td>
+
+        <td>{{ card.type }}</td>
     </tr>
     {% endfor %}
 </tbody>

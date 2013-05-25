@@ -230,6 +230,12 @@ class StatesTests(KardboardTestCase):
         from kardboard.models import States
         return States
 
+    def test_orderable(self):
+        states = self._make_one()
+        expected = ['Backlog']
+        actual = states.orderable
+        assert expected == actual
+
     def test_find_by_slug(self):
         states = self._make_one()
         expected = 'Deploy'

@@ -68,6 +68,14 @@ class States(object):
         return by_slug[slug]
 
     @property
+    def orderable(self):
+        orderable = [self._find_backlog(), ]
+        for state in self.config.get('FUNNEL_VIEWS', {}).keys():
+            if state in self.states:
+                orderable.append(state)
+        return list(set(orderable))
+
+    @property
     def for_forms(self):
         form_list = [('', ''), ]  # Add a blank
         form_list.extend([(state, state) for state in self.states])

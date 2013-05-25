@@ -262,9 +262,10 @@ class Kard(app.db.Document):
             self.state = target_state
 
     def _auto_state_changes(self):
+        states = States()
+
         # Auto move to done
         if self.done_date:
-            states = States()
             self.in_progress = False
             self.state = states.done
 
@@ -274,6 +275,10 @@ class Kard(app.db.Document):
             # Do we have a state change?
             if self.state_changing:
                 self.unblock()
+
+        if self.state not in states.orderable:
+            self.priority = None
+
 
     def _set_cycle_lead_times(self):
         # Auto fill in final cycle and lead time

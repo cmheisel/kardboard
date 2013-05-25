@@ -238,14 +238,38 @@ def funnel(state_slug):
     for c in cards:
         times_in_state[c.key] = _key_fn(c)
 
-    cards = sorted(cards, key=lambda c: times_in_state[c.key])
-    cards.reverse()
+    cards_with_ordering = [c for c in cards if c.priority]
+    cards_without_ordering = [c for c in cards if c.priority is None]
+
+    cards_with_ordering = sorted(cards_with_ordering, key=lambda c: c.priority)
+
+    cards_without_ordering = sorted(cards_without_ordering, key=lambda c: times_in_state[c.key])
+    cards_without_ordering.reverse()
+    cards = cards_with_ordering + cards_without_ordering
+
+    if request.method == "POST":
+        if kardboard.auth.is_authenticated() is False:
+            abort(403)
+
+        start = time.time()
+        card_key_list = request.form.getlist('card[]')
+
+        counter = 1
+        for card_key in card_key_list:
+            Kard.objects(
+                key=card_key.strip()
+            ).only('priority').update_one(set__priority=counter)
+            counter +=1
+
+        elapsed = (time.time() - start)
+        return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
 
     title = "%s: All boards" % state
 
     context = {
         'title': title,
         'state': state,
+        'state_slug': state_slug,
         'cards': cards,
         'times_in_state': times_in_state,
         'funnel_throughput': funnel_throughput,
@@ -1107,5 +1131,5 @@ app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
 app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
-app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", ])
+app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", "POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)
