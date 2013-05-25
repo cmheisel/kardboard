@@ -1,3 +1,7 @@
+from copy import deepcopy
+
+import py
+
 from kardboard.util import slugify
 from kardboard.tests.core import KardboardTestCase, DashboardTestCase
 
@@ -19,6 +23,39 @@ class TeamTests(DashboardTestCase):
 
     def test_team_page(self):
         res = self.app.get(self._get_target_url(self.team1))
+        self.assertEqual(200, res.status_code)
+
+
+@py.test.mark.funnel
+class FunnelTests(DashboardTestCase):
+    def setUp(self):
+        super(FunnelTests, self).setUp()
+        self.old_config = deepcopy(self.config)
+        self.config['CARD_STATES'] = (
+            'Backlog',
+            'In Progress',
+            'Deploy',
+            'Done',
+        )
+
+        nondefault_keys = [
+            'BACKLOG_STATE',
+            'START_STATE',
+            'DONE_STATE',
+        ]
+        for key in nondefault_keys:
+            if key in self.config.keys():
+                del(self.config[key])
+
+    def tearDown(self):
+        self.config = deepcopy(self.old_config)
+
+    def _get_target_url(self, state):
+        state_slug = slugify(state)
+        return '/funnel/%s/' % state_slug
+
+    def test_funnel_get(self):
+        res = self.app.get(self._get_target_url('Deploy'))
         self.assertEqual(200, res.status_code)
 
 

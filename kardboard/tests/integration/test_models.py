@@ -230,6 +230,12 @@ class StatesTests(KardboardTestCase):
         from kardboard.models import States
         return States
 
+    def test_find_by_slug(self):
+        states = self._make_one()
+        expected = 'Deploy'
+        actual = states.find_by_slug('deploy')
+        assert expected == actual
+
     def test_iteration(self):
         states = self._make_one()
         expected = [state for state in self.config['CARD_STATES']]

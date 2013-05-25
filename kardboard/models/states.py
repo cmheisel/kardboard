@@ -1,5 +1,5 @@
 from kardboard.app import app
-
+from kardboard.util import slugify
 
 class States(object):
     def __init__(self, config=None):
@@ -60,6 +60,12 @@ class States(object):
 
     def index(self, *args, **kwargs):
         return self.states.index(*args, **kwargs)
+
+    def find_by_slug(self, slug):
+        by_slug = {}
+        for state in self:
+            by_slug[slugify(state)] = state
+        return by_slug[slug]
 
     @property
     def for_forms(self):

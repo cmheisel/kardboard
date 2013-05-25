@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block extrajs %}
+{% if authenticated %}
+<script type="text/javascript">
+var drag_and_drop_handler = function(event,ui) {
+    $('tbody.sortable_table').sortable('disable');
+    var sorted_cards = $('tbody.sortable_table').sortable('serialize', {
+        expression: /(.+)[_](.+)/
+    });
+    $.ajax({
+        type: "POST",
+        data: sorted_cards,
+        url: "/team/" + '{{ team_slug }}' + "/backlog/",
+        error: function(jqXHR, textStatus, errorThrown) {
+            window.alert(textStatus + ": " + errorThrown);
+        },
+        success: function(data, textStatus, jqXHR) {
+            $('tbody.sortable_table').sortable('enable');
+            var response = $.parseJSON(data);
+            if (window.console) {
+                console.log(textStatus + ": " + data['message']);
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+    $('tbody.sortable_table').on('sortupdate', drag_and_drop_handler);
+    $('tbody.sortable_table').sortable('enable');
+});
+</script>
+{% endif %}
+{% endblock extrajs %}
+
+{% block content %}
+
+<p class="nav">
+{% for team in teams %}
+    <a href="{{ url_for('team', team_slug=team.slug) }}">{{ team.name }}</a>{% if not loop.last %} / {% endif %}
+{% endfor %}
+</p>
+
+{% if backlog_marker_data %}
+<!--
+Backlog markers based on:
+* Up to {{ backlog_marker_data['weeks'] }} weeks
+* Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
+* Cards: {{ backlog_marker_data['cards']|count }}
+* Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
+* 90% confidence: {{ backlog_marker_data['confidence_90'] }}
+
+Other data for comparison
+* Median: {{ backlog_marker_data['median'] }}
+* Average: {{ backlog_marker_data['average'] }}
+* Std Dev: {{ backlog_marker_data['standard_deviation'] }}
+
+Histogram
+==========
+Cycle time        Card count
+{% for key in backlog_marker_data['histogram_keys'] %}
+{{ key }}        {{ backlog_marker_data['histogram'][key] }}
+{% endfor %}
+
+Raw Data
+============
+key        service_class        cycle_time        done_date
+{% for card in backlog_marker_data['cards'] %}
+{{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
+{% endfor %}
+
+-->
+{% endif %}
+
+<table class="extended_backlog">
+<thead>
+    <caption>{{ state }}</caption>
+    <tr>
+        <th class="reorder_col">&nbsp;</th>
+        <th class="key_col">Ticket</th>
+        <th class="type_col">Type</th>
+        <th class="title_col">Title</th>
+        <th class="cycle_col">Time in state</th>
+        <th class="sclass_col">Service Class</th>
+        <th class="due_col">Due date</th>
+    </tr>
+</thead>
+
+<tbody class="sortable_table">
+ {% for card in backlog %}
+     {% if backlog_markers %}
+        {%- if loop.index0 % backlog_marker_data['weekly_throughput'] == 0 %}
+            <tr class="backlog_marker ui-state-disabled">
+                <td colspan="6">
+                    Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
+                </td>
+            </tr>
+        {% endif %}
+    {% endif %}
+
+    <tr class="{{ loop.cycle('odd', 'even') }} card_in_backlog" id="card_{{ card.key }}">
+        <td class="reorder"><i class="icon-move"></i></td>
+
+        <td>
+            <a href="{{ card.ticket_system.get_ticket_url() }}">{{ card.key }}</a>
+        </td>
+
+        <td>{{ card.type }}</td>
+
+        <td>
+            <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
+        </td>
+
+        <td> TIME IN STATE HERE </td>
+
+        <td>{{ card.service_class['name'] }}</td>
+
+        <td>{% if card.due_date %}{{ card.due_date.strftime("%m/%d") }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+</table>
+
+
+{% endblock content %}

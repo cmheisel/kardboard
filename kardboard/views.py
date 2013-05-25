@@ -217,6 +217,24 @@ def team_backlog(team_slug=None):
 
     return render_template('team-backlog.html', **context)
 
+
+def funnel(state_slug):
+    states = States()
+    state = states.find_by_slug(state_slug)
+
+    title = "%s: All boards" % state
+
+    context = {
+        'title': title,
+        'state': state,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+        'authenticated': kardboard.auth.is_authenticated(),
+    }
+
+    return render_template('funnel.html', **context)
+
+
 def state():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
@@ -1067,4 +1085,5 @@ app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
 app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
+app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", ])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)
