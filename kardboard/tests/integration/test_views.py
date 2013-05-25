@@ -70,6 +70,7 @@ class FunnelTests(DashboardTestCase):
         res = self.app.get(self._get_target_url('Foo Bar'))
         self.assertEqual(404, res.status_code)
 
+
 class DetailPageTests(DashboardTestCase):
     def _get_target_url(self):
         return '/card/%s/' % self.card.key
