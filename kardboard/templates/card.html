@@ -2,6 +2,8 @@
 
 {% block title %}{{ card.key }}{% endblock title %}
 
+{% import "card_macros.html" as card_macros %}
+
 {% macro blank_or_date(field) %}
     {% if field %}
         {{ field.strftime("%m/%d/%Y") }}
@@ -23,14 +25,6 @@
         {{ field.strftime("%m/%d/%Y %I:%M %p") }}
     {% else %}
 
-    {% endif %}
-{% endmacro %}
-
-{% macro hours_to_days(hours) %}
-    {% if hours < 24 %}
-        {{ hours|int }}h
-    {% else %}
-        {{ "%.1f"|format(hours/24.0) }}d
     {% endif %}
 {% endmacro %}
 
@@ -117,7 +111,7 @@
             {% for log in card_log %}
             <tr>
                 <td>{{ log.state }}</td>
-                <td>{{ hours_to_days(log.duration) }}</td>
+                <td>{{ card_macros.hours_to_days(log.duration) }}</td>
                 <td>{{ blank_or_datetime(log.entered) }}</td>
                 <td>{{ blank_or_datetime(log.exited) }}</td>
                 <td>{{ log.service_class }}</td>

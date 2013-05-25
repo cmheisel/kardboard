@@ -1,3 +1,11 @@
+{% macro hours_to_days(hours) %}
+    {% if hours < 24 %}
+        {{ hours|int }}h
+    {% else %}
+        {{ "%.1f"|format(hours/24.0) }}d
+    {% endif %}
+{% endmacro %}
+
 {% macro card_table(card_collection, request, caption="", show_done=False, show_state=True, show_priority=False, show_cycle=True, show_assigned=True, show_in_goal=True) -%}
 <table>
     <caption>{{ caption }}</caption>

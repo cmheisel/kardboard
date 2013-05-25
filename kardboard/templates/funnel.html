@@ -35,6 +35,8 @@ $(document).ready(function() {
 
 {% block content %}
 
+{% import "card_macros.html" as card_macros %}
+
 <p class="nav">
 {% for team in teams %}
     <a href="{{ url_for('team', team_slug=team.slug) }}">{{ team.name }}</a>{% if not loop.last %} / {% endif %}
@@ -72,15 +74,16 @@ key        service_class        cycle_time        done_date
 -->
 {% endif %}
 
-<table class="extended_backlog">
+<table class="funnel">
 <thead>
     <caption>{{ state }}: {{ cards|length }}</caption>
     <tr>
         <th class="reorder_col">&nbsp;</th>
+        <th class="ordering_col">#</th>
         <th class="key_col">Ticket</th>
         <th class="type_col">Type</th>
         <th class="title_col">Title</th>
-        <th class="cycle_col">Time in state</th>
+        <th class="cycle_col">In State</th>
         <th class="sclass_col">Service Class</th>
         <th class="due_col">Due date</th>
     </tr>
@@ -101,6 +104,8 @@ key        service_class        cycle_time        done_date
     <tr class="{{ loop.cycle('odd', 'even') }} card_in_backlog" id="card_{{ card.key }}">
         <td class="reorder"><i class="icon-move"></i></td>
 
+        <td>{% if card.priority != None %}{{ card.priority }}{% endif %}</td>
+
         <td>
             <a href="{{ card.ticket_system.get_ticket_url() }}">{{ card.key }}</a>
         </td>
@@ -111,7 +116,7 @@ key        service_class        cycle_time        done_date
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
         </td>
 
-        <td> TIME IN STATE HERE </td>
+        <td>{{ card_macros.hours_to_days(times_in_state[card.key]) }}</td>
 
         <td>{{ card.service_class['name'] }}</td>
 

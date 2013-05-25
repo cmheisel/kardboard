@@ -230,12 +230,24 @@ def funnel(state_slug):
         state=state,
     ).exclude('_ticket_system_data')
 
+    def _key_fn(card):
+        statelog = StateLog.objects.filter(card=card, state=state).order_by('-entered')[0]
+        return statelog.duration
+
+    times_in_state = {}
+    for c in cards:
+        times_in_state[c.key] = _key_fn(c)
+
+    cards = sorted(cards, key=lambda c: times_in_state[c.key])
+    cards.reverse()
+
     title = "%s: All boards" % state
 
     context = {
         'title': title,
         'state': state,
         'cards': cards,
+        'times_in_state': times_in_state,
         'funnel_throughput': funnel_throughput,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
