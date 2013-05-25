@@ -71,7 +71,6 @@ class CardFormTest(FormTests):
 
         card = self._get_card_class()()
         f.populate_obj(card)
-        card.save()
 
         for key, value in self._post_data().items():
             self.assertNotEqual(
@@ -101,14 +100,12 @@ class CardFormTest(FormTests):
         self.assertEquals(0, len(f.errors))
         card = self._get_card_class()()
         f.populate_obj(card)
-        card.save()
         self.assertEqual(2, card.priority)
 
         self.required_data['priority'] = u''
         f = self._get_target_class(new=False)(self._post_data())
         f.validate()
         f.populate_obj(card)
-        card.save()
         self.assertEqual(None, card.priority)
 
     def test_datetime_coercing(self):
