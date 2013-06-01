@@ -633,7 +633,7 @@ def report_leaderboard(group="all", months=3, person=None, start_month=None, sta
 
 def report_service_class(group="all", months=None):
     from kardboard.app import app
-    service_class_order = app.config['SERVICE_CLASSES'].keys()
+    service_class_order = app.config.get('SERVICE_CLASSES', {}).keys()
     service_class_order.sort()
     service_classes = [
         app.config['SERVICE_CLASSES'][k] for k in service_class_order
