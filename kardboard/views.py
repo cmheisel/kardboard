@@ -242,7 +242,7 @@ def funnel(state_slug):
     states = States()
     try:
         state = states.find_by_slug(state_slug)
-        funnel_throughput = app.config.get('FUNNEL_VIEWS', {})[state]
+        funnel_throughput = app.config.get('FUNNEL_VIEWS', {})[state]['throughput']
     except KeyError:
         abort(404)
 
@@ -267,8 +267,17 @@ def funnel(state_slug):
     cards_without_ordering.reverse()
     cards = cards_with_ordering + cards_without_ordering
 
+    if kardboard.auth.is_authenticated() is True:
+        funnel_auth = app.config.get('FUNNEL_VIEWS', {})[state].get('auth', [])
+        if len(funnel_auth) == 0:
+            funnel_auth = True  # No usernames specified so its open to all
+        elif session['username'] in funnel_auth:
+            funnel_auth = True
+        else:
+            funnel_auth = False
+
     if request.method == "POST":
-        if kardboard.auth.is_authenticated() is False:
+        if kardboard.auth.is_authenticated() is False or funnel_auth is False:
             abort(403)
 
         start = time.time()
@@ -296,6 +305,7 @@ def funnel(state_slug):
         'times_in_state': times_in_state,
         'funnel_throughput': funnel_throughput,
         'funnel_markers': funnel_markers,
+        'funnel_auth': funnel_auth,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
         'authenticated': kardboard.auth.is_authenticated(),
