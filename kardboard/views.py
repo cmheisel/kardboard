@@ -27,6 +27,7 @@ from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, 
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.services import teams as teams_service
+from kardboard.services.funnel import Funnel
 from kardboard.util import (
     make_start_date,
     make_end_date,
@@ -238,25 +239,20 @@ def _funnel_markers(daily_batch_size, cards):
             counter +=1
     return funnel_markers
 
+
 def funnel(state_slug):
     states = States()
     try:
         state = states.find_by_slug(state_slug)
-        funnel_throughput = app.config.get('FUNNEL_VIEWS', {})[state]['throughput']
+        funnel = Funnel(state, app.config.get('FUNNEL_VIEWS', {})[state])
     except KeyError:
         abort(404)
 
-    cards = Kard.objects.filter(
-        state=state,
-    ).exclude('_ticket_system_data')
-
-    def _key_fn(card):
-        statelog = StateLog.objects.filter(card=card, state=state).order_by('-entered')[0]
-        return statelog.duration
+    cards = funnel.find_cards()
 
     times_in_state = {}
     for c in cards:
-        times_in_state[c.key] = _key_fn(c)
+        times_in_state[c.key] = funnel.state_duration(c)
 
     cards_with_ordering = [c for c in cards if c.priority]
     cards_without_ordering = [c for c in cards if c.priority is None]
@@ -295,7 +291,7 @@ def funnel(state_slug):
 
     title = "%s: All boards" % state
 
-    funnel_markers = _funnel_markers(funnel_throughput, cards)
+    funnel_markers = _funnel_markers(funnel.throughput, cards)
 
     context = {
         'title': title,
@@ -303,7 +299,7 @@ def funnel(state_slug):
         'state_slug': state_slug,
         'cards': cards,
         'times_in_state': times_in_state,
-        'funnel_throughput': funnel_throughput,
+        'funnel_throughput': funnel.throughput,
         'funnel_markers': funnel_markers,
         'funnel_auth': funnel_auth,
         'updated_at': datetime.datetime.now(),
