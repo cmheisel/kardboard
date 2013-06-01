@@ -26,7 +26,7 @@ class TeamTests(DashboardTestCase):
         self.assertEqual(200, res.status_code)
 
 
-@py.test.mark.funnel
+@py.test.mark.funnel_slow
 class FunnelTests(DashboardTestCase):
     def setUp(self):
         super(FunnelTests, self).setUp()
@@ -39,7 +39,9 @@ class FunnelTests(DashboardTestCase):
         )
 
         self.config['FUNNEL_VIEWS'] = {
-            'Deploy': 2,
+            'Deploy': {
+                'throughput': 2,
+            }
         }
 
         nondefault_keys = [
