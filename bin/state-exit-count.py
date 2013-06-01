@@ -14,7 +14,7 @@ def histogram(counts):
     return dict(d)
 
 
-def exit_counts(state, months, raw=False):
+def state_transition_counts(state, months, count_type="exit", raw=False):
     end = make_end_date(date=datetime.datetime.now())
 
     start = end - relativedelta(months=months)
@@ -33,23 +33,33 @@ def exit_counts(state, months, raw=False):
         range_start = make_start_date(date=current_date)
         range_end = make_end_date(date=current_date)
 
-        otis_exit_count = StateLog.objects.filter(
+        if count_type == "exit":
+            kwargs = dict(
+                exited__gte=range_start,
+                exited__lte=range_end,
+            )
+        elif count_type == "enter":
+            kwargs = dict(
+                entered__gte=range_start,
+                entered__lte=range_end,
+            )
+
+        count = StateLog.objects.filter(
             state=state,
-            exited__gte=range_start,
-            exited__lte=range_end,
+            **kwargs
         ).count()
 
-        data.append((current_date, otis_exit_count))
-        counts.append(otis_exit_count)
+        data.append((current_date, count))
+        counts.append(count)
         current_date = current_date + relativedelta(days=1)
 
     counts.sort()
 
-    print "%s -- %s" % (start, end)
-    print "Median: %s" % median(counts)
-    print "Average: %s" % average(counts)
-    print "Min: %s" % counts[0]
-    print "Max: %s" % counts[-1]
+    print "%s\t%s" % (start, end)
+    print "Median\t%s" % median(counts)
+    print "Average\t%s" % average(counts)
+    print "Min\t%s" % counts[0]
+    print "Max\t%s" % counts[-1]
 
     hist = histogram(counts)
     keys = hist.keys()
@@ -64,4 +74,8 @@ def exit_counts(state, months, raw=False):
 
 if __name__ == "__main__":
     import sys
-    exit_counts(sys.argv[1], int(sys.argv[2]))
+    try:
+        raw = bool(sys.argv[4])
+    except IndexError:
+        raw = False
+    state_transition_counts(sys.argv[1], int(sys.argv[2]), sys.argv[3], raw)
