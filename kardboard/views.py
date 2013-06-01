@@ -218,27 +218,6 @@ def team_backlog(team_slug=None):
 
     return render_template('team-backlog.html', **context)
 
-def _funnel_markers(daily_batch_size, cards):
-    funnel_markers = []
-    if daily_batch_size:
-        counter = 0
-        batch_counter = 0
-        for k in cards:
-            if counter % daily_batch_size == 0:
-                if len(funnel_markers) > 0:
-                    base_date = funnel_markers[-1]
-                else:
-                    base_date = datetime.datetime.now()
-                est_done_date = base_date + relativedelta.relativedelta(days=1)
-                if est_done_date.weekday() == 5:  # Saturday
-                    est_done_date = est_done_date + relativedelta.relativedelta(days=2)
-                if est_done_date.weekday() == 6:  # Sunday
-                    est_done_date = est_done_date + relativedelta.relativedelta(days=1)
-                funnel_markers.append(est_done_date)
-                batch_counter += 1
-            counter +=1
-    return funnel_markers
-
 
 def funnel(state_slug):
     states = States()
@@ -273,7 +252,7 @@ def funnel(state_slug):
 
     title = "%s: All boards" % state
 
-    funnel_markers = _funnel_markers(funnel.throughput, cards)
+    funnel_markers = funnel.markers()
 
     context = {
         'title': title,

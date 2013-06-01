@@ -1,3 +1,7 @@
+import datetime
+
+from dateutil import relativedelta
+
 from kardboard.models.kard import Kard
 from kardboard.models.statelog import StateLog
 
@@ -45,3 +49,24 @@ class Funnel(object):
         cards_without_ordering.reverse()
         cards = cards_with_ordering + cards_without_ordering
         return cards
+
+    def markers(self):
+        funnel_markers = []
+        if self.throughput:
+            counter = 0
+            batch_counter = 0
+            for k in self.find_cards():
+                if counter % self.throughput == 0:
+                    if len(funnel_markers) > 0:
+                        base_date = funnel_markers[-1]
+                    else:
+                        base_date = datetime.datetime.now()
+                    est_done_date = base_date + relativedelta.relativedelta(days=1)
+                    if est_done_date.weekday() == 5:  # Saturday
+                        est_done_date = est_done_date + relativedelta.relativedelta(days=2)
+                    if est_done_date.weekday() == 6:  # Sunday
+                        est_done_date = est_done_date + relativedelta.relativedelta(days=1)
+                    funnel_markers.append(est_done_date)
+                    batch_counter += 1
+                counter +=1
+        return funnel_markers
