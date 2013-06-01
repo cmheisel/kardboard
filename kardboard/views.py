@@ -248,20 +248,7 @@ def funnel(state_slug):
     except KeyError:
         abort(404)
 
-    cards = funnel.find_cards()
-
-    times_in_state = {}
-    for c in cards:
-        times_in_state[c.key] = funnel.state_duration(c)
-
-    cards_with_ordering = [c for c in cards if c.priority]
-    cards_without_ordering = [c for c in cards if c.priority is None]
-
-    cards_with_ordering = sorted(cards_with_ordering, key=lambda c: c.priority)
-
-    cards_without_ordering = sorted(cards_without_ordering, key=lambda c: times_in_state[c.key])
-    cards_without_ordering.reverse()
-    cards = cards_with_ordering + cards_without_ordering
+    cards = funnel.ordered_cards()
 
     if kardboard.auth.is_authenticated() is True:
         funnel_auth = app.config.get('FUNNEL_VIEWS', {})[state].get('auth', [])
@@ -298,7 +285,7 @@ def funnel(state_slug):
         'state': state,
         'state_slug': state_slug,
         'cards': cards,
-        'times_in_state': times_in_state,
+        'times_in_state': funnel.times_in_state(),
         'funnel_throughput': funnel.throughput,
         'funnel_markers': funnel_markers,
         'funnel_auth': funnel_auth,
