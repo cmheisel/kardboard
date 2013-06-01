@@ -250,14 +250,9 @@ def funnel(state_slug):
 
     cards = funnel.ordered_cards()
 
+    funnel_auth = False
     if kardboard.auth.is_authenticated() is True:
-        funnel_auth = app.config.get('FUNNEL_VIEWS', {})[state].get('auth', [])
-        if len(funnel_auth) == 0:
-            funnel_auth = True  # No usernames specified so its open to all
-        elif session['username'] in funnel_auth:
-            funnel_auth = True
-        else:
-            funnel_auth = False
+        funnel_auth = funnel.is_authorized(session['username'])
 
     if request.method == "POST":
         if kardboard.auth.is_authenticated() is False or funnel_auth is False:

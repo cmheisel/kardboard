@@ -10,6 +10,14 @@ class Funnel(object):
     def throughput(self):
         return self.config.get('throughput', None)
 
+    def is_authorized(self, username):
+        user_list = self.config.get('auth', [])
+        if len(user_list) is 0:
+            return True
+        if username in user_list:
+            return True
+        return False
+
     def find_cards(self):
         cards = Kard.objects.filter(
             state=self.state,

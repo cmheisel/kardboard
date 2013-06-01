@@ -37,6 +37,32 @@ class FunnelTests(unittest2.TestCase):
 
         assert f.throughput is None
 
+    def test_funnel_auth_none(self):
+        config = {
+            'Build to OTIS': {
+            }
+        }
+        f = self._get_class()('Build to OTIS', config['Build to OTIS'])
+        assert f.is_authorized('joe') is True
+
+    def test_funnel_auth_tru(self):
+        config = {
+            'Build to OTIS': {
+                'auth': ['joe', 'jane']
+            }
+        }
+        f = self._get_class()('Build to OTIS', config['Build to OTIS'])
+        assert f.is_authorized('joe') is True
+
+    def test_funnel_auth_false(self):
+        config = {
+            'Build to OTIS': {
+                'auth': ['joe', 'jane']
+            }
+        }
+        f = self._get_class()('Build to OTIS', config['Build to OTIS'])
+        assert f.is_authorized('jack') is False
+
     def test_find_cards(self):
         with mock.patch('kardboard.services.funnel.Kard') as mock_Kard:
             f = self._get_class()('Build to OTIS', {})
