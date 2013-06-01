@@ -27,6 +27,7 @@ from kardboard.models import Kard, DailyRecord, Q, Person, ReportGroup, States, 
 from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, CardBlockForm, CardUnblockForm
 import kardboard.util
 from kardboard.services import teams as teams_service
+from kardboard.services.funnel import Funnel
 from kardboard.util import (
     make_start_date,
     make_end_date,
@@ -217,58 +218,23 @@ def team_backlog(team_slug=None):
 
     return render_template('team-backlog.html', **context)
 
-def _funnel_markers(daily_batch_size, cards):
-    funnel_markers = []
-    if daily_batch_size:
-        counter = 0
-        batch_counter = 0
-        for k in cards:
-            if counter % daily_batch_size == 0:
-                if len(funnel_markers) > 0:
-                    base_date = funnel_markers[-1]
-                else:
-                    base_date = datetime.datetime.now()
-                est_done_date = base_date + relativedelta.relativedelta(days=1)
-                if est_done_date.weekday() == 5:  # Saturday
-                    est_done_date = est_done_date + relativedelta.relativedelta(days=2)
-                if est_done_date.weekday() == 6:  # Sunday
-                    est_done_date = est_done_date + relativedelta.relativedelta(days=1)
-                funnel_markers.append(est_done_date)
-                batch_counter += 1
-            counter +=1
-    return funnel_markers
 
 def funnel(state_slug):
     states = States()
     try:
         state = states.find_by_slug(state_slug)
-        funnel_throughput = app.config.get('FUNNEL_VIEWS', {})[state]
+        funnel = Funnel(state, app.config.get('FUNNEL_VIEWS', {})[state])
     except KeyError:
         abort(404)
 
-    cards = Kard.objects.filter(
-        state=state,
-    ).exclude('_ticket_system_data')
+    cards = funnel.ordered_cards()
 
-    def _key_fn(card):
-        statelog = StateLog.objects.filter(card=card, state=state).order_by('-entered')[0]
-        return statelog.duration
-
-    times_in_state = {}
-    for c in cards:
-        times_in_state[c.key] = _key_fn(c)
-
-    cards_with_ordering = [c for c in cards if c.priority]
-    cards_without_ordering = [c for c in cards if c.priority is None]
-
-    cards_with_ordering = sorted(cards_with_ordering, key=lambda c: c.priority)
-
-    cards_without_ordering = sorted(cards_without_ordering, key=lambda c: times_in_state[c.key])
-    cards_without_ordering.reverse()
-    cards = cards_with_ordering + cards_without_ordering
+    funnel_auth = False
+    if kardboard.auth.is_authenticated() is True:
+        funnel_auth = funnel.is_authorized(session.get('username', ''))
 
     if request.method == "POST":
-        if kardboard.auth.is_authenticated() is False:
+        if kardboard.auth.is_authenticated() is False or funnel_auth is False:
             abort(403)
 
         start = time.time()
@@ -286,16 +252,17 @@ def funnel(state_slug):
 
     title = "%s: All boards" % state
 
-    funnel_markers = _funnel_markers(funnel_throughput, cards)
+    funnel_markers = funnel.markers()
 
     context = {
         'title': title,
         'state': state,
         'state_slug': state_slug,
         'cards': cards,
-        'times_in_state': times_in_state,
-        'funnel_throughput': funnel_throughput,
+        'times_in_state': funnel.times_in_state(),
+        'funnel_throughput': funnel.throughput,
         'funnel_markers': funnel_markers,
+        'funnel_auth': funnel_auth,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
         'authenticated': kardboard.auth.is_authenticated(),
@@ -666,7 +633,7 @@ def report_leaderboard(group="all", months=3, person=None, start_month=None, sta
 
 def report_service_class(group="all", months=None):
     from kardboard.app import app
-    service_class_order = app.config['SERVICE_CLASSES'].keys()
+    service_class_order = app.config.get('SERVICE_CLASSES', {}).keys()
     service_class_order.sort()
     service_classes = [
         app.config['SERVICE_CLASSES'][k] for k in service_class_order

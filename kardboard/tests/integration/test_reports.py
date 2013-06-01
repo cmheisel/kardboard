@@ -127,7 +127,7 @@ class DonePageTests(DashboardTestCase):
     def test_done_page(self):
         done = self.Kard.objects.done()
 
-        rv = self.app.get(self._get_target_url(months=24))
+        rv = self.app.get(self._get_target_url(months=36))
         self.assertEqual(200, rv.status_code)
 
         for c in done:

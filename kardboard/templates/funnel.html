@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extrajs %}
-{% if authenticated %}
+{% if authenticated and funnel_auth %}
 <script type="text/javascript">
 var drag_and_drop_handler = function(event,ui) {
     $('tbody.sortable_table').sortable('disable');
@@ -72,7 +72,7 @@ $(document).ready(function() {
     {% endif %}
 
     <tr class="{{ loop.cycle('odd', 'even') }} card_in_backlog" id="card_{{ card.key }}">
-        <td class="reorder"><i class="icon-move"></i></td>
+        <td {% if funnel_auth %}class="reorder"><i class="icon-move"></i>{% else %}>&nbsp;{% endif %}</td>
 
         <td>{% if card.priority != None %}{{ card.priority }}{% endif %}</td>
 
