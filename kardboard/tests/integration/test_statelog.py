@@ -141,3 +141,135 @@ class StatelogKardTests(StatelogTests):
         card.ticket_system.actually_update()
         slo = StateLog.objects.get(card=card)
         self.assertEqualDateTimes(slo.entered, original_entered)
+
+    def assertEnteredStateOnceAt(self, card, state, when):
+        StateLog = self._get_target_class()
+        sln = StateLog.objects.get(card=card, state=state)
+        self.assertEqualDateTimes(sln.entered, when)
+        assert sln.exited is None
+
+    def assertExitedStateOnceAt(self, card, state, when):
+        StateLog = self._get_target_class()
+        sln = StateLog.objects.get(card=card, state=state)
+        self.assertEqualDateTimes(sln.exited, when)
+
+    def assertEnteredStateNTimesRecently(self, times, card, state, when):
+        StateLog = self._get_target_class()
+        state_logs = StateLog.objects.filter(card=card, state=state).order_by('-entered')
+        assert times == len(state_logs)
+        self.assertEqualDateTimes(state_logs[0].entered, when)
+        assert state_logs[0].exited is None
+
+        for i in xrange(1, times-1):
+            assert state_logs[i].entered != when
+            assert state_logs[i].exited != when
+
+    def assertExitedStateNTimesRecently(self, times, card, state, when):
+        StateLog = self._get_target_class()
+        state_logs = StateLog.objects.filter(card=card, state=state).order_by('-entered')
+        assert times == len(state_logs)
+        self.assertEqualDateTimes(state_logs[0].exited, when)
+        assert state_logs[0].entered is not None
+
+        for i in xrange(1, times-1):
+            assert state_logs[i].entered != when
+            assert state_logs[i].exited != when
+
+    @mock.patch('kardboard.models.statelog.now')
+    def test_card_going_back_and_forth(self, mocked_now):
+        TODO = 'Todo'
+        PLANNING = 'Planning'
+        DOING = 'Doing'
+        TESTING = 'Testing'
+        DEPLOYING = 'Deploying'
+        DONE = 'Done'
+
+        # Created a new card 30 days ago in Todo
+        mocked_now.return_value = datetime.now() - relativedelta(days=30)
+        card = self.make_card(state=TODO)
+        card.save()
+
+        self.assertEnteredStateOnceAt(card, TODO, mocked_now.return_value)
+
+        # Now move it to Planning 29 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=29)
+        card.state = PLANNING
+        card.save()
+        self.assertExitedStateOnceAt(card, TODO, mocked_now.return_value)
+        self.assertEnteredStateOnceAt(card, PLANNING, mocked_now.return_value)
+
+        # Now move it back to TODO 25 days agao
+        mocked_now.return_value = datetime.now() - relativedelta(days=25)
+        card.state = TODO
+        card.save()
+
+        self.assertExitedStateOnceAt(card, PLANNING, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(2, card, TODO, mocked_now.return_value)
+
+        # Now move it back to PLANNING 24 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=24)
+        card.state = PLANNING
+        card.save()
+
+        self.assertExitedStateNTimesRecently(2, card, TODO, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(2, card, PLANNING, mocked_now.return_value)
+
+        # Now move it to DOING 24 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=24)
+        card.state = DOING
+        card.save()
+
+        self.assertExitedStateNTimesRecently(2, card, PLANNING, mocked_now.return_value)
+        self.assertEnteredStateOnceAt(card, DOING, mocked_now.return_value)
+
+        # Now move it to TESTING 22 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=22)
+        card.state = TESTING
+        card.save()
+
+        self.assertExitedStateOnceAt(card, DOING, mocked_now.return_value)
+        self.assertEnteredStateOnceAt(card, TESTING, mocked_now.return_value)
+
+        # Now move it back to DOING 22 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=20)
+        card.state = DOING
+        card.save()
+
+        self.assertExitedStateOnceAt(card, TESTING, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(2, card, DOING, mocked_now.return_value)
+
+        # Now move it to TESTING 19 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=19)
+        card.state = TESTING
+        card.save()
+
+        self.assertExitedStateNTimesRecently(2, card, DOING, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(2, card, TESTING, mocked_now.return_value)
+
+        # Now move it back to DOING again again 18 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=18)
+        card.state = DOING
+        card.save()
+        self.assertExitedStateNTimesRecently(2, card, TESTING, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(3, card, DOING, mocked_now.return_value)
+
+        # Now move it back to TESTING again again 17 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=17)
+        card.state = TESTING
+        card.save()
+        self.assertExitedStateNTimesRecently(3, card, DOING, mocked_now.return_value)
+        self.assertEnteredStateNTimesRecently(3, card, TESTING, mocked_now.return_value)
+
+        # Now move it to DEPLOYING 16 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=16)
+        card.state = DEPLOYING
+        card.save()
+        self.assertExitedStateNTimesRecently(3, card, TESTING, mocked_now.return_value)
+        self.assertEnteredStateOnceAt(card, DEPLOYING, mocked_now.return_value)
+
+        # Now move it to DONE 16 days ago
+        mocked_now.return_value = datetime.now() - relativedelta(days=16)
+        card.state = DONE
+        card.save()
+        self.assertExitedStateOnceAt(card, DEPLOYING, mocked_now.return_value)
+        self.assertEnteredStateOnceAt(card, DONE, mocked_now.return_value)
