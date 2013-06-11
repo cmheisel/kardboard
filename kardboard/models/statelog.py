@@ -67,13 +67,13 @@ class StateLog(app.db.Document):
         if observed_card.old_state is not None:
             try:
                 slos = cls.objects.filter(
-                        card=observed_card,
-                        state=observed_card.old_state,
-                        service_class=observed_card.service_class.get('name'),
-                        exited__exists=False)
+                    card=observed_card,
+                    state=observed_card.old_state,
+                    service_class=observed_card.service_class.get('name'),
+                    exited__exists=False)
                 for s in slos:
                     s.exited = now()
-                    s.save() # Close the old state log
+                    s.save()  # Close the old state log
             except cls.DoesNotExist:
                 #  For some reason we didn't record the old state, this should only happen when first rolled out
                 pass
@@ -82,19 +82,22 @@ class StateLog(app.db.Document):
     def kard_post_save(cls, sender, document, **kwargs):
         observed_card = document
 
-        try:
-            # This could be a freshly created card, so create a log for it
-            sl, created = cls.objects.get_or_create(auto_save=False,
+        # Is there a currently open state log
+        logs = cls.objects.filter(
+            card=observed_card,
+            state=observed_card.state,
+            exited__exists=False,
+        ).order_by('-entered')
+        if len(logs) == 0:
+            sl = cls(
                 card=observed_card,
-                state=observed_card.state)
-            if created:
-                sl.entered = now()
-        except cls.MultipleObjectsReturned:
-            sl = cls.objects.filter(
-                card=observed_card,
-                state=observed_card.state)[0]
+                state=observed_card.state,
+                entered=now()
+            )
+        else:
+            sl = logs[0]
 
-        sl.service_class=observed_card.service_class.get('name')
+        sl.service_class = observed_card.service_class.get('name')
         sl.save()
 
     @property
