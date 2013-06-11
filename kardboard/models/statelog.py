@@ -67,13 +67,13 @@ class StateLog(app.db.Document):
         if observed_card.old_state is not None:
             try:
                 slos = cls.objects.filter(
-                        card=observed_card,
-                        state=observed_card.old_state,
-                        service_class=observed_card.service_class.get('name'),
-                        exited__exists=False)
+                    card=observed_card,
+                    state=observed_card.old_state,
+                    service_class=observed_card.service_class.get('name'),
+                    exited__exists=False)
                 for s in slos:
                     s.exited = now()
-                    s.save() # Close the old state log
+                    s.save()  # Close the old state log
             except cls.DoesNotExist:
                 #  For some reason we didn't record the old state, this should only happen when first rolled out
                 pass
@@ -97,7 +97,7 @@ class StateLog(app.db.Document):
         else:
             sl = logs[0]
 
-        sl.service_class=observed_card.service_class.get('name')
+        sl.service_class = observed_card.service_class.get('name')
         sl.save()
 
     @property
