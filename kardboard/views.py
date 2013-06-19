@@ -881,7 +881,8 @@ def report_cycle_distribution(group="all", months=3, limit=None):
             query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
         pct = round(pct, 2)
-        distro.append((label, pct))
+        cum_pct = pct + sum([row[1] for row in distro])
+        distro.append([label, pct, cum_pct])
 
     chart = {}
     chart['data'] = distro

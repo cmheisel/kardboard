@@ -66,12 +66,14 @@ $(function () {
     <tr>
     	<th>Range</th>
     	<th>% of cards</th>
+        <th>Confidence</th>
     </tr>
 
     {% for row in data %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
     	<td>{{ row[0] }}</td>
     	<td>{{ "%.0f%%"|format(row[1]*100) }}</td>
+        <td>{{ "%.0f%%"|format(row[2]*100) }}</td>
     </tr>
     {% endfor %}
 </table>
