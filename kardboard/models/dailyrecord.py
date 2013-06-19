@@ -31,6 +31,13 @@ class DailyRecord(app.db.Document):
     moving_lead_time = app.db.IntField(required=True)
     """The moving average lead time for that date."""
 
+    moving_std_dev = app.db.IntField(required=True)
+    """The moving standard deviation of cycle times"""
+
+    moving_median_abs_dev = app.db.IntField(required=True)
+    """The moving median absolute deviation
+    See http://en.wikipedia.org/wiki/Median_absolute_deviation"""
+
     updated_at = app.db.DateTimeField(required=True)
     """The datetime the record was last updated at."""
 
@@ -73,6 +80,10 @@ class DailyRecord(app.db.Document):
         k.moving_cycle_time = ReportGroup(group, Kard.objects).queryset.moving_cycle_time(
             year=date.year, month=date.month, day=date.day)
         k.moving_lead_time = ReportGroup(group, Kard.objects).queryset.moving_lead_time(
+            year=date.year, month=date.month, day=date.day)
+        k.moving_std_dev = ReportGroup(group, Kard.objects).queryset.moving_std_dev(
+            year=date.year, month=date.month, day=date.day)
+        k.moving_median_abs_dev = ReportGroup(group, Kard.objects).queryset.moving_median_abs_dev(
             year=date.year, month=date.month, day=date.day)
 
         k.save()

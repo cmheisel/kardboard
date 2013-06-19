@@ -756,23 +756,26 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
 
     daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
+    daily_mad = [(r.date, r.moving_median_abs_dev) for r in records]
+
 
     start_date = daily_moving_averages[0][0]
     chart = {}
     chart['series'] = [
         {
-            'name': 'Lead time',
-            'data': [r[1] for r in daily_moving_lead],
-        },
-        {
             'name': 'Cycle time',
             'data': [r[1] for r in daily_moving_averages],
+        },
+        {
+            'name': 'Unpredictability',
+            'data': [r[1] for r in daily_mad],
         }
     ]
     chart['goal'] = app.config.get('CYCLE_TIME_GOAL', ())
 
     daily_moving_averages.reverse()  # reverse order for display
     daily_moving_lead.reverse()
+    daily_mad.reverse()
     context = {
         'title': "How quick can we do it?",
         'updated_at': datetime.datetime.now(),
@@ -780,7 +783,7 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
         'months': months,
         'start_date': start_date,
         'daily_averages': daily_moving_averages,
-        'daily_lead': daily_moving_lead,
+        'daily_mad': daily_mad,
         'version': VERSION,
     }
 
@@ -879,7 +882,8 @@ def report_cycle_distribution(group="all", months=3, limit=None):
             query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
         pct = ReportGroup(group, Kard.objects.filter(query)).queryset.count() / float(total)
         pct = round(pct, 2)
-        distro.append((label, pct))
+        cum_pct = pct + sum([row[1] for row in distro])
+        distro.append([label, pct, cum_pct])
 
     chart = {}
     chart['data'] = distro
