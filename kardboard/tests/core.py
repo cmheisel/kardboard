@@ -130,6 +130,8 @@ class KardboardTestCase(unittest2.TestCase):
             'completed': 1,
             'moving_cycle_time': 12,
             'moving_lead_time': 16,
+            'moving_std_dev': 69,
+            'moving_median_abs_dev': 30,
         }
         fields.update(**kwargs)
         r = self._get_record_class()(**fields)
