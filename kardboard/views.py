@@ -756,17 +756,19 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
 
     daily_moving_averages = [(r.date, r.moving_cycle_time) for r in records]
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
+    daily_mad = [(r.date, r.moving_median_abs_dev) for r in records]
+
 
     start_date = daily_moving_averages[0][0]
     chart = {}
     chart['series'] = [
         {
-            'name': 'Lead time',
-            'data': [r[1] for r in daily_moving_lead],
-        },
-        {
             'name': 'Cycle time',
             'data': [r[1] for r in daily_moving_averages],
+        },
+        {
+            'name': 'Unpredictability',
+            'data': [r[1] for r in daily_mad],
         }
     ]
     chart['goal'] = app.config.get('CYCLE_TIME_GOAL', ())
@@ -780,7 +782,7 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
         'months': months,
         'start_date': start_date,
         'daily_averages': daily_moving_averages,
-        'daily_lead': daily_moving_lead,
+        'daily_mad': daily_mad,
         'version': VERSION,
     }
 
