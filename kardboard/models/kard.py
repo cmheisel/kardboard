@@ -21,6 +21,8 @@ from kardboard.util import (
     month_range,
     week_range,
     average,
+    standard_deviation,
+    median,
 )
 
 class KardQuerySet(QuerySet):
@@ -41,12 +43,65 @@ class KardQuerySet(QuerySet):
 
     def average(self, field_str):
         values = [getattr(k, field_str) for k in self.filter().only(field_str)]
+        values = [value for value in values if value is not None]
         if len(values) == 0:
             return 0
         return average(values)
 
     def distinct(self, field_str):
         return super(KardQuerySet, self).distinct(field_str)
+
+    def moving_std_dev(self, year=None, month=None, day=None, weeks=4):
+        """
+        The moving cycle time standard deviation for every day in the last N weeks.
+        """
+
+        end_date = make_end_date(year, month, day)
+        start_date = end_date - relativedelta(weeks=weeks)
+        start_date = make_start_date(date=start_date)
+
+        qs = self.done().filter(
+            done_date__lte=end_date,
+            done_date__gte=start_date,
+        ).scalar('_cycle_time')
+
+        cycle_times = [t for t in qs if t is not None]
+        stdev = standard_deviation(cycle_times)
+        if stdev is not None:
+            stdev = int(round(stdev))
+        else:
+            stdev = 0
+
+        return stdev
+
+    def moving_median_abs_dev(self, year=None, month=None, day=None, weeks=4):
+        """
+        The moving median absolute deviation of cycle time for every day in the last N weeks.
+        See http://en.wikipedia.org/wiki/Median_absolute_deviation
+        """
+
+        end_date = make_end_date(year, month, day)
+        start_date = end_date - relativedelta(weeks=weeks)
+        start_date = make_start_date(date=start_date)
+
+        qs = self.done().filter(
+            done_date__lte=end_date,
+            done_date__gte=start_date,
+        ).scalar('_cycle_time')
+
+        cycle_times = [t for t in qs if t is not None]
+        median_cycle_time = median(cycle_times)
+
+        if median_cycle_time is not None:
+            absolute_deviations = [ math.fabs(median_cycle_time-c) for c in cycle_times]
+            mad = median(absolute_deviations)
+        else:
+            mad = None
+
+        if mad is None:
+            mad = 0
+
+        return int(round(mad))
 
     def moving_cycle_time(self, year=None, month=None, day=None, weeks=4):
         """
