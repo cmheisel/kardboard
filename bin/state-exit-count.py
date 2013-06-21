@@ -78,4 +78,13 @@ if __name__ == "__main__":
         raw = bool(sys.argv[4])
     except IndexError:
         raw = False
-    state_transition_counts(sys.argv[1], int(sys.argv[2]), sys.argv[3], raw)
+
+    try:
+        state = sys.argv[1]
+        months = int(sys.argv[2])
+        count_type = sys.argv[3]
+    except IndexError:
+        print "Usage: {{state}} {{months}} {{exit|enter}} {{raw data}}"
+        raise
+
+    state_transition_counts(state, months, count_type, raw)
