@@ -26,7 +26,6 @@ class TeamTests(DashboardTestCase):
         self.assertEqual(200, res.status_code)
 
 
-@py.test.mark.funnel_slow
 class FunnelTests(DashboardTestCase):
     def setUp(self):
         super(FunnelTests, self).setUp()
@@ -83,6 +82,7 @@ class DetailPageTests(DashboardTestCase):
         self.response = self.app.get(self._get_target_url())
         self.assertEqual(200, self.response.status_code)
 
+    @py.test.mark.questionable
     def test_data(self):
         expected_values = [
             self.card.title,
