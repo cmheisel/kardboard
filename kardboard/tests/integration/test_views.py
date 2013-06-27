@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-import py
+import pytest
 
 from kardboard.util import slugify
 from kardboard.tests.core import KardboardTestCase, DashboardTestCase
@@ -82,7 +82,7 @@ class DetailPageTests(DashboardTestCase):
         self.response = self.app.get(self._get_target_url())
         self.assertEqual(200, self.response.status_code)
 
-    @py.test.mark.questionable
+    @pytest.mark.questionable
     def test_data(self):
         expected_values = [
             self.card.title,
