@@ -4,7 +4,7 @@ import unittest2
 
 
 class UtilTests(unittest2.TestCase):
-    def test_days_between(self):
+    def ztest_days_between(self):
         from kardboard.util import days_between
 
         wednesday = datetime.datetime(year=2011, month=6, day=1)
@@ -16,6 +16,22 @@ class UtilTests(unittest2.TestCase):
         manydayslater = datetime.datetime(year=2012, month=6, day=1)
         result = days_between(aday, manydayslater)
         self.assertEqual(result, 366)
+
+    def test_days_between_partial_days_over(self):
+        from kardboard.util import days_between
+
+        start = datetime.datetime(2013, 6, 20, 19, 40, 32, 60000)
+        end = datetime.datetime(2013, 6, 24, 8, 46, 35, 461000)
+        result = days_between(start, end)
+        self.assertEqual(result, 4)
+
+    def test_days_between_partial_days_under(self):
+        from kardboard.util import days_between
+
+        start = datetime.datetime(2013, 6, 20, 12, 59, 59)
+        end = datetime.datetime(2013, 6, 24, 0, 0, 0, 0)
+        result = days_between(start, end)
+        self.assertEqual(result, 3)
 
     def test_month_range(self):
         from kardboard.util import month_range

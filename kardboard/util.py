@@ -17,11 +17,13 @@ assert translitcodec
 from dateutil.relativedelta import relativedelta
 from statlib import stats
 
+
 def median(values):
     try:
         return stats.median(values)
     except (ValueError, UnboundLocalError):
         return None
+
 
 def average(values):
     """Computes the arithmetic mean of a list of numbers.
@@ -54,6 +56,7 @@ def delta_in_hours(delta):
     hours = (seconds / 60.0) / 60.0
     hours = round(hours)
     return hours
+
 
 class ImproperlyConfigured(Exception):
     pass
@@ -115,7 +118,13 @@ def days_between(date1, date2):
         oldest_date, youngest_date = date2, date1
 
     delta = youngest_date - oldest_date
-    return delta.days
+
+    days = delta.days
+    partial_days = ((delta.seconds / 60) / 60) / 24.0
+
+    diff_in_days = float(days + partial_days)
+
+    return int(round(diff_in_days))
 
 
 def month_ranges(date, num_months):

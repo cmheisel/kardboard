@@ -78,7 +78,7 @@ class ServiceClassSnapshotTests(ServiceClassTests):
                 'service_class': 'Normal',
                 'wip': 10,
                 'wip_percent': 10 / 20.0,
-                'cycle_time_average': 9.0,
+                'cycle_time_average': 10,
                 'cards_hit_goal': 10,
                 'cards_hit_goal_percent': 1.0
             },
@@ -86,7 +86,7 @@ class ServiceClassSnapshotTests(ServiceClassTests):
                 'service_class': 'default',
                 'wip': 5,
                 'wip_percent': 5 / 20.0,
-                'cycle_time_average': 9.0,
+                'cycle_time_average': 10,
                 'cards_hit_goal': 5,
                 'cards_hit_goal_percent': 1.0
             },
@@ -97,7 +97,6 @@ class ServiceClassSnapshotTests(ServiceClassTests):
         self.assertEqual(expected, r.data)
 
 
-@pytest.mark.serviceclassrecord
 class ServiceClassRecordTests(ServiceClassTests):
     def _get_target_class(self):
         from kardboard.models import ServiceClassRecord
