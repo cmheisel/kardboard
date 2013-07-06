@@ -284,6 +284,13 @@ table.board div.card_on_board p.assignee {
     padding: 0;
 }
 
+table.board th div.col_over_wip {
+    color: #911;
+    font-weight: bold;
+    border: 1px solid #911;
+    padding: 0 1% 0 1%;
+}
+
 .overview_board table.board {
     width: 100%;
     margin: 0;

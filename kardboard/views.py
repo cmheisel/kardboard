@@ -28,6 +28,7 @@ from kardboard.forms import get_card_form, _make_choice_field_ready, LoginForm, 
 import kardboard.util
 from kardboard.services import teams as teams_service
 from kardboard.services.funnel import Funnel
+from kardboard.services.wiplimits import WIPLimits
 from kardboard.util import (
     make_start_date,
     make_end_date,
@@ -123,6 +124,21 @@ def team(team_slug=None):
     teams = _get_teams()
     team = _find_team_by_slug(team_slug, teams)
 
+    try:
+        wip_limit_config = app.config['WIP_LIMITS'][team_slug]
+    except KeyError:
+        wip_limit_config = {}
+
+    conwip = wip_limit_config.get('conwip', None)
+    try:
+        del wip_limit_config['conwip']
+    except KeyError:
+        pass
+    wip_limits = WIPLimits(
+        conwip=conwip,
+        columns=wip_limit_config,
+    )
+
     weeks=12
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
@@ -157,6 +173,7 @@ def team(team_slug=None):
         'title': title,
         'team_slug': team_slug,
         'team': team,
+        'wip_limits': wip_limits,
         'weekly_throughput': weekly_throughput,
         'metrics': metrics,
         'report_config': report_config,
@@ -293,6 +310,7 @@ def state():
         'board': board,
         'states': states,
         'metrics': metrics,
+        'wip_limits': {},
         'date': date,
         'teams': teams,
         'updated_at': datetime.datetime.now(),

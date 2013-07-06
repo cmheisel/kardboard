@@ -33,19 +33,6 @@ class TeamTests(unittest2.TestCase):
         )
         assert t.name == "Team 3"
 
-    def test_team_wip(self):
-        t = self.Team(
-            name="Team 3",
-            wip_limit=20,
-        )
-        assert t.wip_limit == 20
-
-    def test_default_team_wip(self):
-        t = self.Team(
-            name="Team 3",
-        )
-        assert t.wip_limit == 0
-
 
 @pytest.mark.teams
 class TeamListTests(unittest2.TestCase):
