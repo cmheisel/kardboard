@@ -9,8 +9,8 @@ from kardboard.util import make_start_date, make_end_date, standard_deviation, a
 
 
 def setup_teams(config):
-    team_confs = config.get('CARD_TEAMS')
-    teams = [Team(*args) for args in team_confs]
+    team_names = config.get('CARD_TEAMS')
+    teams = [Team(name) for name in team_names]
     team_list = TeamList(*teams)
     return team_list
 
