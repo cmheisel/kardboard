@@ -29,3 +29,50 @@ class WIPLimitTests(unittest2.TestCase):
         """
         w = self._get_target_class()()
         assert w['conwip'] is None
+
+    def test_column_limit(self):
+        """
+        If you pass in a column limit it should return it.
+        """
+        w = self._get_target_class()(
+            columns={'Todo': 5}
+        )
+        assert w['Todo'] == 5
+
+    def test_multiple_columns(self):
+        """
+        If you pass in multiple columns, you should
+        get them back
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+                'Doing': 15,
+            }
+        )
+        assert w['Todo'] == 5
+        assert w['Doing'] == 15
+
+    def test_get_method_key_exists(self):
+        """
+        A WIPlimit object should exhibit
+        dictionary-like get behavior
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+            }
+        )
+        assert w.get('Todo', None) == 5
+
+    def test_get_method_key_doesnt_exist(self):
+        """
+        A WIPlimit object should exhibit
+        dictionary-like get behavior
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+            }
+        )
+        assert w.get('Doing', 1) == 1
