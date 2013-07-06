@@ -18,7 +18,11 @@ class WIPLimits(object):
         _limits = {}
         for key, value in self._columns.items():
             _limits[key] = value
-        _limits['conwip'] = self._conwip
+
+        if self._columns.values() and self._conwip is None:
+            _limits['conwip'] = sum(self._columns.values())
+        else:
+            _limits['conwip'] = self._conwip
         return _limits
 
     def get(self, key, default=None):

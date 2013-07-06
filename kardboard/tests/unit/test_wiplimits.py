@@ -76,3 +76,42 @@ class WIPLimitTests(unittest2.TestCase):
             }
         )
         assert w.get('Doing', 1) == 1
+
+    def test_conwip_calculated_if_not_passed_one_col(self):
+        """
+        If given one or more columns and no conwip
+        then WIPLimits returns the sum of all known columns
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+            }
+        )
+        assert w['conwip'] == 5
+
+    def test_conwip_calculated_if_not_passed_two_col(self):
+        """
+        If given one or more columns and no conwip
+        then WIPLimits returns the sum of all known columns
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+                'Doing': 10
+            }
+        )
+        assert w['conwip'] == 15
+
+    def test_conwip_honored_if_passed(self):
+        """
+        If a conwip is explicitly passed, and columns are passed,
+        then the explicit conwip is honored regardless of math.
+        """
+        w = self._get_target_class()(
+            columns={
+                'Todo': 5,
+                'Doing': 10
+            },
+            conwip = 5,
+        )
+        assert w['conwip'] == 5
