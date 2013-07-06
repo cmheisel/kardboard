@@ -1,4 +1,5 @@
 import mock
+import pytest
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -76,6 +77,7 @@ class StatelogKardTests(StatelogTests):
         sl = StateLog.objects.get(card=card, state=self.states[1])
         self.assertEqual(0, sl.duration)
 
+    @pytest.mark.questionable
     def test_new_kard_state_log(self):
         card = self.make_card(state=self.states[0])
         self.assertEqual(None, card.id)
