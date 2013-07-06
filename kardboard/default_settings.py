@@ -22,9 +22,15 @@ START_STATE = 1
 DONE_STATE = -1
 
 CARD_TEAMS = [
-    ('Team 1', ),
-    ('Team 2', 10),
+    'Team 1',
+    'Team 2',
 ]
+
+WIP_LIMITS = {
+    'team-2': {
+        'conwip': 10,
+    }
+}
 
 REPORT_GROUPS = {
     # key is slug

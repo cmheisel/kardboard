@@ -48,8 +48,8 @@ $(document).ready(function() {
           <h2>{{ name }}</h2>
           <p class="value">
             {{ value }}
-            {% if name == "WIP" and team and team.wip_limit %}
-            <span>/</span> {{ team.wip_limit }}
+            {% if name == "WIP" and wip_limits.conwip %}
+            <span>/</span> {{ wip_limits.conwip }}
             {% endif %}
           </p>
       {% endfor %}
