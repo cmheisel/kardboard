@@ -20,7 +20,7 @@ class WIPLimitTests(unittest2.TestCase):
         w = self._get_target_class()(
             conwip=5
         )
-        assert w.conwip == 5
+        assert w['conwip'] == 5
 
     def test_conwip_default_to_none(self):
         """
@@ -28,4 +28,4 @@ class WIPLimitTests(unittest2.TestCase):
         the team defaults to no wip limits
         """
         w = self._get_target_class()()
-        assert w.conwip is None
+        assert w['conwip'] is None
