@@ -310,6 +310,7 @@ def state():
         'board': board,
         'states': states,
         'metrics': metrics,
+        'wip_limits': {},
         'date': date,
         'teams': teams,
         'updated_at': datetime.datetime.now(),
