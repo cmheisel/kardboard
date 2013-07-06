@@ -112,6 +112,6 @@ class WIPLimitTests(unittest2.TestCase):
                 'Todo': 5,
                 'Doing': 10
             },
-            conwip = 5,
+            conwip=5,
         )
         assert w['conwip'] == 5
