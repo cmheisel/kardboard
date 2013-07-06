@@ -129,8 +129,14 @@ def team(team_slug=None):
     except KeyError:
         wip_limit_config = {}
 
+    conwip = wip_limit_config.get('conwip', None)
+    try:
+        del wip_limit_config['conwip']
+    except KeyError:
+        pass
     wip_limits = WIPLimits(
-        conwip=wip_limit_config.get('conwip', None)
+        conwip=conwip,
+        columns=wip_limit_config,
     )
 
     weeks=12
