@@ -50,19 +50,31 @@
         {% else %}
             {% if wip_limits.get(header.state) %}
                 {% set col_wip_limit = wip_limits.get(header.state) %}
+                {% if header.count > col_wip_limit %}
+                    <!-- header.count: {{ header.count }} > col_wip_limit: {{ col_wip_limit }} -->
+                    {% set col_classname = "col_over_wip" %}
+                {% else %}
+                     {% set col_classname = "col_normal" %}
+                {% endif %}
             {% else %}
                 {% set col_wip_limit = None %}
+                {% set col_classname = "col_normal" %}
             {% endif %}
-            {{ header.state }} ({{ header.count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})
+            <div class="{{ col_classname }}">{{ header.state }} ({{ header.count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
         {% endif %}
         {% if header.get('state', '') in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
-            <br />
             {% if wip_limits.get(board.headers[loop.index0+1].state) %}
                 {% set col_wip_limit = wip_limits.get(board.headers[loop.index0+1].state) %}
+                {% if board.headers[loop.index0+1].count > col_wip_limit %}
+                    {% set col_classname = "col_over_wip" %}
+                {% else %}
+                     {% set col_classname = "col_normal" %}
+                {% endif %}
             {% else %}
                 {% set col_wip_limit = None %}
+                {% set col_classname = "col_normal" %}
             {% endif %}
-            {{ board.headers[loop.index0+1].state }} ({{ board.headers[loop.index0+1].count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})
+            <div>{{ board.headers[loop.index0+1].state }} ({{ board.headers[loop.index0+1].count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
         {% endif %}
 
     </th>
