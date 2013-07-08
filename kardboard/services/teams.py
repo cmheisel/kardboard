@@ -155,3 +155,28 @@ class TeamStats(object):
             card_total += card_count
             if card_total >= pct_threshold:
                 return cycle_time
+
+
+class EfficiencyStats(object):
+    """
+    Takes in team state data and returns info about the teams
+    efficiency.
+    """
+    def __init__(self, mapping=None):
+        self.mapping=mapping
+
+    def _get_mapping(self, mapping=None):
+        if mapping is not None:
+            return mapping
+        elif self.mapping is not None:
+            return self.mapping
+        raise TypeError("You must provide a mapping")
+
+    def calculate(self, data, mapping=None):
+        mapping = self._get_mapping(mapping)
+        sums = {}
+
+        for sum_name, list_of_states in mapping.items():
+            sums[sum_name] = sum([data.get(s, 0) for s in list_of_states])
+
+        return sums
