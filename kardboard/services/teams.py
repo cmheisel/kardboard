@@ -187,10 +187,11 @@ class EfficiencyStats(object):
         loop through the series and make each key in each slice
         appear to be incrementing from 0.
         """
-        for i in xrange(0, len(data)-1):
+        previous_values = [d[key] for d in data]
+        for i in xrange(0, len(data)):
             if i == 0:
-                previous_value = data[i][key]
+                previous_value = previous_values[0]
             else:
-                previous_value = data[i-1][key]
+                previous_value = previous_values[i - 1]
             data[i][key] = data[i][key] - previous_value
         return data

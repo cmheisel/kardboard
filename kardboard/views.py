@@ -959,19 +959,19 @@ def report_efficiency(group="all", months=3):
         a_record.update(r.state_counts)
         incremented_state_counts.append(a_record)
 
-    stats.make_incremental(incremented_state_counts, 'Backlog')
-    stats.make_incremental(incremented_state_counts, 'Done')
+    for group_name in app.config.get('EFFICIENCY_INCREMENTS', ()):
+        stats.make_incremental(incremented_state_counts, group_name)
 
     data = []
     for r in incremented_state_counts:
         efficiency_stats = stats.calculate(r)
         data.append(
-            {'date': r['date'], 'stats': efficiency_stats,}
+            {'date': r['date'], 'stats': efficiency_stats}
         )
 
     chart = {}
     chart['categories'] = [report.date.strftime("%m/%d") for report in records]
-    group_names = state_mappings.keys()
+    group_names = app.config.get('EFFICIENCY_MAPPINGS_ORDER', state_mappings.keys())
     series = []
     for group_name in group_names:
         seri_data = []

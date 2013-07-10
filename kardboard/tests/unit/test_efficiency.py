@@ -200,16 +200,16 @@ class EfficiencyTests(unittest2.TestCase):
         """
 
         data = [
-            {'Todo': 5, 'Doing': 3, 'Done': 10,},
-            {'Todo': 4, 'Doing': 3, 'Done': 11,},
-            {'Todo': 2, 'Doing': 5, 'Done': 13,},
-            {'Todo': 2, 'Doing': 5, 'Done': 13,},
+            {'Todo': 5, 'Doing': 3, 'Done': 10},
+            {'Todo': 4, 'Doing': 3, 'Done': 11},
+            {'Todo': 3, 'Doing': 5, 'Done': 13},
+            {'Todo': 2, 'Doing': 5, 'Done': 13},
         ]
         expected = [
-            {'Todo': 5, 'Doing': 3, 'Done': 0,},
-            {'Todo': 4, 'Doing': 3, 'Done': 1,},
-            {'Todo': 2, 'Doing': 5, 'Done': 2,},
-            {'Todo': 2, 'Doing': 5, 'Done': 0,},
+            {'Todo': 5, 'Doing': 3, 'Done': 0},
+            {'Todo': 4, 'Doing': 3, 'Done': 1},
+            {'Todo': 3, 'Doing': 5, 'Done': 2},
+            {'Todo': 2, 'Doing': 5, 'Done': 0},
         ]
 
         es = self._get_target_class()()
