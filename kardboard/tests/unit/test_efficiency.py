@@ -1,5 +1,6 @@
 import unittest2
 
+
 class EfficiencyTests(unittest2.TestCase):
     """
     Tests for the kardboard.services.teams.EfficiencyStats service
@@ -189,4 +190,28 @@ class EfficiencyTests(unittest2.TestCase):
         }
 
         result = es.calculate(data)
+        assert expected == result
+
+    def test_make_incremental(self):
+        """
+        If given a series of dictionaries and a key,
+        loop through the series and make each key in each slice
+        appear to be incrementing from 0.
+        """
+
+        data = [
+            {'Todo': 5, 'Doing': 3, 'Done': 10,},
+            {'Todo': 4, 'Doing': 3, 'Done': 11,},
+            {'Todo': 2, 'Doing': 5, 'Done': 13,},
+            {'Todo': 2, 'Doing': 5, 'Done': 13,},
+        ]
+        expected = [
+            {'Todo': 5, 'Doing': 3, 'Done': 0,},
+            {'Todo': 4, 'Doing': 3, 'Done': 1,},
+            {'Todo': 2, 'Doing': 5, 'Done': 2,},
+            {'Todo': 2, 'Doing': 5, 'Done': 0,},
+        ]
+
+        es = self._get_target_class()()
+        result = es.make_incremental(data, 'Done')
         assert expected == result

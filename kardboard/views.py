@@ -953,11 +953,20 @@ def report_efficiency(group="all", months=3):
         group=group
     )
 
-    data = []
+    incremented_state_counts = []
     for r in records:
-        efficiency_stats = stats.calculate(r.state_counts)
+        a_record = {'date': r.date}
+        a_record.update(r.state_counts)
+        incremented_state_counts.append(a_record)
+
+    stats.make_incremental(incremented_state_counts, 'Backlog')
+    stats.make_incremental(incremented_state_counts, 'Done')
+
+    data = []
+    for r in incremented_state_counts:
+        efficiency_stats = stats.calculate(r)
         data.append(
-            {'date': r.date, 'stats': efficiency_stats,}
+            {'date': r['date'], 'stats': efficiency_stats,}
         )
 
     chart = {}

@@ -180,3 +180,17 @@ class EfficiencyStats(object):
             sums[sum_name] = sum([data.get(s, 0) for s in list_of_states])
 
         return sums
+
+    def make_incremental(self, data, key):
+        """
+        If given a series of dictionaries and a key,
+        loop through the series and make each key in each slice
+        appear to be incrementing from 0.
+        """
+        for i in xrange(0, len(data)-1):
+            if i == 0:
+                previous_value = data[i][key]
+            else:
+                previous_value = data[i-1][key]
+            data[i][key] = data[i][key] - previous_value
+        return data
