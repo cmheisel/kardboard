@@ -994,7 +994,7 @@ def report_efficiency(group="all", months=3):
         'start_date': start_date,
         'chart': chart,
         'table_data': table_data,
-        'data_keys': table_data[0].keys(),
+        'data_keys': ['Date', ] + list(group_names),
         'updated_at': records.order_by('date')[len(records)-1].date,
         'version': VERSION,
     }
