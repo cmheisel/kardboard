@@ -935,6 +935,71 @@ def robots():
     return response
 
 
+def report_efficiency(group="all", months=3):
+    state_mappings = app.config.get('EFFICIENCY_MAPPINGS', None)
+    if state_mappings is None:
+        abort(404)
+    stats = teams_service.EfficiencyStats(mapping=state_mappings)
+
+    end = kardboard.util.now()
+    months_ranges = month_ranges(end, months)
+
+    start_day = make_start_date(date=months_ranges[0][0])
+    end_day = make_end_date(date=end)
+
+    records = FlowReport.objects.filter(
+        date__gte=start_day,
+        date__lte=end_day,
+        group=group
+    )
+
+    incremented_state_counts = []
+    for r in records:
+        a_record = {'date': r.date}
+        a_record.update(r.state_counts)
+        incremented_state_counts.append(a_record)
+
+    for group_name in app.config.get('EFFICIENCY_INCREMENTS', ()):
+        stats.make_incremental(incremented_state_counts, group_name)
+
+    data = []
+    for r in incremented_state_counts:
+        efficiency_stats = stats.calculate(r)
+        data.append(
+            {'date': r['date'], 'stats': efficiency_stats}
+        )
+
+    chart = {}
+    chart['categories'] = [report.date.strftime("%m/%d") for report in records]
+    group_names = app.config.get('EFFICIENCY_MAPPINGS_ORDER', state_mappings.keys())
+    series = []
+    for group_name in group_names:
+        seri_data = []
+        for d in data:
+            seri_data.append(d['stats'][group_name])
+        seri = dict(name=group_name, data=seri_data)
+        series.append(seri)
+    chart['series'] = series
+
+    table_data = []
+    for row in data:
+        table_row = {'Date': row['date']}
+        for group_name in group_names:
+            table_row[group_name] = row['stats'][group_name]
+        table_data.append(table_row)
+
+    start_date = records.order_by('date').first().date
+    context = {
+        'title': "Efficiency",
+        'start_date': start_date,
+        'chart': chart,
+        'table_data': table_data,
+        'data_keys': table_data[0].keys(),
+        'updated_at': records.order_by('date')[len(records)-1].date,
+        'version': VERSION,
+    }
+    return render_template('chart-efficiency.html', **context)
+
 def report_flow(group="all", months=3):
     end = kardboard.util.now()
     months_ranges = month_ranges(end, months)
@@ -1126,6 +1191,8 @@ app.add_url_rule('/reports/<group>/flow/detail/', 'report_detailed_flow', report
 app.add_url_rule('/reports/<group>/flow/detail/<int:months>/', 'report_detailed_flow', report_detailed_flow)
 app.add_url_rule('/reports/<group>/flow/detail/cards/', 'report_detailed_flow_cards', report_detailed_flow_cards)
 app.add_url_rule('/reports/<group>/flow/detail/cards/<int:months>/', 'report_detailed_flow_cards', report_detailed_flow_cards)
+app.add_url_rule('/reports/<group>/efficiency/', 'report_detailed_flow', report_efficiency)
+app.add_url_rule('/reports/<group>/efficiency/<int:months>/', 'report_detailed_flow', report_efficiency)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
 app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
