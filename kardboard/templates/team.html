@@ -48,6 +48,10 @@ $(document).ready(function() {
           <h2>{{ name }}</h2>
           <p class="value">
             {{ value }}
+            <!--
+                name: {{ name }}
+                wip_limits.conwip: {{ wip_limits.conwip }}
+            -->
             {% if name == "WIP" and wip_limits.conwip %}
             <span>/</span> {{ wip_limits.conwip }}
             {% endif %}
