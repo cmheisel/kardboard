@@ -7,9 +7,10 @@ class WIPLimits(object):
     """
     Stores data about a team's wip limit rules
     """
-    def __init__(self, columns=None, conwip=None):
+    def __init__(self, columns=None, conwip=None, name=None):
         if columns is None:
             columns = {}
+        self.name = name
         self._conwip = conwip
         self._columns = columns
         self._limits = self._calculate_limits()
@@ -26,10 +27,7 @@ class WIPLimits(object):
         return _limits
 
     def get(self, key, default=None):
-        try:
-            return self[key]
-        except KeyError:
-            return default
+        return self._limits.get(key, default)
 
     def __getitem__(self, key):
         return self._limits[key]

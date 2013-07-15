@@ -130,11 +130,8 @@ def team(team_slug=None):
         wip_limit_config = {}
 
     conwip = wip_limit_config.get('conwip', None)
-    try:
-        del wip_limit_config['conwip']
-    except KeyError:
-        pass
     wip_limits = WIPLimits(
+        name=team_slug,
         conwip=conwip,
         columns=wip_limit_config,
     )
@@ -179,6 +176,7 @@ def team(team_slug=None):
         'report_config': report_config,
         'backlog_markers': backlog_markers,
         'backlog_marker_data': backlog_marker_data,
+        'wip_limit_config': wip_limit_config,
         'board': board,
         'date': date,
         'updated_at': datetime.datetime.now(),

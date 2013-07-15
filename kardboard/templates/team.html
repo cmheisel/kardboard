@@ -50,7 +50,10 @@ $(document).ready(function() {
             {{ value }}
             <!--
                 name: {{ name }}
-                wip_limits.conwip: {{ wip_limits.conwip }}
+                wip_limits.name: {{ wip_limits.name|safe }}
+                wip_limits.conwip: {{ wip_limits.conwip|safe }}
+                wip_limits: {{ wip_limits|safe }}
+                wip_limit_config: {{ wip_limit_config|safe }}
             -->
             {% if name == "WIP" and wip_limits.conwip %}
             <span>/</span> {{ wip_limits.conwip }}
