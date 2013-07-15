@@ -48,6 +48,7 @@ $(document).ready(function() {
           <h2>{{ name }}</h2>
           <p class="value">
             {{ value }}
+            {% if name == "WIP" and wip_limits.conwip %}
             <!--
                 name: {{ name }}
                 wip_limits.name: {{ wip_limits.name|safe }}
@@ -55,7 +56,6 @@ $(document).ready(function() {
                 wip_limits: {{ wip_limits|safe }}
                 wip_limit_config: {{ wip_limit_config|safe }}
             -->
-            {% if name == "WIP" and wip_limits.conwip %}
             <span>/</span> {{ wip_limits.conwip }}
             {% endif %}
           </p>
