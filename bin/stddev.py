@@ -1,25 +1,40 @@
-from datetime import datetime
-
 from kardboard.models import Kard, ReportGroup
 from kardboard.util import standard_deviation, make_start_date, make_end_date, average
 
+def parse_date(datestr):
+    from dateutil import parser
+    return parser.parse(datestr)
 
-def year_std_dev(year):
-    year_start = make_start_date(date=datetime(year, 1, 1))
-    year_end = make_end_date(date=datetime(year, 12, 31))
+def std_dev(start, stop):
+    start = make_start_date(date=start)
+    stop = make_end_date(date=stop)
 
-    rg = ReportGroup('dev', Kard.objects.filter(start_date__gte=year_start, done_date__lte=year_end))
+    rg = ReportGroup('dev', Kard.objects.filter(start_date__gte=start, done_date__lte=stop))
 
     cards = [c for c in rg.queryset if c.is_card]
     cycle_times = [c.cycle_time for c in cards]
 
-    data = {}
-    data['n'] = len(cards)
-    data['ave'] = average(cycle_times)
-    data['std'] = standard_deviation(cycle_times)
-    return data
+    print "%s -- %s" % (start, stop)
+    print "\t Sample: %s" % len(cards)
+    print "\t Ave: %s" % average(cycle_times)
+    print "\t Stdev: %s" % standard_deviation(cycle_times)
+
+    cards_by_class = {}
+    for c in cards:
+        cards_by_class.setdefault(c.service_class['name'], [])
+        cards_by_class[c.service_class['name']].append(c)
+
+    for sclass, cards in cards_by_class.items():
+        cycle_times = [c.cycle_time for c in cards]
+
+        print "\t ## %s" % (sclass)
+        print "\t\t Sample: %s" % len(cards)
+        print "\t\t Ave: %s" % average(cycle_times)
+        print "\t\t Stdev: %s" % standard_deviation(cycle_times)
 
 
 if __name__ == "__main__":
     import sys
-    print year_std_dev(int(sys.argv[1]))
+    start = parse_date(sys.argv[1])
+    stop= parse_date(sys.argv[2])
+    print std_dev(start, stop)
