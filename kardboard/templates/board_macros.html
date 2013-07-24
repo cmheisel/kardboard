@@ -1,3 +1,5 @@
+{% import "card_macros.html" as card_macros %}
+
 {% macro card_detail(card, request) -%}
     {% set vs_goal = card.cycle_vs_goal %}
     <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.type|slugify }} {% if card.blocked %}card_blocked{% endif %}" id="card_{{ card.key }}">
@@ -27,6 +29,7 @@
 
         {% set assignee = card.assignee %}
         <p class="assignee">
+            {{ card_macros.hours_to_days(card.time_in_state) }} <br />
             {% if card.due_date %}Due: {{ card.due_date.strftime("%m/%d") }}{% endif %}
             {% if card.service_class['name'] in ['Intangible', 'Not Prioritized'] %}
                 {{ card.service_class.get('name') }}
