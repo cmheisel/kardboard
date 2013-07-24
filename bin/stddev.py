@@ -3,15 +3,18 @@ from collections import defaultdict
 from kardboard.models import Kard, ReportGroup
 from kardboard.util import standard_deviation, make_start_date, make_end_date, average
 
+
 def parse_date(datestr):
     from dateutil import parser
     return parser.parse(datestr)
+
 
 def histogram(times):
     d = defaultdict(int)
     for t in times:
         d[t] += 1
     return dict(d)
+
 
 def percentile(target_pct, times):
     hist = histogram(times)
@@ -28,6 +31,7 @@ def percentile(target_pct, times):
         if card_total >= pct_threshold:
             return cycle_time, (card_total / float(total))
 
+
 def std_dev(start, stop):
     start = make_start_date(date=start)
     stop = make_end_date(date=stop)
@@ -42,7 +46,7 @@ def std_dev(start, stop):
     print "\t Ave: %s" % average(cycle_times)
     print "\t Stdev: %s" % standard_deviation(cycle_times)
     ct, pct = percentile(.8, cycle_times)
-    print "\t 80pct: %s / %s" % (ct, pct*100)
+    print "\t 80pct: %s / %s" % (ct, pct * 100)
 
     cards_by_class = {}
     for c in cards:
@@ -61,5 +65,5 @@ def std_dev(start, stop):
 if __name__ == "__main__":
     import sys
     start = parse_date(sys.argv[1])
-    stop= parse_date(sys.argv[2])
+    stop = parse_date(sys.argv[2])
     print std_dev(start, stop)
