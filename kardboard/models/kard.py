@@ -93,7 +93,7 @@ class KardQuerySet(QuerySet):
         median_cycle_time = median(cycle_times)
 
         if median_cycle_time is not None:
-            absolute_deviations = [ math.fabs(median_cycle_time-c) for c in cycle_times]
+            absolute_deviations = [math.fabs(median_cycle_time-c) for c in cycle_times]
             mad = median(absolute_deviations)
         else:
             mad = None
@@ -209,6 +209,8 @@ class Kard(app.db.Document):
     created_at = app.db.DateTimeField(required=True)
 
     due_date = app.db.DateTimeField(required=False)
+
+    _time_in_current_state = app.db.FloatField(required=False, db_field="time_in_current_state")
     _service_class = app.db.StringField(required=False, db_field="service_class")
     _type = app.db.StringField(required=False)
     _assignee = app.db.StringField(db_field="assignee")
@@ -296,9 +298,14 @@ class Kard(app.db.Document):
 
     @property
     def time_in_state(self):
-        from kardboard.models.statelog import StateLog
-        statelog = StateLog.objects.filter(card=self, state=self.state).order_by('-entered')
-        return statelog[0].duration
+        if self._time_in_current_state is None and self.id is not None:
+            from kardboard.models.statelog import StateLog
+            statelog = StateLog.objects.filter(card=self, state=self.state).order_by('-entered')
+            try:
+                self._time_in_current_state = statelog[0].duration
+            except IndexError:
+                return None
+        return self._time_in_current_state
 
     @property
     def old_state(self):
@@ -351,6 +358,8 @@ class Kard(app.db.Document):
         self._set_dates()
 
         self._set_cycle_lead_times()
+        self._time_in_current_state = None # Blank this
+        self._time_in_current_state = self.time_in_state # Recaclulate and cache
 
         self._type = self.ticket_system.type or app.config.get('DEFAULT_TYPE', '')
         if self._type:
