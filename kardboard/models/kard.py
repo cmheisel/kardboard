@@ -295,6 +295,12 @@ class Kard(app.db.Document):
             self.created_at = now()
 
     @property
+    def time_in_state(self):
+        from kardboard.models.statelog import StateLog
+        statelog = StateLog.objects.filter(card=self, state=self.state).order_by('-entered')
+        return statelog[0].duration
+
+    @property
     def old_state(self):
         try:
             k = Kard.objects.only('state').get(key=self.key, )
