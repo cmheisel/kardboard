@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import pytest
-
 from kardboard.util import slugify
 from kardboard.tests.core import KardboardTestCase, DashboardTestCase
 
@@ -70,29 +68,6 @@ class FunnelTests(DashboardTestCase):
     def test_funnel_404_if_unknown_state(self):
         res = self.app.get(self._get_target_url('Foo Bar'))
         self.assertEqual(404, res.status_code)
-
-
-class DetailPageTests(DashboardTestCase):
-    def _get_target_url(self):
-        return '/card/%s/' % self.card.key
-
-    def setUp(self):
-        super(DetailPageTests, self).setUp()
-        self.card = self._get_card_class().objects.first()
-        self.response = self.app.get(self._get_target_url())
-        self.assertEqual(200, self.response.status_code)
-
-    @pytest.mark.questionable
-    def test_data(self):
-        expected_values = [
-            self.card.title,
-            self.card.key,
-            self.card.backlog_date.strftime("%m/%d/%Y"),
-            "/card/%s/edit/" % self.card.key,
-            "/card/%s/delete/" % self.card.key,
-        ]
-        for v in expected_values:
-            self.assertIn(v, self.response.data)
 
 
 class QuickJumpTests(DashboardTestCase):

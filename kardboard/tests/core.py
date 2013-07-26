@@ -176,28 +176,28 @@ class DashboardTestCase(KardboardTestCase):
 
             k = self.make_card(start_date=datetime.datetime(
                 year=self.year, month=self.month, day=12), team=self.team1)
-            k.save()
+            #k.save()
 
             k = self.make_card(
                 start_date=datetime.datetime(year=self.year,
                     month=self.month, day=12),
                 done_date=datetime.datetime(year=self.year,
                     month=self.month, day=19), team=self.team1)
-            k.save()
+            #k.save()
 
         for i in xrange(0, 3):
             #board will have 3 cards in elabo, started, and done
             k = self.make_card(backlog_date=self.backlogged_date, team=self.team2)  # backlogged
-            k.save()
+            #k.save()
 
             k = self.make_card(start_date=datetime.datetime(
                 year=2011, month=6, day=12), team=self.team2)
-            k.save()
+            #k.save()
 
             k = self.make_card(
                 start_date=datetime.datetime(year=2011, month=6, day=12),
                 done_date=datetime.datetime(year=2011, month=6, day=19), team=self.team2)
-            k.save()
+            #k.save()
 
     def _set_up_records(self):
         from kardboard.util import make_start_date
