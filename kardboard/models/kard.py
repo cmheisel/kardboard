@@ -216,6 +216,10 @@ class Kard(app.db.Document):
     _service_class = app.db.StringField(required=False, db_field="service_class")
     _type = app.db.StringField(required=False)
     _assignee = app.db.StringField(db_field="assignee")
+    _worked_on = app.db.ListField(
+        field=app.db.StringField(required=False),
+        required=False
+    )
     _version = app.db.StringField(required=False, db_field="version")
 
     _ticket_system_updated_at = app.db.DateTimeField()
@@ -360,6 +364,9 @@ class Kard(app.db.Document):
         self._set_cycle_lead_times()
         self._time_in_current_state = None  # Blank this
         self._time_in_current_state = self.time_in_state  # Recaclulate and cache
+
+        self._worked_on = []  # Blank this
+        self._worked_on = self.worked_on  # Recaclulate and cache
 
         self._type = self.ticket_system.type or app.config.get('DEFAULT_TYPE', '')
         if self._type:
@@ -609,6 +616,14 @@ class Kard(app.db.Document):
 
     @property
     def worked_on(self):
-        developers = self.ticket_system_data.get('developers', [])
-        testers = self.ticket_system_data.get('qaers', [])
-        return [self._assignee, ] + testers + developers
+        if not self._worked_on:
+            assignees = [self._assignee or "", ]
+            testers = self.ticket_system_data.get('qaers', [])
+            testers = [t for t in testers if t not in assignees]
+            worked_on = assignees + testers
+
+            developers = self.ticket_system_data.get('developers', [])
+            developers = [d for d in developers if d not in worked_on]
+            worked_on = worked_on + developers
+            return worked_on
+        return self._worked_on

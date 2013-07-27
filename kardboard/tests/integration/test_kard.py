@@ -56,3 +56,20 @@ class NewKardTests(KardboardTestCase):
 
         expected = ['cheisel', 'chief', 'gaeda', 'starbuck', 'apollo']
         assert k.worked_on == expected
+
+    def test_worked_on_returns_unique_present(self):
+        k = self._get_target_class()()
+        k._assignee = "starbuck"
+        k._ticket_system_data = {
+            'developers': [
+                'starbuck',
+                'apollo',
+            ],
+            'qaers': [
+                'chief',
+                'gaeda',
+            ]
+        }
+
+        expected = ['starbuck', 'chief', 'gaeda', 'apollo']
+        assert k.worked_on == expected
