@@ -162,9 +162,10 @@ def team(team_slug=None):
     title = "%s cards" % team.name
 
     report_config = (
+        {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
+        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
+        {'slug': 'done', 'name': 'Done'},
         {'slug': 'service-class', 'name': 'Service class'},
-        {'slug': 'leaderboard', 'name': 'Leaderboard'},
-        {'slug': 'done', 'name': 'Done'}
     )
 
     board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput * 4)
