@@ -38,10 +38,12 @@ from kardboard.util import (
     week_range,
 )
 
+
 def _get_date():
     date = datetime.datetime.now()
     date = make_end_date(date=date)
     return date
+
 
 def _get_teams():
     teams = teams_service.setup_teams(
@@ -49,11 +51,13 @@ def _get_teams():
     )
     return teams
 
+
 def _find_team_by_slug(team_slug, teams):
     team_mapping = teams.slug_name_mapping
     target_team = team_mapping.get(team_slug, None)
     team = teams.find_by_name(target_team)
     return team
+
 
 def _get_excluded_classes():
     service_class_conf = app.config.get('SERVICE_CLASSES', {})
@@ -62,6 +66,7 @@ def _get_excluded_classes():
         if sclass_data.get('unplanned', False):
             exclude_classes.append(sclass)
     return exclude_classes
+
 
 def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
     backlog_markers = []
@@ -75,10 +80,11 @@ def _make_backlog_markers(lead_time, weekly_throughput, backlog_cards):
             batch_counter += 1
             est_done_date = datetime.datetime.now() + relativedelta.relativedelta(days=lead_time * batch_counter)
             start_date, end_date = week_range(est_done_date)
-            est_done_monday = end_date + relativedelta.relativedelta(days=2) # Adjust to Monday
+            est_done_monday = end_date + relativedelta.relativedelta(days=2)  # Adjust to Monday
             backlog_markers.append(est_done_monday)
-        counter +=1
+        counter += 1
     return backlog_markers
+
 
 def _team_backlog_markers(team, cards, weeks=12):
     exclude_classes = _get_excluded_classes()
@@ -136,7 +142,7 @@ def team(team_slug=None):
         columns=wip_limit_config,
     )
 
-    weeks=12
+    weeks = 12
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
@@ -161,7 +167,7 @@ def team(team_slug=None):
         {'slug': 'done', 'name': 'Done'}
     )
 
-    board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput*4)
+    board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput * 4)
 
     #raise Exception
     backlog_marker_data, backlog_markers = _team_backlog_markers(team, board.rows[0][0]['cards'], weeks)
@@ -187,6 +193,7 @@ def team(team_slug=None):
 
     return render_template('team.html', **context)
 
+
 def team_backlog(team_slug=None):
     if request.method == "POST":
         if kardboard.auth.is_authenticated() is False:
@@ -199,20 +206,19 @@ def team_backlog(team_slug=None):
             Kard.objects(
                 key=card_key.strip()
             ).only('priority').update_one(set__priority=counter)
-            counter +=1
+            counter += 1
 
         elapsed = (time.time() - start)
         return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
 
     teams = _get_teams()
     team = _find_team_by_slug(team_slug, teams)
-    weeks=12
+    weeks = 12
 
     backlog = Kard.objects.filter(
         team=team.name,
         state=States().backlog,
     ).exclude('_ticket_system_data').order_by('priority')
-
 
     backlog_marker_data, backlog_markers = _team_backlog_markers(team, backlog, weeks)
 
@@ -260,7 +266,7 @@ def funnel(state_slug):
             Kard.objects(
                 key=card_key.strip()
             ).only('priority').update_one(set__priority=counter)
-            counter +=1
+            counter += 1
 
         elapsed = (time.time() - start)
         return jsonify(message="Reordered %s cards in %.2fs" % (counter, elapsed))
@@ -726,14 +732,16 @@ def report_throughput(group="all", months=3, start=None):
     chart['categories'] = [c[0] for c in month_counts]
 
     if with_defects:
-        chart['series'] = [{
-            'data': [c[1]['card'] for c in month_counts],
-            'name': 'Cards'
-        },
-        {
-            'data': [c[1]['defect'] for c in month_counts],
-            'name': 'Defects'
-        }]
+        chart['series'] = [
+            {
+                'data': [c[1]['card'] for c in month_counts],
+                'name': 'Cards'
+            },
+            {
+                'data': [c[1]['defect'] for c in month_counts],
+                'name': 'Defects'
+            }
+        ]
     else:
         chart['series'] = [{
             'data': [c[1] for c in month_counts],
@@ -774,7 +782,6 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
     daily_moving_lead = [(r.date, r.moving_lead_time) for r in records]
     daily_mad = [(r.date, r.moving_median_abs_dev) for r in records]
 
-
     start_date = daily_moving_averages[0][0]
     chart = {}
     chart['series'] = [
@@ -804,6 +811,7 @@ def report_cycle(group="all", months=3, year=None, month=None, day=None):
     }
 
     return render_template('report-cycle.html', **context)
+
 
 def report_assignee(group="all"):
     states = States()
@@ -840,13 +848,76 @@ def report_assignee(group="all"):
     }
     return render_template('report-assignee.html', **context)
 
+
 def report_defect_cycle_distribution(group="all", months=3):
     return report_cycle_distribution(group, months, limit='defects')
+
 
 def report_card_cycle_distribution(group="all", months=3):
     return report_cycle_distribution(group, months, limit='cards')
 
+
 def report_cycle_distribution(group="all", months=3, limit=None):
+    from kardboard.services.reports import CycleTimeDistribution
+
+    defects_only, cards_only = False, False
+    if limit == 'cards':
+        cards_only = True
+    if limit == 'defects':
+        defects_only = True
+
+    today = datetime.datetime.today()
+    start_day = today - relativedelta.relativedelta(months=months)
+    start_day = make_start_date(date=start_day)
+    end_day = make_end_date(date=today)
+
+    context = {
+        'title': "How quick can we do it?",
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    query = Q(done_date__gte=start_day) & Q(done_date__lte=end_day)
+    if defects_only:
+        query = query & Q(_type__in=app.config.get('DEFECT_TYPES', []))
+    elif cards_only:
+        query = query & Q(_type__nin=app.config.get('DEFECT_TYPES', []))
+    rg = ReportGroup(group, Kard.objects.filter(query))
+
+    cards = list(rg.queryset)
+
+    total = len(cards)
+    if total == 0:
+        context = {
+            'error': "Zero cards were completed in the past %s months" % months
+        }
+        return render_template('report-cycle-distro.html', **context)
+
+    cdr = CycleTimeDistribution(cards=cards)
+
+    context = {
+        'histogram_data': cdr.histogram(),
+        'chart': {},
+        'title': "How quick can we do it?",
+        'months': months,
+        'total': total,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+    if defects_only:
+        context['title'] = "Defects: %s" % (context['title'])
+        context['card_type'] = 'defects'
+    elif cards_only:
+        context['title'] = "Cards: %s" % (context['title'])
+        context['card_type'] = 'cards'
+    else:
+        context['title'] = "All: %s" % (context['title'])
+        context['card_type'] = 'cards and defects'
+
+    return render_template('report-cycle-distro.html', **context)
+
+
+def old_report_cycle_distribution(group="all", months=3, limit=None):
     defects_only, cards_only = False, False
     if limit == 'cards':
         cards_only = True
@@ -993,10 +1064,11 @@ def report_efficiency(group="all", months=3):
         'chart': chart,
         'table_data': table_data,
         'data_keys': ['Date', ] + list(group_names),
-        'updated_at': records.order_by('date')[len(records)-1].date,
+        'updated_at': records.order_by('date')[len(records) - 1].date,
         'version': VERSION,
     }
     return render_template('chart-efficiency.html', **context)
+
 
 def report_flow(group="all", months=3):
     end = kardboard.util.now()

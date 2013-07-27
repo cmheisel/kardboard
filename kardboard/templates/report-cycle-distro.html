@@ -10,7 +10,7 @@ $(function () {
 
             chart: {
                 renderTo: 'container',
-                type: 'line'
+                type: 'column'
             },
 
             title: {
@@ -46,7 +46,9 @@ $(function () {
             series: [{
                 type: 'pie',
                 name: '{{ title }}',
+                {# disabled:
                 data: {{ chart['data']|jsonencode }}
+                #}
             }]
         });
     });
@@ -64,16 +66,16 @@ $(function () {
 {% else %}
 <table>
     <tr>
-    	<th>Range</th>
-    	<th>% of cards</th>
-        <th>Confidence</th>
+    	<th>Cycle Time</th>
+    	<th>Number of cards</th>
+        <th>% of cards</th>
     </tr>
 
-    {% for row in data %}
+    {% for row in histogram_data %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-    	<td>{{ row[0] }}</td>
-    	<td>{{ "%.0f%%"|format(row[1]*100) }}</td>
-        <td>{{ "%.0f%%"|format(row[2]*100) }}</td>
+    	<td>{{ row.days }}</td>
+    	<td>{{ row.count }}</td>
+        <td>{{ "%.0f%%"|format(row.percent*100) }}</td>
     </tr>
     {% endfor %}
 </table>
