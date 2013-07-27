@@ -1,6 +1,6 @@
 from dateutil.relativedelta import relativedelta
 from kardboard.models import Kard, ReportGroup, FlowReport, DailyRecord
-from kardboard.util import make_start_date, make_end_date
+from kardboard.util import make_start_date, make_end_date, average, standard_deviation
 
 
 def parse_date(datestr):
@@ -56,6 +56,9 @@ def moving_data(start, stop):
     kards = list(ReportGroup('dev', query).queryset)
     features = [k for k in kards if k.is_card]
     defects = [k for k in kards if not k.is_card]
+    over_sla = [k for k in kards if k.cycle_time > k.service_class['upper']]
+    feature_cycle_ave = average([k.cycle_time for k in features])
+    feature_stddev = standard_deviation([k.cycle_time for k in features])
 
     wip = find_wip(stop)
     tpa = daily_throughput_average(stop)
@@ -68,23 +71,26 @@ def moving_data(start, stop):
         'stop': stop,
         'features': len(features),
         'bugfixes': len(defects),
-        'little_law': round(little_law),
-        'cycle_time_ave': round(cycle_time_ave),
+        'little_law': int(round(little_law)),
+        'cycle_time_ave': int(round(cycle_time_ave)),
         'wip': wip,
+        'feature_cycle_average': int(round(feature_cycle_ave)),
+        'feature_stddev': int(round(feature_stddev)),
+        'over_sla': len(over_sla),
     }
     return data
 
 
 def print_data(data):
-    print "%s - %s\nF: %s\tB: %s\tL: %s\tC: %s\tW: %s" % (
-        data['start'],
-        data['stop'],
-        data['features'],
-        data['bugfixes'],
-        data['little_law'],
-        data['cycle_time_ave'],
-        data['wip'],
-    )
+    print "%s - %s" % (data['start'], data['stop'],)
+    print "Feat: %s" % data['features']
+    print "Bugs: %s" % data['bugfixes']
+    print "Lead: %s" % data['little_law']
+    print "Cycl: %s" % data['cycle_time_ave']
+    print " WIP: %s" % data['wip']
+    print "oSLA: %s" % data['over_sla']
+    print "fCyc: %s" % data['feature_cycle_average']
+    print "fStd: %s" % data['feature_stddev']
 
 
 def weekly_moving_data(start):
