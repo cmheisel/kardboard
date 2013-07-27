@@ -895,9 +895,23 @@ def report_cycle_distribution(group="all", months=3, limit=None):
 
     cdr = CycleTimeDistribution(cards=cards)
 
+    chart = {}
+    chart['categories'] = cdr.days()
+    chart['series'] = []
+
+    service_class_series = cdr.service_class_series()
+    sclasses = service_class_series.keys()
+    sclasses.sort()
+
+    for sclass in sclasses:
+        seri = service_class_series[sclass]
+        chart['series'].append(
+            dict(name=sclass, data=seri)
+        )
+
     context = {
         'histogram_data': cdr.histogram(),
-        'chart': {},
+        'chart': chart,
         'title': "How quick can we do it?",
         'months': months,
         'total': total,
