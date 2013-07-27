@@ -21,35 +21,53 @@ $(function () {
                 text: 'Previous {{ months }} months: {{ total }} {{ card_type }}'
             },
 
-            tooltip: {
-                formatter: function() {
-                    return ''+
-                        this.point.name +': '+ this.percentage.toFixed(0) + " %";
-                }
+            xAxis: {
+                categories: {{ chart['categories']|jsonencode }}
             },
 
-           plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        connectorColor: '#000000',
-                        formatter: function() {
-                            return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(0) +' %';
-                        }
+            yAxis: {
+                title: {
+                    text: 'Cards'
+                },
+
+                labels: {
+                    formatter: function() {
+                        return this.value;
                     }
                 }
             },
 
-            series: [{
-                type: 'pie',
-                name: '{{ title }}',
-                {# disabled:
-                data: {{ chart['data']|jsonencode }}
-                #}
-            }]
+            tooltip: {
+                formatter: function() {
+                    return ''+
+                        this.x + ' days: '+ Highcharts.numberFormat(this.y, 0, ',') +' cards';
+                }
+            },
+
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key} days</span><div>',
+                pointFormat: '<span style="color:{series.color};padding:0">{series.name}: </span>' +
+                    '<span><b>{point.y} cards</b></span><br />',
+                footerFormat: '</div>',
+                shared: true,
+                useHTML: true
+            },
+
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+
+            series: [
+                {% for seri in chart['series'] %}
+                {
+                    name: {{ seri['name']|jsonencode }},
+                    data: {{ seri['data']|jsonencode }},
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ]
         });
     });
 });</script>
