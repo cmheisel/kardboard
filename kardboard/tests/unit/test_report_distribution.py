@@ -58,7 +58,7 @@ class CycleTimeDistributionReportTests(unittest2.TestCase):
         sclasses.sort()
         assert sclasses == actual_sclasses
 
-    def test_data_table_returns_counts(self):
+    def test_histogram_returns_counts(self):
         cycle_times = [0, 1, 5, 3, 2, 5, 3]
         cards = self._create_cards(cycle_times)
 
@@ -94,3 +94,59 @@ class CycleTimeDistributionReportTests(unittest2.TestCase):
         ]
 
         assert expected == cdr.histogram()
+
+    def test_days_returns_unique_ordered_days(self):
+        cycle_times = [0, 1, 5, 3, 2, 5, 3]
+        cards = self._create_cards(cycle_times)
+
+        CDR = self._get_target_class()
+        cdr = CDR(cards=cards)
+
+        expected = [0, 1, 2, 3, 5]
+        assert expected == cdr.days()
+
+    def test_service_classes_returns_unique_ordered_days(self):
+        ctimes = [1, 3, 1, 3, 4]
+        sclasses = [
+            'Expedite',
+            'Standard',
+            'Standard',
+            'Expedite',
+            'Intangible',
+        ]
+        cards = self._create_cards(ctimes, sclasses)
+
+        CDR = self._get_target_class()
+        cdr = CDR(cards=cards)
+
+        expected = ['Expedite', 'Intangible', 'Standard']
+        assert expected == cdr.service_classes()
+
+    def test_service_classes_series_returns_counts(self):
+        ctimes = [0, 1, 5, 3, 2, 5, 3]  # [0, 1, 2, 3, 5]
+        sclasses = [
+            'Expedite',  # 0
+            'Standard',  # 1
+            'Standard',  # 5
+            'Expedite',  # 3
+            'Intangible',  # 2
+            'Standard',  # 5
+            'Standard',  # 3
+        ]
+        cards = self._create_cards(ctimes, sclasses)
+
+        CDR = self._get_target_class()
+        cdr = CDR(cards=cards)
+
+        actual = cdr.service_class_series()
+        expected = {
+                        #0, 1, 2, 3, 5
+            'Expedite': [1, 0, 0, 1, 0],
+                          #0, 1, 2, 3, 5
+            'Intangible': [0, 0, 1, 0, 0],
+                        #0, 1, 2, 3, 5
+            'Standard': [0, 1, 0, 1, 2],
+        }
+
+        assert expected == actual
+
