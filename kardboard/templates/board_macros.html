@@ -27,15 +27,21 @@
         </div>
 
 
-        {% set assignee = card.assignee %}
         <p class="assignee">
             {{ card_macros.hours_to_days(card.time_in_state) }} <br />
             {% if card.due_date %}Due: {{ card.due_date.strftime("%m/%d") }}{% endif %}
             {% if card.service_class['name'] in ['Intangible', 'Not Prioritized'] %}
                 {{ card.service_class.get('name') }}
-                {% if assignee %} &ndash; {% endif %}
+                {% if card.worked_on %} &ndash; {% endif %}
             {% endif %}
-            {% if assignee %}<a href="{{ url_for('person', name=assignee) }}">{{ assignee }}</a>{% endif %}
+
+            {% if card.state not in ["Backlog", "Done"] %}
+                {% if card.worked_on %}
+                    {% for worker in card.worked_on %}
+                        <a href="{{ url_for('person', name=worker) }}">{{ worker }}</a>{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
         </p>
         </div>
 
