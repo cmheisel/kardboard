@@ -41,8 +41,12 @@ def std_dev(start, stop):
     cards = [c for c in rg.queryset if c.is_card]
     cycle_times = [c.cycle_time for c in cards]
 
+    over_21 = [c for c in cycle_times if c > 21]
+    over_21_pct = float(len(over_21)) / len(cycle_times)
+
     print "%s -- %s" % (start, stop)
     print "\t Sample: %s" % len(cards)
+    print "\t Over 21: %s / %s" % (len(over_21), over_21_pct * 100)
     print "\t Ave: %s" % average(cycle_times)
     print "\t Stdev: %s" % standard_deviation(cycle_times)
     ct, pct = percentile(.8, cycle_times)
