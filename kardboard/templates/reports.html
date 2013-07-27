@@ -17,12 +17,22 @@
     </li>
 
     <li>
-        <a href="/reports/{{ slug }}/cycle/1/">Cycle Time History</a> / <a href="/reports/{{ slug }}/cycle/6/">6</a> / <a href="/reports/{{ slug }}/cycle/9/">9</a> / <a href="/reports/{{ slug }}/cycle/12/">12</a>
+        <a href="/reports/{{ slug }}/flow/detail/1/">Detailed Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/detail//6">6</a> / <a href="/reports/{{ slug }}/flow/detail/9">9</a> / <a href="/reports/{{ slug }}/flow/detail/12">12</a>
+    </li>
+
+
+    <li>
+        <a href="/reports/{{ slug }}/efficiency/1/">Workflow Efficiency</a> / <a href="/reports/{{ slug }}/efficiency//6">6</a> / <a href="/reports/{{ slug }}/efficiency/9">9</a> / <a href="/reports/{{ slug }}/efficiency/12">12</a>
     </li>
 
     <li>
-        <a href="/reports/{{ slug }}/cycle/distribution/1/">Cycle Time Distribution</a> / <a href="/reports/{{ slug }}/cycle/distribution/6/">6</a> / <a href="/reports/{{ slug }}/cycle/distribution/9/">9</a> / <a href="/reports/{{ slug }}/cycle/distribution/12/">12</a>
+        <a href="/reports/{{ slug }}/cycle/distribution/all/1/">Cycle Time Distribution: all</a> / <a href="/reports/{{ slug }}/cycle/distribution/all/6/">6</a> / <a href="/reports/{{ slug }}/cycle/distribution/all/9/">9</a> / <a href="/reports/{{ slug }}/cycle/distribution/all/12/">12</a>
     </li>
+
+    <li>
+        <a href="/reports/{{ slug }}/cycle/distribution/1/">Cycle Time Distribution: cards</a> / <a href="/reports/{{ slug }}/cycle/distribution/6/">6</a> / <a href="/reports/{{ slug }}/cycle/distribution/9/">9</a> / <a href="/reports/{{ slug }}/cycle/distribution/12/">12</a>
+    </li>
+
 
     <li>
         <a href="/reports/{{ slug }}/service-class/">Service class</a> / <a href="/reports/{{ slug }}/service-class/3">3</a> / <a href="/reports/{{ slug }}/service-class/6">6</a> / <a href="/reports/{{ slug }}/service-class/6">9</a> / <a href="/reports/{{ slug }}/service-class/12">12</a>
@@ -32,22 +42,13 @@
         <a href="/reports/{{ slug }}/leaderboard/1/">Developer leaderboard</a> / <a href="/reports/{{ slug }}/leaderboard/6">6</a> / <a href="/reports/{{ slug }}/leaderboard/6">9</a> / <a href="/reports/{{ slug }}/leaderboard/12">12</a>
     </li>
 
-    {% if with_defects %}
-    <li>
-        <a href="/reports/{{ slug }}/flow/detail/cards/1/">Detailed Cumulative Flow Cards only</a> / <a href="/reports/{{ slug }}/flow/detail/cards/6">6</a> / <a href="/reports/{{ slug }}/flow/detail/cards/9">9</a> / <a href="/reports/{{ slug }}/flow/detail/cards/12">12</a>
-    </li>
-    {% endif %}
-
-    <li>
-        <a href="/reports/{{ slug }}/flow/detail/1/">Detailed Cumulative Flow</a> / <a href="/reports/{{ slug }}/flow/detail//6">6</a> / <a href="/reports/{{ slug }}/flow/detail/9">9</a> / <a href="/reports/{{ slug }}/flow/detail/12">12</a>
-    </li>
-
-    <li>
-        <a href="/reports/{{ slug }}/efficiency/1/">Workflow Efficiency</a> / <a href="/reports/{{ slug }}/efficiency//6">6</a> / <a href="/reports/{{ slug }}/efficiency/9">9</a> / <a href="/reports/{{ slug }}/efficiency/12">12</a>
-    </li>
 
     <li>
         <a href="/reports/{{ slug }}/assignee/">Assignee breakdown</a>
+    </li>
+
+    <li>
+        <a href="/reports/{{ slug }}/cycle/1/">Cycle Time History</a> / <a href="/reports/{{ slug }}/cycle/6/">6</a> / <a href="/reports/{{ slug }}/cycle/9/">9</a> / <a href="/reports/{{ slug }}/cycle/12/">12</a>
     </li>
 
 </ul>
