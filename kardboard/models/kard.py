@@ -25,6 +25,7 @@ from kardboard.util import (
     median,
 )
 
+
 class KardQuerySet(QuerySet):
     def done_in_week(self, year=None, month=None, day=None, date=None):
         """
@@ -93,7 +94,7 @@ class KardQuerySet(QuerySet):
         median_cycle_time = median(cycle_times)
 
         if median_cycle_time is not None:
-            absolute_deviations = [math.fabs(median_cycle_time-c) for c in cycle_times]
+            absolute_deviations = [math.fabs(median_cycle_time - c) for c in cycle_times]
             mad = median(absolute_deviations)
         else:
             mad = None
@@ -166,6 +167,7 @@ class KardQuerySet(QuerySet):
         results = self.done().filter(done_date__lte=date,
             done_date__gte=start_date)
         return results
+
 
 class Kard(app.db.Document):
     """
@@ -252,7 +254,6 @@ class Kard(app.db.Document):
             'wip': classdef.get('wip', None),
         }
         return service_class
-
 
     def _convert_dates_to_datetimes(self, date):
         if not date:
@@ -347,7 +348,6 @@ class Kard(app.db.Document):
         if self.state not in states.orderable:
             self.priority = None
 
-
     def _set_cycle_lead_times(self):
         # Auto fill in final cycle and lead time
         if self.done_date and self.start_date:
@@ -358,8 +358,8 @@ class Kard(app.db.Document):
         self._set_dates()
 
         self._set_cycle_lead_times()
-        self._time_in_current_state = None # Blank this
-        self._time_in_current_state = self.time_in_state # Recaclulate and cache
+        self._time_in_current_state = None  # Blank this
+        self._time_in_current_state = self.time_in_state  # Recaclulate and cache
 
         self._type = self.ticket_system.type or app.config.get('DEFAULT_TYPE', '')
         if self._type:
@@ -606,3 +606,9 @@ class Kard(app.db.Document):
     @property
     def assignee(self):
         return self._assignee
+
+    @property
+    def worked_on(self):
+        developers = self.ticket_system_data.get('developers', [])
+        testers = self.ticket_system_data.get('qaers', [])
+        return [self._assignee, ] + testers + developers
