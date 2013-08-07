@@ -6,9 +6,10 @@ from kardboard.util import (
     average,
 )
 
-def report_on_cards(rg):
+
+def report_on_cards(cards):
     data = {}
-    for k in rg.queryset():
+    for k in cards:
         class_cards = data.get(k.service_class.get('name'), [])
         class_cards.append(k)
         data[k.service_class.get('name')] = class_cards
@@ -67,7 +68,7 @@ class ServiceClassSnapshot(app.db.Document):
             record.data = {}
 
         kards = ReportGroup(group, Kard.in_progress())
-        record.data = report_on_cards(kards)
+        record.data = report_on_cards(list(kards.queryset))
         record.save()
         return record
 
@@ -99,7 +100,6 @@ class ServiceClassRecord(app.db.Document):
     data = app.db.DictField(required=False, default={})
     """The report on service classes."""
 
-
     def save(self, *args, **kwargs):
         self.updated_at = now()
         super(ServiceClassRecord, self).save(*args, **kwargs)
@@ -127,10 +127,10 @@ class ServiceClassRecord(app.db.Document):
 
         kards = ReportGroup(group,
             Kard.objects.filter(
-                start_date__gte=start_date,
-                start_date__lte=end_date,
+                done_date__gte=start_date,
+                done_date__lte=end_date,
             )
         )
-        record.data = report_on_cards(kards)
+        record.data = report_on_cards(list(kards.queryset))
         record.save()
         return record
