@@ -98,11 +98,19 @@ class ServiceClassSnapshotTests(ServiceClassTests):
 
 
 class ServiceClassRecordTests(ServiceClassTests):
+    def setUp(self):
+        super(ServiceClassRecordTests, self).setUp()
+        self.config['REPORT_GROUPS'] = {
+            'team-venture': (("Team Venture",), 'Team Venture'),
+            'guild': (("Guild of Calamitous Intent", ), 'Guild',)
+
+        }
+
     def _get_target_class(self):
         from kardboard.models import ServiceClassRecord
         return ServiceClassRecord
 
-    def _fixtures_for_test_calculate(self):
+    def _fixtures_for_test_calculate(self, team=None):
         # Speedy cards
         for i in xrange(0, 5):
             k = self.make_card(
@@ -110,6 +118,7 @@ class ServiceClassRecordTests(ServiceClassTests):
                 backlog_date=datetime(2013, 1, 1),
                 start_date=datetime(2013, 1, 3),
                 done_date=datetime(2013, 1, 4),
+                team=team,
             )
             k.save()
 
@@ -120,6 +129,7 @@ class ServiceClassRecordTests(ServiceClassTests):
                 backlog_date=datetime(2013, 1, 1),
                 start_date=datetime(2013, 1, 11),
                 done_date=datetime(2013, 1, 21),
+                team=team,
             )
             k.save()
 
@@ -129,6 +139,7 @@ class ServiceClassRecordTests(ServiceClassTests):
                 backlog_date=datetime(2013, 1, 1),
                 start_date=datetime(2013, 1, 11),
                 done_date=datetime(2013, 1, 26),
+                team=team,
             )
             k.save()
 
@@ -138,6 +149,7 @@ class ServiceClassRecordTests(ServiceClassTests):
                 backlog_date=datetime(2013, 1, 1),
                 start_date=datetime(2013, 1, 9),
                 done_date=datetime(2013, 1, 24),
+                team=team,
             )
             k.save()
 
@@ -178,3 +190,80 @@ class ServiceClassRecordTests(ServiceClassTests):
         actual = r.data
 
         self.assertEqual(expected, actual)
+
+    def test_calculate_with_group(self):
+        """
+        If there's data for more than one group,
+        and we specify a group for the SCR, then
+        we should only get the group's data back.
+        """
+
+        self._fixtures_for_test_calculate(
+            team="Team Venture")
+        self._fixtures_for_test_calculate(
+            team="Guild of Calamitous Intent")
+
+        expected = {
+            'Speedy': {
+                'service_class': 'Speedy',
+                'wip': 5,
+                'wip_percent': 5 / 25.0,
+                'cycle_time_average': 1.0,
+                'cards_hit_goal': 5,
+                'cards_hit_goal_percent': 1.0
+            },
+            'Normal': {
+                'service_class': 'Normal',
+                'wip': 15,
+                'wip_percent': 15 / 25.0,
+                'cycle_time_average': 12.0,
+                'cards_hit_goal': 10,
+                'cards_hit_goal_percent': 10 / 15.0
+            },
+            'default': {
+                'service_class': 'default',
+                'wip': 5,
+                'wip_percent': 5 / 25.0,
+                'cycle_time_average': 15,
+                'cards_hit_goal': 5,
+                'cards_hit_goal_percent': 1.0
+            },
+        }
+
+        Record = self._get_target_class()
+        start_date = datetime(2013, 1, 1)
+        end_date = datetime(2013, 1, 31)
+        r = Record.calculate(start_date, end_date, group="team-venture")
+        actual = r.data
+
+        for key in actual.keys():
+            assert actual[key] == expected[key]
+
+    def test_regress_service_class_miscalc(self):
+        from kardboard.util import make_start_date, make_end_date
+
+        c = self.make_card(
+            key="JANUS-234",
+            title="MMF: Database visualization (Iteration 1)",
+            backlog_date=datetime(2013, 2, 14),
+            start_date=datetime(2013, 5, 30),
+            done_date=datetime(2013, 8, 1),
+            _service_class="Normal",
+            state="Done",
+            team="Team Venture",
+        )
+        c.save()
+
+        Record = self._get_target_class()
+        start_date = make_start_date(date=datetime(2013, 8, 1))
+        end_date = make_end_date(date=datetime(2013, 8, 31))
+        Record.calculate(start_date, end_date, group="team-venture")
+
+        r = Record.objects.get(
+            start_date=start_date,
+            end_date=end_date,
+            group="team-venture",
+        )
+        actual = r.data
+
+        assert actual['Normal']['wip'] == 1
