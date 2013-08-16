@@ -142,7 +142,7 @@ def team(team_slug=None):
         columns=wip_limit_config,
     )
 
-    weeks = 12
+    weeks = 4
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
