@@ -92,7 +92,7 @@ def _team_backlog_markers(team, cards, weeks=12):
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
-    confidence_90 = team_stats.percentile(.90, weeks)
+    confidence_80 = team_stats.percentile(.80, weeks)
     metrics_cards = team_stats.card_info
     metrics_cards = sorted(metrics_cards, key=lambda c: c['cycle_time'])
     metrics_cards.reverse()
@@ -112,17 +112,94 @@ def _team_backlog_markers(team, cards, weeks=12):
         'weekly_throughput': weekly_throughput,
         'average': average,
         'median': median,
-        'confidence_90': confidence_90,
+        'confidence_80': confidence_80,
         'standard_deviation': team_stats.standard_deviation(weeks),
     }
 
     backlog_markers = _make_backlog_markers(
-        confidence_90,
+        confidence_80,
         weekly_throughput,
         cards,
     )
 
     return backlog_marker_data, backlog_markers
+
+
+def new_team(team_slug=None):
+    from kardboard.services.boards import TeamBoard
+
+    teams = _get_teams()
+    team = _find_team_by_slug(team_slug, teams)
+
+    try:
+        wip_limit_config = app.config['WIP_LIMITS'][team_slug]
+    except KeyError:
+        wip_limit_config = {}
+
+    conwip = wip_limit_config.get('conwip', None)
+    wip_limits = WIPLimits(
+        name=team_slug,
+        conwip=conwip,
+        columns=wip_limit_config,
+    )
+
+    weeks = 4
+    exclude_classes = _get_excluded_classes()
+    team_stats = teams_service.TeamStats(team.name, exclude_classes)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+    metrics = [
+        {'WIP': team_stats.wip_count()},
+        {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
+    ]
+    ave = team_stats.average(weeks)
+    if ave:
+        metrics.append({'Cycle time ave.': team_stats.average(weeks)})
+
+    stdev = team_stats.standard_deviation(weeks)
+    if stdev:
+        metrics.append({'Standard deviation': stdev},)
+
+    board = TeamBoard(team.name, States(), wip_limits)
+    cards = Kard.objects.for_team_board(
+        team=team.name,
+        backlog_limit=weekly_throughput * 4,
+        done_days=7,
+    )
+    board.add_cards(cards)
+
+    backlog_marker_data, backlog_markers = _team_backlog_markers(
+        team,
+        board.columns[0]['cards'],
+        weeks,
+    )
+    metrics.append(
+        {'80% confidence': backlog_marker_data['confidence_80']},
+    )
+
+    report_config = (
+        {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
+        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
+        {'slug': 'done', 'name': 'Done'},
+        {'slug': 'service-class', 'name': 'Service class'},
+    )
+
+    context = {
+        'title': "%s cards" % team.name,
+        'metrics': metrics,
+        'wip_limits': wip_limits,
+        'team': team,
+        'teams': teams,
+        'board': board,
+        'backlog_markers': backlog_markers,
+        'backlog_marker_data': backlog_marker_data,
+        'weekly_throughput': weekly_throughput,
+        'report_config': report_config,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+        'authenticated': kardboard.auth.is_authenticated(),
+    }
+
+    return render_template('new-team.html', **context)
 
 
 def team(team_slug=None):
@@ -890,7 +967,7 @@ def report_cycle_distribution(group="all", months=3, limit=None):
     total = len(cards)
     if total == 0:
         context = {
-            'error': "Zero cards were completed in the past %s months" % months
+            'error': "Zero cards were completed in the past %s months" % months,
         }
         return render_template('report-cycle-distro.html', **context)
 
@@ -1214,6 +1291,7 @@ app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/new-team/<team_slug>/', 'new_team', new_team)
 app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
 app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", "POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)
