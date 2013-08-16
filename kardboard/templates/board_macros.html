@@ -52,7 +52,7 @@
 <table class="board">
 <tr>
   {% for header in board.headers %}
-    {% if header.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
+    {% if header.get('state', '') not in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
     <th class="{{ header.get('state', header.get('label', ''))|slugify }}">
         {% if header.get('label') %}
             {{ header.label }}
@@ -71,7 +71,7 @@
             {% endif %}
             <div class="{{ col_classname }}">{{ header.state }} ({{ header.count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
         {% endif %}
-        {% if header.get('state', '') in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
+        {% if header.get('state', '') in ('Building', 'Testing', 'OTIS Verify') %}
             {% if wip_limits.get(board.headers[loop.index0+1].state) %}
                 {% set col_wip_limit = wip_limits.get(board.headers[loop.index0+1].state) %}
                 {% if board.headers[loop.index0+1].count > col_wip_limit %}
@@ -96,11 +96,11 @@
 {% if repeat_headers and not loop.first %}
 <tr>
   {% for header in board.headers %}
-    {% if header.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
+    {% if header.get('state', '') not in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
     <th class="{{ header.get('state', header.get('label', ''))|slugify }}">
         {% if header.get('label') %}
             {{ header.label }}
-        {% elif header.get('state', '') in ('Build to OTIS', 'Prodward Bound') %}
+        {% elif header.get('state', '') in ('Building', 'Testing', 'OTIS Verify') %}
             {{ header.state }}
         {% else %}
             {{ header.state }}
@@ -132,12 +132,12 @@
 
             <h3><a href="./backlog/">Full backlog &raquo;</a></h3>
         </td>
-    {% elif cell.get('state', '') not in ('Testing', 'OTIS Verify', 'Done') %}
+    {% elif cell.get('state', '') not in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
         <td class="cards cards_{{ cell.get('state')|slugify }}">
         {% for card in cell['cards'] %}
                 {{ card_detail(card, request) }}
         {% endfor %}
-        {% if cell.get('state', '') in ('Ready: Testing', 'Build to OTIS', 'Prodward Bound') %}
+        {% if cell.get('state', '') in ('Building', 'Testing', 'OTIS Verify') %}
             {% for card in row[loop.index0+1]['cards'] %}
                 {% if loop.first %}
                     <div class="split_cell_header">
