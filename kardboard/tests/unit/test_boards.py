@@ -1,7 +1,6 @@
 """
 Tests for services/boards
 """
-
 import unittest2
 import mock
 
@@ -38,6 +37,12 @@ class TeamBoardTests(unittest2.TestCase):
 
     def _make_card(self, **kwargs):
         mock_card = mock.Mock()
+
+        if 'current_cycle_time' in kwargs.keys():
+            mock_card.current_cycle_time.return_value = \
+                kwargs['current_cycle_time']
+            del kwargs['current_cycle_time']
+
         for key, value in kwargs.items():
             setattr(mock_card, key, value)
         return mock_card
@@ -246,3 +251,59 @@ class TeamBoardTests(unittest2.TestCase):
         col = bd.columns[1]
 
         assert len(col['placeholders']) == 2
+
+    def test_card_column_sorts_wip_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(1, 5):  # Returns 4 cards
+            title = "Building %s" % i
+            state = "Building"
+            current_cycle_time = i
+            cards.append(self._make_card(
+                title=title,
+                state=state,
+                current_cycle_time=current_cycle_time
+            ))
+
+        cards = [cards[2], cards[0], cards[3], cards[1]]
+
+        bd.add_cards(cards)
+        col = bd.columns[2]
+
+        expected = [
+            "Building 4",
+            "Building 3",
+            "Building 2",
+            "Building 1",
+        ]
+        actual = [c.title for c in col['cards']]
+        assert expected == actual
+
+    def test_card_buffer_sorts_wip_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(1, 5):  # Returns 4 cards
+            title = "Ready: Testing %s" % i
+            state = "Ready: Testing"
+            current_cycle_time = i
+            cards.append(self._make_card(
+                title=title,
+                state=state,
+                current_cycle_time=current_cycle_time
+            ))
+
+        cards = [cards[2], cards[0], cards[3], cards[1]]
+
+        bd.add_cards(cards)
+        col = bd.columns[2]
+
+        expected = [
+            "Ready: Testing 4",
+            "Ready: Testing 3",
+            "Ready: Testing 2",
+            "Ready: Testing 1",
+        ]
+        actual = [c.title for c in col['buffer_cards']]
+        assert expected == actual

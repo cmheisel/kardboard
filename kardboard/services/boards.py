@@ -38,6 +38,12 @@ class TeamBoard(object):
         for c in cards:
             self.cards_by_state[c.state].append(c)
 
+    def _get_ordered_cards(self, state_name):
+        cards = self.cards_by_state[state_name]
+        cards.sort(key=lambda c: c.current_cycle_time())
+        cards.reverse()
+        return cards
+
     @property
     def columns(self):
         columns = []
@@ -53,8 +59,8 @@ class TeamBoard(object):
                 'wip_limit': wip_limit,
                 'wip': wip,
                 'wip_state': wip_state(wip, wip_limit),
-                'cards': self.cards_by_state[state.name],
-                'buffer_cards': self.cards_by_state[state.buffer],
+                'cards': self._get_ordered_cards(state.name),
+                'buffer_cards': self._get_ordered_cards(state.buffer),
                 'placeholders': placeholders(wip, wip_limit)
             })
         return columns
