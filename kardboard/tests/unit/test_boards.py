@@ -3,6 +3,7 @@ Tests for services/boards
 """
 
 import unittest2
+import mock
 
 
 class TeamBoardTests(unittest2.TestCase):
@@ -34,6 +35,12 @@ class TeamBoardTests(unittest2.TestCase):
         kwargs.setdefault('name', "Team Name Here")
         kwargs.setdefault('wip_limits', self.mock_wip_limits)
         return self._get_target_class()(*args, **kwargs)
+
+    def _make_card(self, **kwargs):
+        mock_card = mock.Mock()
+        for key, value in kwargs.items():
+            setattr(mock_card, key, value)
+        return mock_card
 
     def test_name(self):
         b = self._get_target_class()(
@@ -92,3 +99,20 @@ class TeamBoardTests(unittest2.TestCase):
         col = bd.columns[1]
 
         assert col['wip_limit'] == 2
+
+    def test_columns_return_wip_info_with_cards(self):
+        self.mock_wip_limits = {
+            'Elaboration': 2,
+        }
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(3):
+            title = "Elabo Card %s" % i
+            state = "Elaboration"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert col['wip'] == 3
