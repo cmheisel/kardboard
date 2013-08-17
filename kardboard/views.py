@@ -92,7 +92,7 @@ def _team_backlog_markers(team, cards, weeks=12):
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
 
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
-    confidence_90 = team_stats.percentile(.90, weeks)
+    confidence_80 = team_stats.percentile(.80, weeks)
     metrics_cards = team_stats.card_info
     metrics_cards = sorted(metrics_cards, key=lambda c: c['cycle_time'])
     metrics_cards.reverse()
@@ -112,12 +112,12 @@ def _team_backlog_markers(team, cards, weeks=12):
         'weekly_throughput': weekly_throughput,
         'average': average,
         'median': median,
-        'confidence_90': confidence_90,
+        'confidence_80': confidence_80,
         'standard_deviation': team_stats.standard_deviation(weeks),
     }
 
     backlog_markers = _make_backlog_markers(
-        confidence_90,
+        confidence_80,
         weekly_throughput,
         cards,
     )
@@ -171,6 +171,9 @@ def new_team(team_slug=None):
         team,
         board.columns[0]['cards'],
         weeks,
+    )
+    metrics.append(
+        {'80% confidence': backlog_marker_data['confidence_80']},
     )
 
     report_config = (
