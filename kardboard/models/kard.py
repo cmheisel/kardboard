@@ -168,6 +168,42 @@ class KardQuerySet(QuerySet):
             done_date__gte=start_date)
         return results
 
+    def for_team_board(self, team, backlog_limit, done_days):
+        states = States()
+
+        in_progress_q = Q(
+            state__in=states.in_progress,
+            team=team)
+        done_q = Q(done_date__gte=now() - relativedelta(days=done_days),
+            team=team)
+
+        cards_query = in_progress_q | done_q
+        wip_and_done = list(
+            self.filter(cards_query).exclude('_ticket_system_data')
+        )
+
+        ordered_backlog_q = Q(
+            state=states.backlog,
+            team=team,
+            priority__exists=True)
+        unordered_backlog_q = Q(
+            state=states.backlog,
+            team=team,
+            priority__exists=False)
+
+        ordered_backlog_cards = self.filter(ordered_backlog_q).order_by('priority', 'created_at')
+        ordered_backlog_cards = ordered_backlog_cards.limit(backlog_limit).exclude('_ticket_system_data')
+        unordered_backlog_cards = []
+        if len(ordered_backlog_cards) < backlog_limit:
+            ordered_backlog_cards = list(ordered_backlog_cards)
+            unordered_backlog_cards = Kard.objects.filter(unordered_backlog_q).order_by('created_at')
+            unordered_backlog_cards = unordered_backlog_cards.limit(backlog_limit).exclude('_ticket_system_data')
+
+        backlog = list(ordered_backlog_cards) + list(unordered_backlog_cards)
+        backlog = backlog[:backlog_limit]
+
+        return backlog + wip_and_done
+
 
 class Kard(app.db.Document):
     """

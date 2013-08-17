@@ -143,7 +143,29 @@ def new_team(team_slug=None):
         columns=wip_limit_config,
     )
 
+    weeks = 4
+    exclude_classes = _get_excluded_classes()
+    team_stats = teams_service.TeamStats(team.name, exclude_classes)
+    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+    metrics = [
+        {'WIP': team_stats.wip_count()},
+        {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
+    ]
+    ave = team_stats.average(weeks)
+    if ave:
+        metrics.append({'Cycle time ave.': team_stats.average(weeks)})
+
+    stdev = team_stats.standard_deviation(weeks)
+    if stdev:
+        metrics.append({'Standard deviation': stdev},)
+
     board = TeamBoard(team.name, States(), wip_limits)
+    cards = Kard.objects.for_team_board(
+        team=team.name,
+        backlog_limit=weekly_throughput * 4,
+        done_days=7,
+    )
+    board.add_cards(cards)
 
     report_config = (
         {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
@@ -154,6 +176,8 @@ def new_team(team_slug=None):
 
     context = {
         'title': "%s cards" % team.name,
+        'metrics': metrics,
+        'wip_limits': wip_limits,
         'team': team,
         'board': board,
         'report_config': report_config,

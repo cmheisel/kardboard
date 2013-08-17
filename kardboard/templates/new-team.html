@@ -2,6 +2,24 @@
 
 {% block content %}
 
+{% if metrics %}
+
+{% for m in metrics %}
+    <div class="metric metric_{{ m.keys()[0]|slugify }}">
+      {% for name, value in m.items() %}
+          <h2>{{ name }}</h2>
+          <p class="value">
+            {{ value }}
+            {% if name == "WIP" and wip_limits.conwip %}
+            <span>/</span> {{ wip_limits.conwip }}
+            {% endif %}
+          </p>
+      {% endfor %}
+    </div>
+    {% endfor %}
+{% endif %}
+
+
 <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
 {% for report in report_config %}
     <a href="/reports/{{ team.slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
@@ -23,7 +41,7 @@
         {% for column in board.columns %}
         <th>
             <div>
-                {{ column.name }}
+                {{ column.name }} {{ column.wip }}
                 {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
             </div>
             {% if column.buffer %}
