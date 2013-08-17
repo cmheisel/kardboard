@@ -131,7 +131,19 @@ def new_team(team_slug=None):
     teams = _get_teams()
     team = _find_team_by_slug(team_slug, teams)
 
-    board = TeamBoard(team.name, States())
+    try:
+        wip_limit_config = app.config['WIP_LIMITS'][team_slug]
+    except KeyError:
+        wip_limit_config = {}
+
+    conwip = wip_limit_config.get('conwip', None)
+    wip_limits = WIPLimits(
+        name=team_slug,
+        conwip=conwip,
+        columns=wip_limit_config,
+    )
+
+    board = TeamBoard(team.name, States(), wip_limits)
 
     report_config = (
         {'slug': 'cycle/distribution/all', 'name': "Cycle time"},

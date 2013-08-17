@@ -486,3 +486,9 @@ table.funnel tr.backlog_marker {
     font-weight: bold;
     border: 1px solid black;
 }
+
+
+table.board_enhanced {
+    width: 100%;
+    margin: 0;
+}

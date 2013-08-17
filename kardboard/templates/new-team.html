@@ -16,13 +16,16 @@
 
 
 
-<div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
+<div class="{% if team.slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
 
-<table class="board">
+<table class="board_enhanced">
     <tr>
         {% for column in board.columns %}
         <th>
-            <div>{{ column.name }}</div>
+            <div>
+                {{ column.name }}
+                {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
+            </div>
             {% if column.buffer %}
             <div>{{ column.buffer }}</div>
             {% endif %}
