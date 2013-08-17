@@ -167,6 +167,12 @@ def new_team(team_slug=None):
     )
     board.add_cards(cards)
 
+    backlog_marker_data, backlog_markers = _team_backlog_markers(
+        team,
+        board.columns[0]['cards'],
+        weeks,
+    )
+
     report_config = (
         {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
         {'slug': 'flow/detail', 'name': "Cumulative Flow"},
@@ -181,6 +187,9 @@ def new_team(team_slug=None):
         'team': team,
         'teams': teams,
         'board': board,
+        'backlog_markers': backlog_markers,
+        'backlog_marker_data': backlog_marker_data,
+        'weekly_throughput': weekly_throughput,
         'report_config': report_config,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,

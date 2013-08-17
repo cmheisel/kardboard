@@ -51,6 +51,16 @@
         {% for column in board.columns %}
         <td>
             {% for card in column.cards %}
+
+            {% if backlog_markers %}
+                {%- if loop.index0 % weekly_throughput == 0 %}
+                    <div class="split_cell_header ui-state-default ui-state-disabled">
+                        Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+
             {{ card_detail(card, request) }}
             {% endfor %}
 
