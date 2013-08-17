@@ -40,11 +40,14 @@ class TeamBoard(object):
             wip = len(self.cards_by_state[state.name])
             if state.buffer:
                 wip += len(self.cards_by_state[state.buffer])
+
             columns.append({
                 'name': state.name,
                 'buffer': state.buffer,
                 'wip_limit': wip_limit,
                 'wip': wip,
                 'wip_state': wip_state(wip, wip_limit),
+                'cards': self.cards_by_state[state.name],
+                'buffer_cards': self.cards_by_state[state.buffer],
             })
         return columns

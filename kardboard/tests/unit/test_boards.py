@@ -187,3 +187,31 @@ class TeamBoardTests(unittest2.TestCase):
         col = bd.columns[1]
 
         assert col['wip'] == 4
+
+    def test_card_column_returns_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(2):
+            title = "Elabo Card %s" % i
+            state = "Elaboration"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert len(col['cards']) == 2
+
+    def test_card_column_returns_buffered_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(2):
+            title = "Ready Card %s" % i
+            state = "Ready: Building"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert len(col['buffer_cards']) == 2
