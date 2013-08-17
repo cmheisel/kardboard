@@ -520,3 +520,12 @@ table.board_enhanced td {
 table.board_enhanced div.card_placeholder {
     border: 2px dashed black;
 }
+
+table.board_enhanced td h3 {
+    text-align: center;
+}
+
+table.board_enhanced td h3 a {
+    color: #367000;
+    text-decoration: underline;
+}

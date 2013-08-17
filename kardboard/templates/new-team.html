@@ -71,6 +71,11 @@
                 {{ card_detail(card, request) }}
                 {% endfor %}
             {% endif %}
+
+            {% if column.name == board.states.backlog %}
+                <h3><a href="{{ url_for('team_backlog', team_slug=team.slug) }}">Full backlog &raquo;</a></h3>
+            {% endif %}
+
         </td>
         {% endfor %}
     </tr>
