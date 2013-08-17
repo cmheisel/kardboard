@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
+{% for report in report_config %}
+    <a href="/reports/{{ team.slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
+{% endfor %}
+</p>
+
+<p class="nav">
+{% for team in teams %}
+    <a href="{{ url_for('team', team_slug=team.slug) }}">{{ team.name }}</a>{% if not loop.last %} / {% endif %}
+{% endfor %}
+</p>
+
+
+
+<div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
+
+<table class="board">
+    <tr>
+        {% for column in board.columns %}
+        <th>
+            <div>{{ column.name }}</div>
+            {% if column.buffer %}
+            <div>{{ column.buffer }}</div>
+            {% endif %}
+        </th>
+        {% endfor %}
+    </tr>
+</table>
+
+</div>
+
+
+{% endblock content %}

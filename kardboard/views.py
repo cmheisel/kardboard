@@ -125,6 +125,34 @@ def _team_backlog_markers(team, cards, weeks=12):
     return backlog_marker_data, backlog_markers
 
 
+def new_team(team_slug=None):
+    from kardboard.services.boards import TeamBoard
+
+    teams = _get_teams()
+    team = _find_team_by_slug(team_slug, teams)
+
+    board = TeamBoard(team.name, States())
+
+    report_config = (
+        {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
+        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
+        {'slug': 'done', 'name': 'Done'},
+        {'slug': 'service-class', 'name': 'Service class'},
+    )
+
+    context = {
+        'title': "%s cards" % team.name,
+        'team': team,
+        'board': board,
+        'report_config': report_config,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+        'authenticated': kardboard.auth.is_authenticated(),
+    }
+
+    return render_template('new-team.html', **context)
+
+
 def team(team_slug=None):
     date = _get_date()
     teams = _get_teams()
@@ -890,7 +918,7 @@ def report_cycle_distribution(group="all", months=3, limit=None):
     total = len(cards)
     if total == 0:
         context = {
-            'error': "Zero cards were completed in the past %s months" % months
+            'error': "Zero cards were completed in the past %s months" % months,
         }
         return render_template('report-cycle-distro.html', **context)
 
@@ -1214,6 +1242,7 @@ app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
+app.add_url_rule('/new-team/<team_slug>/', 'new_team', new_team)
 app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
 app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", "POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)
