@@ -1,3 +1,4 @@
+from collections import defaultdict
 
 
 def wip_state(wip, wip_limit):
@@ -21,9 +22,7 @@ class TeamBoard(object):
     def __init__(self, name, states, wip_limits=None):
         self.name = name
         self.states = states
-        self.cards_by_state = {}
-        for state_name in self.states:
-            self.cards_by_state.setdefault(state_name, [])
+        self.cards_by_state = defaultdict(list)
 
         if wip_limits is None:
             wip_limits = {}
@@ -39,6 +38,8 @@ class TeamBoard(object):
         for state in self.states.active:
             wip_limit = self.wip_limits.get(state.name, None)
             wip = len(self.cards_by_state[state.name])
+            if state.buffer:
+                wip += len(self.cards_by_state[state.buffer])
             columns.append({
                 'name': state.name,
                 'buffer': state.buffer,
