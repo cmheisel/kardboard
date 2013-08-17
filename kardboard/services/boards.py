@@ -11,6 +11,12 @@ def wip_state(wip, wip_limit):
     return "at"
 
 
+def placeholders(wip, wip_limit):
+    if wip_limit and wip < wip_limit:
+        return xrange(1, (wip_limit + 1) - wip)
+    return xrange(0, 0)
+
+
 class TeamBoard(object):
     """
     TeamBoard's take in states, optionally WIP limits, and optionally
@@ -49,5 +55,6 @@ class TeamBoard(object):
                 'wip_state': wip_state(wip, wip_limit),
                 'cards': self.cards_by_state[state.name],
                 'buffer_cards': self.cards_by_state[state.buffer],
+                'placeholders': placeholders(wip, wip_limit)
             })
         return columns

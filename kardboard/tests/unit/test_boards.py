@@ -215,3 +215,34 @@ class TeamBoardTests(unittest2.TestCase):
         col = bd.columns[1]
 
         assert len(col['buffer_cards']) == 2
+
+    def test_placeholders_with_no_wip(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(2):
+            title = "Ready Card %s" % i
+            state = "Ready: Building"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert len(col['placeholders']) == 0
+
+    def test_placeholders_with_wip(self):
+        self.mock_wip_limits = {
+            'Elaboration': 4,
+        }
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(2):
+            title = "Ready Card %s" % i
+            state = "Ready: Building"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert len(col['placeholders']) == 2
