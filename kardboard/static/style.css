@@ -492,3 +492,14 @@ table.board_enhanced {
     width: 100%;
     margin: 0;
 }
+
+table.board_enhanced th.col_wip_under {
+    color: #367000;
+    font-style: italic;
+}
+
+table.board_enhanced th.col_wip_over {
+    color: #991111;
+    text-transform: lowercase;
+    font-style: normal;
+}

@@ -39,7 +39,7 @@
 <table class="board_enhanced">
     <tr>
         {% for column in board.columns %}
-        <th>
+        <th class="col_wip_{{ column.wip_state }}">
             <div>
                 {{ column.name }} {{ column.wip }}
                 {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
