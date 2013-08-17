@@ -98,3 +98,126 @@ class StatesTests(unittest2.TestCase):
             ('Done', 'Done'),
         )
         self.assertEqual(expected, states.for_forms)
+
+
+class BufferStatesTests(unittest2.TestCase):
+    def setUp(self):
+        CARD_STATES = [
+            'Backlog',
+            ('Elaborating', 'Ready: Building'),
+            ('Building', 'Ready: Testing',),
+            ('Testing', 'Build to OTIS',),
+            ('OTIS Verify', 'Prodward Bound',),
+            'Done',
+        ]
+
+        BACKLOG_STATE = 0
+        START_STATE = 3
+        DONE_STATE = -1
+
+        self.config = {
+            'CARD_STATES': CARD_STATES,
+            'BACKLOG_STATE': BACKLOG_STATE,
+            'START_STATE': START_STATE,
+            'DONE_STATE': DONE_STATE,
+        }
+
+        self.states = self._make_one()
+
+    def _get_target_class(self):
+        from kardboard.models import States
+        return States
+
+    def _make_one(self, *args, **kwargs):
+        if 'config' not in kwargs.keys():
+            kwargs['config'] = self.config
+        return self._get_target_class()(*args, **kwargs)
+
+    def test_find_start(self):
+        assert "Building" == self.states.start
+
+    def test_find_backlog(self):
+        assert "Backlog" == self.states.backlog
+
+    def test_find_done(self):
+        assert "Done" == self.states.done
+
+    def test_pre_start(self):
+        expected = ['Backlog', 'Elaborating', 'Ready: Building']
+        assert expected == self.states.pre_start
+
+    def test_in_progress(self):
+        expected = [
+            'Elaborating',
+            'Ready: Building',
+            'Building',
+            'Ready: Testing',
+            'Testing',
+            'Build to OTIS',
+            'OTIS Verify',
+            'Prodward Bound',
+        ]
+        assert expected == self.states.in_progress
+
+    def test_iteration(self):
+        expected = [
+            'Backlog',
+            'Elaborating',
+            'Ready: Building',
+            'Building',
+            'Ready: Testing',
+            'Testing',
+            'Build to OTIS',
+            'OTIS Verify',
+            'Prodward Bound',
+            'Done',
+        ]
+        assert expected == [state for state in self.states]
+
+    def test_str(self):
+        expected = [
+            'Backlog',
+            'Elaborating',
+            'Ready: Building',
+            'Building',
+            'Ready: Testing',
+            'Testing',
+            'Build to OTIS',
+            'OTIS Verify',
+            'Prodward Bound',
+            'Done',
+        ]
+        expected = str(expected)
+        assert expected == str(self.states)
+
+    def test_by_index(self):
+        assert "Backlog" == self.states[0]
+        assert "Done" == self.states[-1]
+        assert "Ready: Building" == self.states[2]
+
+    def test_find_by_slug(self):
+        expected = "Build to OTIS"
+        assert expected == self.states.find_by_slug('build-to-otis')
+
+    def test_orderable(self):
+        expected = ['Backlog']
+        assert expected == self.states.orderable
+
+    def test_index(self):
+        assert 0 == self.states.index("Backlog")
+
+    def test_for_forms(self):
+        expected = (
+            ('', ''),
+            ('Backlog', 'Backlog'),
+            ('Elaborating', 'Elaborating'),
+            ('Ready: Building', 'Ready: Building'),
+            ('Building', 'Building'),
+            ('Ready: Testing', 'Ready: Testing'),
+            ('Testing', 'Testing'),
+            ('Build to OTIS', 'Build to OTIS'),
+            ('OTIS Verify', 'OTIS Verify'),
+            ('Prodward Bound', 'Prodward Bound'),
+            ('Done', 'Done'),
+        )
+        assert expected == self.states.for_forms
