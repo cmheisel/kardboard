@@ -179,6 +179,7 @@ def new_team(team_slug=None):
         'metrics': metrics,
         'wip_limits': wip_limits,
         'team': team,
+        'teams': teams,
         'board': board,
         'report_config': report_config,
         'updated_at': datetime.datetime.now(),
