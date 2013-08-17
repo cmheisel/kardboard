@@ -3,7 +3,6 @@
 {% block content %}
 
 {% if metrics %}
-
 {% for m in metrics %}
     <div class="metric metric_{{ m.keys()[0]|slugify }}">
       {% for name, value in m.items() %}
@@ -36,7 +35,7 @@
 
 <div class="{% if team.slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
 
-<table class="board_enhanced">
+<table class="board_enhanced board">
     <tr>
         {% for column in board.columns %}
         <th class="col_wip_{{ column.wip_state }}">
@@ -44,10 +43,26 @@
                 {{ column.name }} {{ column.wip }}
                 {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
             </div>
-            {% if column.buffer %}
-            <div>{{ column.buffer }}</div>
-            {% endif %}
         </th>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        {% for column in board.columns %}
+        <td>
+            {% for card in column.cards %}
+            {{ card_detail(card, request) }}
+            {% endfor %}
+
+            {% if column.buffer %}
+                <div class="split_cell_header">
+                    {{ column.buffer }}
+                </div>
+                {% for card in column.buffer_cards %}
+                {{ card_detail(card, request) }}
+                {% endfor %}
+            {% endif %}
+        </td>
         {% endfor %}
     </tr>
 </table>
@@ -56,3 +71,54 @@
 
 
 {% endblock content %}
+
+
+{% import "card_macros.html" as card_macros %}
+
+{% macro card_detail(card, request) -%}
+    {% set vs_goal = card.cycle_vs_goal %}
+    <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.type|slugify }} {% if card.blocked %}card_blocked{% endif %}" id="card_{{ card.key }}">
+        <div class="card_key"><span>{{ card.key }}</span>
+            {% if card.done_date %}
+                - {{ card.cycle_time }}d
+            {% elif card.start_date %}
+                - {{ card.current_cycle_time() }}d
+            {% endif %}
+            {% if not card.is_card %}<i class="icon-plus-sign-alt" title="{{ card.type }}"></i>{% endif %}
+            {% if 'Expedite' in card.service_class['name'] %}<i class="icon-forward" title="{{ card.service_class['name'] }}"></i>
+            {% elif 'Date' in card.service_class['name'] %}<i class="icon-calendar" title="{{ card.service_class['name'] }}"></i>{% endif %}
+        </div>
+
+        <div class="card_contents">
+        <div class="title">
+            <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a></p>
+
+            {% if card.blocked %}
+            <div class="blocker">
+                <p>{{ card.blockers[-1].reason }}</p>
+            </div>
+        {% endif %}
+
+        </div>
+
+
+        <p class="assignee">
+            {{ card_macros.hours_to_days(card.time_in_state) }} <br />
+            {% if card.due_date %}Due: {{ card.due_date.strftime("%m/%d") }}{% endif %}
+            {% if card.service_class['name'] in ['Intangible', 'Not Prioritized'] %}
+                {{ card.service_class.get('name') }}
+                {% if card.worked_on %} &ndash; {% endif %}
+            {% endif %}
+
+            {% if card.state not in ["Backlog", "Done"] %}
+                {% if card.worked_on %}
+                    {% for worker in card.worked_on %}
+                        <a href="{{ url_for('person', name=worker) }}">{{ worker }}</a>{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+        </p>
+        </div>
+
+    </div>
+{%- endmacro %}

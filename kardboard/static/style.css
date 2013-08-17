@@ -503,3 +503,16 @@ table.board_enhanced th.col_wip_over {
     text-transform: lowercase;
     font-style: normal;
 }
+
+table.board_enhanced div.split_cell_header {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    background-color: #92CC47;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+table.board_enhanced td {
+    vertical-align: top;
+}
