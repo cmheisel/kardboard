@@ -1,5 +1,15 @@
 
 
+def wip_state(wip, wip_limit):
+    if wip_limit is None:
+        return "at"
+    if wip > wip_limit:
+        return "over"
+    if wip < wip_limit:
+        return "under"
+    return "at"
+
+
 class TeamBoard(object):
     """
     TeamBoard's take in states, optionally WIP limits, and optionally
@@ -27,10 +37,13 @@ class TeamBoard(object):
     def columns(self):
         columns = []
         for state in self.states.active:
+            wip_limit = self.wip_limits.get(state.name, None)
+            wip = len(self.cards_by_state[state.name])
             columns.append({
                 'name': state.name,
                 'buffer': state.buffer,
-                'wip_limit': self.wip_limits.get(state.name, None),
-                'wip': len(self.cards_by_state[state.name]),
+                'wip_limit': wip_limit,
+                'wip': wip,
+                'wip_state': wip_state(wip, wip_limit),
             })
         return columns

@@ -116,3 +116,54 @@ class TeamBoardTests(unittest2.TestCase):
         col = bd.columns[1]
 
         assert col['wip'] == 3
+
+    def test_columns_return_wip_state_over(self):
+        self.mock_wip_limits = {
+            'Elaboration': 2,
+        }
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(3):
+            title = "Elabo Card %s" % i
+            state = "Elaboration"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert col['wip_state'] == "over"
+
+    def test_columns_return_wip_state_under(self):
+        self.mock_wip_limits = {
+            'Elaboration': 2,
+        }
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(1):
+            title = "Elabo Card %s" % i
+            state = "Elaboration"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert col['wip_state'] == "under"
+
+    def test_columns_return_wip_state_at(self):
+        self.mock_wip_limits = {
+            'Elaboration': 2,
+        }
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(2):
+            title = "Elabo Card %s" % i
+            state = "Elaboration"
+            cards.append(self._make_card(title=title, state=state))
+
+        bd.add_cards(cards)
+        col = bd.columns[1]
+
+        assert col['wip_state'] == "at"
