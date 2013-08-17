@@ -1,5 +1,38 @@
 {% extends "base.html" %}
 
+{% block extrajs %}
+{% if authenticated %}
+<script type="text/javascript">
+var drag_and_drop_handler = function(event,ui) {
+    $('td.cards_backlog').sortable('disable');
+    var sorted_cards = $('td.cards_backlog').sortable('serialize', {
+        expression: /(.+)[_](.+)/
+    });
+    $.ajax({
+        type: "POST",
+        data: sorted_cards,
+        url: "{{ url_for('team_backlog', team_slug=team.slug) }}",
+        error: function(jqXHR, textStatus, errorThrown) {
+            window.alert(textStatus + ": " + errorThrown);
+        },
+        success: function(data, textStatus, jqXHR) {
+            $('td.cards_backlog').sortable('enable');
+            var response = $.parseJSON(data);
+            if (window.console) {
+                console.log(textStatus + ": " + data['message']);
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+    $('td.cards_backlog').on('sortupdate', drag_and_drop_handler);
+    $('td.cards_backlog').sortable('enable');
+});
+</script>
+{% endif %}
+{% endblock extrajs %}
+
 {% block content %}
 
 {% if metrics %}
@@ -49,7 +82,7 @@
 
     <tr>
         {% for column in board.columns %}
-        <td>
+        <td class="cards_{{ column.name|slugify }}">
             {% for card in column.cards %}
 
             {% if backlog_markers %}
