@@ -54,6 +54,15 @@
             {{ card_detail(card, request) }}
             {% endfor %}
 
+            {% for placeholder in column.placeholders %}
+            <div class="card_on_board card_placeholder">
+                <!-- Placeholder #{{ placeholder }} -->
+                &nbsp;<br />
+                &nbsp;<br />
+                &nbsp;
+            </div>
+            {% endfor %}
+
             {% if column.buffer %}
                 <div class="split_cell_header">
                     {{ column.buffer }}

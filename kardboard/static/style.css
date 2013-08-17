@@ -516,3 +516,7 @@ table.board_enhanced div.split_cell_header {
 table.board_enhanced td {
     vertical-align: top;
 }
+
+table.board_enhanced div.card_placeholder {
+    border: 2px dashed black;
+}
