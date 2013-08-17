@@ -131,3 +131,11 @@ class States(object):
         form_list = [('', ''), ]  # Add a blank
         form_list.extend([(state.name, state.name) for state in self.states])
         return tuple(form_list)
+
+    @property
+    def active(self):
+        active = []
+        for state in self.states:
+            if state.is_buffer is False:
+                active.append(state)
+        return active

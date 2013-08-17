@@ -221,3 +221,6 @@ class BufferStatesTests(unittest2.TestCase):
             ('Done', 'Done'),
         )
         assert expected == self.states.for_forms
+
+    def test_active_states(self):
+        assert 6 == len(self.states.active)
