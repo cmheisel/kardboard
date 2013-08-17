@@ -92,6 +92,8 @@
                 - {{ card.cycle_time }}d
             {% elif card.start_date %}
                 - {{ card.current_cycle_time() }}d
+            {% elif card.priority %}
+                - #{{ card.priority }}
             {% endif %}
             {% if not card.is_card %}<i class="icon-plus-sign-alt" title="{{ card.type }}"></i>{% endif %}
             {% if 'Expedite' in card.service_class['name'] %}<i class="icon-forward" title="{{ card.service_class['name'] }}"></i>

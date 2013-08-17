@@ -40,8 +40,18 @@ class TeamBoard(object):
 
     def _get_ordered_cards(self, state_name):
         cards = self.cards_by_state[state_name]
-        cards.sort(key=lambda c: c.current_cycle_time())
-        cards.reverse()
+        if len(cards) == 0:
+            return cards
+
+        if state_name == self.states.done:
+            cards.sort(key=lambda c: c.cycle_time)
+            cards.reverse()
+        elif state_name in self.states.pre_start:
+            cards.sort(key=lambda c: c.priority)
+        else:
+            cards.sort(key=lambda c: c.current_cycle_time())
+            cards.reverse()
+
         return cards
 
     @property

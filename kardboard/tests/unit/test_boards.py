@@ -23,6 +23,11 @@ class TeamBoardTests(unittest2.TestCase):
             State("Proward Bound", None, True),
             State("Done", None, False),
         ]
+        self.mock_states.backlog = "Backlog"
+        self.mock_states.done = "Done"
+        self.mock_states.pre_start = [
+            "Backlog", "Elaboration", "Ready: Building"
+        ]
         self.mock_wip_limits = {}
 
     def _get_target_class(self):
@@ -252,7 +257,7 @@ class TeamBoardTests(unittest2.TestCase):
 
         assert len(col['placeholders']) == 2
 
-    def test_card_column_sorts_wip_cards(self):
+    def test_column_sorts_wip_cards(self):
         bd = self._make_one()
 
         cards = []
@@ -280,7 +285,7 @@ class TeamBoardTests(unittest2.TestCase):
         actual = [c.title for c in col['cards']]
         assert expected == actual
 
-    def test_card_buffer_sorts_wip_cards(self):
+    def test_buffer_sorts_wip_cards(self):
         bd = self._make_one()
 
         cards = []
@@ -306,4 +311,63 @@ class TeamBoardTests(unittest2.TestCase):
             "Ready: Testing 1",
         ]
         actual = [c.title for c in col['buffer_cards']]
+        assert expected == actual
+
+    def test_col_sorts_done_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(1, 5):  # Returns 4 cards
+            title = "Done %s" % i
+            state = "Done"
+            cycle_time = i
+            cards.append(self._make_card(
+                title=title,
+                state=state,
+                cycle_time=cycle_time
+            ))
+
+        cards = [cards[2], cards[0], cards[3], cards[1]]
+
+        bd.add_cards(cards)
+        col = bd.columns[-1]
+
+        expected = [
+            "Done 4",
+            "Done 3",
+            "Done 2",
+            "Done 1",
+        ]
+        actual = [c.title for c in col['cards']]
+        assert expected == actual
+
+    def test_col_sorts_pre_start_cards(self):
+        bd = self._make_one()
+
+        cards = []
+        for i in xrange(1, 5):  # Returns 4 cards
+            title = "Backlog %s" % i
+            state = "Backlog"
+            priority = i
+            cards.append(self._make_card(
+                title=title,
+                state=state,
+                priority=priority
+            ))
+
+        cards = [cards[2], cards[0], cards[3], cards[1]]
+
+        bd.add_cards(cards)
+        col = bd.columns[0]
+
+        import pprint
+        pprint.pprint(col)
+
+        expected = [
+            "Backlog 1",
+            "Backlog 2",
+            "Backlog 3",
+            "Backlog 4",
+        ]
+        actual = [c.title for c in col['cards']]
         assert expected == actual
