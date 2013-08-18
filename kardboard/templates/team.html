@@ -11,7 +11,7 @@ var drag_and_drop_handler = function(event,ui) {
     $.ajax({
         type: "POST",
         data: sorted_cards,
-        url: "/team/" + '{{ team_slug }}' + "/backlog/",
+        url: "{{ url_for('team_backlog', team_slug=team.slug) }}",
         error: function(jqXHR, textStatus, errorThrown) {
             window.alert(textStatus + ": " + errorThrown);
         },
@@ -35,13 +35,7 @@ $(document).ready(function() {
 
 {% block content %}
 
-{% import "card_macros.html" as card_macros %}
-{% import "board_macros.html" as board_macros %}
-
-
 {% if metrics %}
-<!-- Reference date: {{ date }} -->
-
 {% for m in metrics %}
     <div class="metric metric_{{ m.keys()[0]|slugify }}">
       {% for name, value in m.items() %}
@@ -49,13 +43,6 @@ $(document).ready(function() {
           <p class="value">
             {{ value }}
             {% if name == "WIP" and wip_limits.conwip %}
-            <!--
-                name: {{ name }}
-                wip_limits.name: {{ wip_limits.name|safe }}
-                wip_limits.conwip: {{ wip_limits.conwip|safe }}
-                wip_limits: {{ wip_limits|safe }}
-                wip_limit_config: {{ wip_limit_config|safe }}
-            -->
             <span>/</span> {{ wip_limits.conwip }}
             {% endif %}
           </p>
@@ -64,44 +51,12 @@ $(document).ready(function() {
     {% endfor %}
 {% endif %}
 
-{% if backlog_marker_data %}
-<!--
-Backlog markers based on:
-* Up to {{ backlog_marker_data['weeks'] }} weeks
-* Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
-* Cards: {{ backlog_marker_data['cards']|count }}
-* Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
-* 90% confidence: {{ backlog_marker_data['confidence_90'] }}
 
-Other data for comparison
-* Median: {{ backlog_marker_data['median'] }}
-* Average: {{ backlog_marker_data['average'] }}
-* Std Dev: {{ backlog_marker_data['standard_deviation'] }}
-
-Histogram
-==========
-Cycle time        Card count
-{% for key in backlog_marker_data['histogram_keys'] %}
-{{ key }}        {{ backlog_marker_data['histogram'][key] }}
+<p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
+{% for report in report_config %}
+    <a href="/reports/{{ team.slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
 {% endfor %}
-
-Raw Data
-============
-key        service_class        cycle_time        done_date
-{% for card in backlog_marker_data['cards'] %}
-{{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
-{% endfor %}
-
--->
-{% endif %}
-
-{% if team_slug %}
-    <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
-    {% for report in report_config %}
-        <a href="/reports/{{ team_slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
-    {% endfor %}
-    </p>
-{% endif %}
+</p>
 
 <p class="nav">
 {% for team in teams %}
@@ -111,19 +66,118 @@ key        service_class        cycle_time        done_date
 
 
 
-<div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
+<div class="{% if team.slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
 
-{% if not team_slug %}
-    {% set repeat_headers = True %}
-{% else %}
-    {% set repeat_headers = False %}
-{% endif %}
-{% if backlog_markers %}
-{{ board_macros.board(board, wip_limits, request, repeat_headers, backlog_marker_data.get('weekly_throughput', 0), backlog_markers) }}
-{% else %}
-{{ board_macros.board(board, wip_limits, request, repeat_headers) }}
-{% endif %}
+<table class="board_enhanced board">
+    <tr>
+        {% for column in board.columns %}
+        <th class="col_wip_{{ column.wip_state }}">
+            <div>
+                {{ column.name }} {{ column.wip }}
+                {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
+            </div>
+        </th>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        {% for column in board.columns %}
+        <td class="cards_{{ column.name|slugify }}">
+            {% for card in column.cards %}
+
+            {% if backlog_markers %}
+                {%- if loop.index0 % weekly_throughput == 0 %}
+                    <div class="split_cell_header ui-state-default ui-state-disabled">
+                        Roughly: Week of {{ backlog_markers.pop(0).strftime("%m/%d") }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+
+            {{ card_detail(card, request) }}
+            {% endfor %}
+
+            {% for placeholder in column.placeholders %}
+            <div class="card_on_board card_placeholder">
+                <!-- Placeholder #{{ placeholder }} -->
+                &nbsp;<br />
+                &nbsp;<br />
+                &nbsp;
+            </div>
+            {% endfor %}
+
+            {% if column.buffer %}
+                <div class="split_cell_header">
+                    {{ column.buffer }}
+                </div>
+                {% for card in column.buffer_cards %}
+                {{ card_detail(card, request) }}
+                {% endfor %}
+            {% endif %}
+
+            {% if column.name == board.states.backlog %}
+                <h3><a href="{{ url_for('team_backlog', team_slug=team.slug) }}">Full backlog &raquo;</a></h3>
+            {% endif %}
+
+        </td>
+        {% endfor %}
+    </tr>
+</table>
+
 </div>
 
 
 {% endblock content %}
+
+
+{% import "card_macros.html" as card_macros %}
+
+{% macro card_detail(card, request) -%}
+    {% set vs_goal = card.cycle_vs_goal %}
+    <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.type|slugify }} {% if card.blocked %}card_blocked{% endif %}" id="card_{{ card.key }}">
+        <div class="card_key"><span>{{ card.key }}</span>
+            {% if card.done_date %}
+                - {{ card.cycle_time }}d
+            {% elif card.start_date %}
+                - {{ card.current_cycle_time() }}d
+            {% elif card.priority %}
+                - #{{ card.priority }}
+            {% endif %}
+            {% if not card.is_card %}<i class="icon-plus-sign-alt" title="{{ card.type }}"></i>{% endif %}
+            {% if 'Expedite' in card.service_class['name'] %}<i class="icon-forward" title="{{ card.service_class['name'] }}"></i>
+            {% elif 'Date' in card.service_class['name'] %}<i class="icon-calendar" title="{{ card.service_class['name'] }}"></i>{% endif %}
+        </div>
+
+        <div class="card_contents">
+        <div class="title">
+            <p class="title"><a href="{{ url_for('card', key=card.key) }}">{{ card.title }}</a></p>
+
+            {% if card.blocked %}
+            <div class="blocker">
+                <p>{{ card.blockers[-1].reason }}</p>
+            </div>
+        {% endif %}
+
+        </div>
+
+
+        <p class="assignee">
+            {{ card_macros.hours_to_days(card.time_in_state) }} <br />
+            {% if card.due_date %}Due: {{ card.due_date.strftime("%m/%d") }}{% endif %}
+            {% if card.service_class['name'] in ['Intangible', 'Not Prioritized'] %}
+                {{ card.service_class.get('name') }}
+                {% if card.worked_on %} &ndash; {% endif %}
+            {% endif %}
+
+            {% if card.state not in ["Backlog", "Done"] %}
+                {% if card.worked_on %}
+                    {% for worker in card.worked_on %}
+                        <a href="{{ url_for('person', name=worker) }}">{{ worker }}</a>{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+        </p>
+        </div>
+
+    </div>
+{%- endmacro %}

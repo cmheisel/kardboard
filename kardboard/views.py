@@ -125,7 +125,7 @@ def _team_backlog_markers(team, cards, weeks=12):
     return backlog_marker_data, backlog_markers
 
 
-def new_team(team_slug=None):
+def team(team_slug=None):
     from kardboard.services.boards import TeamBoard
 
     teams = _get_teams()
@@ -195,76 +195,6 @@ def new_team(team_slug=None):
         'weekly_throughput': weekly_throughput,
         'report_config': report_config,
         'updated_at': datetime.datetime.now(),
-        'version': VERSION,
-        'authenticated': kardboard.auth.is_authenticated(),
-    }
-
-    return render_template('new-team.html', **context)
-
-
-def team(team_slug=None):
-    date = _get_date()
-    teams = _get_teams()
-    team = _find_team_by_slug(team_slug, teams)
-
-    try:
-        wip_limit_config = app.config['WIP_LIMITS'][team_slug]
-    except KeyError:
-        wip_limit_config = {}
-
-    conwip = wip_limit_config.get('conwip', None)
-    wip_limits = WIPLimits(
-        name=team_slug,
-        conwip=conwip,
-        columns=wip_limit_config,
-    )
-
-    weeks = 4
-    exclude_classes = _get_excluded_classes()
-    team_stats = teams_service.TeamStats(team.name, exclude_classes)
-    weekly_throughput = team_stats.weekly_throughput_ave(weeks)
-
-    metrics = [
-        {'WIP': team_stats.wip_count()},
-        {'Weekly throughput': team_stats.weekly_throughput_ave(4)},
-    ]
-    ave = team_stats.average(4)
-    if ave:
-        metrics.append({'Cycle time ave.': team_stats.average(4)})
-
-    stdev = team_stats.standard_deviation(4)
-    if stdev:
-        metrics.append({'Standard deviation': stdev},)
-
-    title = "%s cards" % team.name
-
-    report_config = (
-        {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
-        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
-        {'slug': 'done', 'name': 'Done'},
-        {'slug': 'service-class', 'name': 'Service class'},
-    )
-
-    board = DisplayBoard(teams=[team.name, ], backlog_limit=weekly_throughput * 4)
-
-    #raise Exception
-    backlog_marker_data, backlog_markers = _team_backlog_markers(team, board.rows[0][0]['cards'], weeks)
-
-    context = {
-        'title': title,
-        'team_slug': team_slug,
-        'team': team,
-        'wip_limits': wip_limits,
-        'weekly_throughput': weekly_throughput,
-        'metrics': metrics,
-        'report_config': report_config,
-        'backlog_markers': backlog_markers,
-        'backlog_marker_data': backlog_marker_data,
-        'wip_limit_config': wip_limit_config,
-        'board': board,
-        'date': date,
-        'updated_at': datetime.datetime.now(),
-        'teams': teams,
         'version': VERSION,
         'authenticated': kardboard.auth.is_authenticated(),
     }
@@ -1291,7 +1221,6 @@ app.add_url_rule('/person/<name>/', 'person', person)
 app.add_url_rule('/quick/', 'quick', quick, methods=["GET"])
 app.add_url_rule('/robots.txt', 'robots', robots,)
 app.add_url_rule('/team/<team_slug>/', 'team', team)
-app.add_url_rule('/new-team/<team_slug>/', 'new_team', new_team)
 app.add_url_rule('/team/<team_slug>/backlog/', 'team_backlog', team_backlog, methods=["GET", "POST"])
 app.add_url_rule('/funnel/<state_slug>/', 'funnel', funnel, methods=["GET", "POST"])
 app.add_url_rule('/favicon.ico', 'favicon', favicon)
