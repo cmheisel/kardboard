@@ -328,7 +328,7 @@ def state():
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
-    return render_template('team.html', **context)
+    return render_template('state.html', **context)
 
 
 def _init_new_card_form(*args, **kwargs):
