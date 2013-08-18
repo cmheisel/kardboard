@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from kardboard.tests.core import KardboardTestCase
 
+
 @pytest.mark.displayboard
 class DisplayBoardTests(KardboardTestCase):
     def setUp(self):
@@ -120,7 +121,7 @@ class DisplayBoardTests(KardboardTestCase):
         backlog_date = self._date('start', days=-10)
         team = "Team 3"
 
-        priorities = [i+1 for i in xrange(0, 3)]
+        priorities = [i + 1 for i in xrange(0, 3)]
 
         for i in xrange(0, 3):
             # Make one card with no order
@@ -151,7 +152,7 @@ class DisplayBoardTests(KardboardTestCase):
         backlog_date = self._date('start', days=-10)
         team = "Team 3"
 
-        priorities = [i+1 for i in xrange(0, 3)]
+        priorities = [i + 1 for i in xrange(0, 3)]
 
         for i in xrange(0, 3):
             # Make one card with no order
@@ -201,108 +202,6 @@ class DisplayBoardTests(KardboardTestCase):
         expected = ['1.2.1', '1.2.1-c', None]
         actual = [c._version for c in backlog]
         self.assertEqual(expected, actual)
-
-
-class StatesTests(KardboardTestCase):
-    def setUp(self):
-        super(StatesTests, self).setUp()
-        self.old_config = deepcopy(self.config)
-        self.config['CARD_STATES'] = (
-            'Backlog',
-            'In Progress',
-            'Deploy',
-            'Done',
-        )
-
-        nondefault_keys = [
-            'BACKLOG_STATE',
-            'START_STATE',
-            'DONE_STATE',
-        ]
-        for key in nondefault_keys:
-            if key in self.config.keys():
-                del(self.config[key])
-
-    def tearDown(self):
-        self.config = deepcopy(self.old_config)
-
-    def _get_target_class(self):
-        from kardboard.models import States
-        return States
-
-    def test_orderable(self):
-        states = self._make_one()
-        expected = ['Backlog']
-        actual = states.orderable
-        assert expected == actual
-
-    def test_find_by_slug(self):
-        states = self._make_one()
-        expected = 'Deploy'
-        actual = states.find_by_slug('deploy')
-        assert expected == actual
-
-    def test_iteration(self):
-        states = self._make_one()
-        expected = [state for state in self.config['CARD_STATES']]
-        actual = [state for state in states]
-        self.assertEqual(expected, actual)
-
-    def test_default_state_groups(self):
-        states = self._make_one()
-        expected = 'Backlog'
-        self.assertEqual(expected, states.backlog)
-        self.assertEqual([expected, ], states.pre_start)
-
-        expected = 'In Progress'
-        self.assertEqual(expected, states.start)
-
-        expected = ['In Progress', 'Deploy']
-        self.assertEqual(expected, states.in_progress)
-
-        expected = 'Done'
-        self.assertEqual(expected, states.done)
-
-    def test_configured_state_groups(self):
-        self.config['CARD_STATES'] = (
-            'Backlog',
-            'Planning',
-            'In Progress',
-            'Testing',
-            'Deploy',
-            'Done',
-            'Archive',
-        )
-        self.config['BACKLOG_STATE'] = 0
-        self.config['START_STATE'] = 2
-        self.config['DONE_STATE'] = -2
-
-        states = self._make_one()
-
-        expected = ['Backlog', 'Planning']
-        self.assertEqual(expected[0], states.backlog)
-        self.assertEqual(expected, states.pre_start)
-
-        expected = 'In Progress'
-        self.assertEqual(expected, states.start)
-
-        expected = ['Planning', 'In Progress', 'Testing', 'Deploy']
-        self.assertEqual(expected, states.in_progress)
-
-        expected = 'Done'
-        self.assertEqual(expected, states.done)
-
-    def test_for_forms(self):
-        states = self._make_one()
-
-        expected = (
-            ('', ''),
-            ('Backlog', 'Backlog'),
-            ('In Progress', 'In Progress'),
-            ('Deploy', 'Deploy'),
-            ('Done', 'Done'),
-        )
-        self.assertEqual(expected, states.for_forms)
 
 
 class DailyRecordTests(KardboardTestCase):
@@ -504,8 +403,7 @@ class KardTests(KardTestCase):
         self.assertEquals(None, self.wip_card.lead_time)
         self.assertEquals(None, self.wip_card._lead_time)
 
-        actual = self.wip_card.current_cycle_time(
-                today=today)
+        actual = self.wip_card.current_cycle_time(today=today)
         self.assertEquals(34, actual)
 
     def test_current_lead_time(self):
@@ -517,8 +415,7 @@ class KardTests(KardTestCase):
         self.assertEquals(None, self.wip_card.lead_time)
         self.assertEquals(None, self.wip_card._lead_time)
 
-        actual = self.wip_card.current_lead_time(
-                today=today)
+        actual = self.wip_card.current_lead_time(today=today)
         self.assertEquals(41, actual)
 
     def test_elabo_cycle_time(self):
@@ -530,8 +427,7 @@ class KardTests(KardTestCase):
         self.assertEquals(None, self.elabo_card.lead_time)
         self.assertEquals(None, self.elabo_card._lead_time)
 
-        actual = self.elabo_card.current_cycle_time(
-                today=today)
+        actual = self.elabo_card.current_cycle_time(today=today)
         self.assertEquals(None, actual)
 
     def test_backlogged(self):
@@ -663,7 +559,6 @@ class KardTests(KardTestCase):
         self.assertEqual("CMSCMH-1", k.key)
 
 
-import pytest
 @pytest.mark.warningtest
 class KardWarningTests(KardTestCase):
     def setUp(self):
