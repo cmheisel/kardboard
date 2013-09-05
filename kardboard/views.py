@@ -160,9 +160,10 @@ def team(team_slug=None):
         metrics.append({'Standard deviation': stdev},)
 
     board = TeamBoard(team.name, States(), wip_limits)
+    backlog_limit = weekly_throughput * 4 or 30
     cards = Kard.objects.for_team_board(
         team=team.name,
-        backlog_limit=weekly_throughput * 4,
+        backlog_limit=backlog_limit,
         done_days=7,
     )
     board.add_cards(cards)
