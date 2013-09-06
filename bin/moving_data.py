@@ -8,7 +8,7 @@ def parse_date(datestr):
     return parser.parse(datestr)
 
 
-def daily_throughput_average(stop, weeks=4):
+def daily_throughput_average(report_group_slug, stop, weeks=4):
     start = (stop - relativedelta(days=weeks * 7)) + relativedelta(days=1)
     start = make_start_date(date=start)
 
@@ -16,14 +16,14 @@ def daily_throughput_average(stop, weeks=4):
         done_date__gte=start,
         done_date__lte=stop,)
 
-    kards = list(ReportGroup('dev', query).queryset)
+    kards = list(ReportGroup(report_group_slug, query).queryset)
     return len(kards) / float(weeks * 7)
 
 
-def find_wip(stop):
+def find_wip(report_group_slug, stop):
     sl = FlowReport.objects.get(
         date=make_end_date(date=stop),
-        group='dev',
+        group=report_group_slug,
     )
 
     exclude = [u'Backlog', u'Done', ]
@@ -35,14 +35,14 @@ def find_wip(stop):
     return wip
 
 
-def find_cycle_time_ave(stop):
+def find_cycle_time_ave(report_group_slug, stop):
     try:
         dr = DailyRecord.objects.get(
             date=make_end_date(date=stop),
-            group='dev',
+            group=report_group_slug,
         )
     except DailyRecord.DoesNotExist:
-        print "No Daily Record: %s %s" % ('dev', make_end_date(date=stop))
+        print "No Daily Record: %s %s" % (report_group_slug, make_end_date(date=stop))
         raise
 
     return dr.moving_cycle_time
@@ -60,11 +60,15 @@ def moving_data(report_group_slug, start, stop):
     card_cycle_ave = average([k.cycle_time for k in kards]) or 0
     card_stddev = standard_deviation([k.cycle_time for k in kards]) or 0
 
-    wip = find_wip(stop)
-    tpa = daily_throughput_average(stop)
-    little_law = wip / float(tpa)
+    wip = find_wip(report_group_slug, stop)
+    tpa = daily_throughput_average(report_group_slug, stop)
 
-    cycle_time_ave = find_cycle_time_ave(stop)
+    try:
+        little_law = wip / float(tpa)
+    except:
+        little_law = 0
+
+    cycle_time_ave = find_cycle_time_ave(report_group_slug, stop)
 
     data = {
         'start': start,
