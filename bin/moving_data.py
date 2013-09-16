@@ -54,6 +54,12 @@ def moving_data(report_group_slug, start, stop):
         done_date__lte=stop,)
 
     kards = list(ReportGroup(report_group_slug, query).queryset)
+
+    bad_kards = [k for k in kards if k.cycle_time is None]
+    print "Bad cards"
+    print "*"*10
+    print [k.key for k in bad_kards]
+
     features = [k for k in kards if k.is_card]
     defects = [k for k in kards if not k.is_card]
     over_sla = [k for k in kards if k.cycle_time > k.service_class['upper']]
@@ -93,8 +99,8 @@ def print_data(data):
     print "Cycl: %s" % data['cycle_time_ave']
     print " WIP: %s" % data['wip']
     print "oSLA: %s" % data['over_sla']
-    print "fCyc: %s" % data['cycle_average']
-    print "fStd: %s" % data['stddev']
+    print "Cyc: %s" % data['cycle_average']
+    print "Std: %s" % data['stddev']
 
 
 def weekly_moving_data(report_group_slug, start):
