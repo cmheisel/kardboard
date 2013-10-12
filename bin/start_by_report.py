@@ -120,6 +120,10 @@ def _time_building(card):
     return _get_state_time('Building', card)
 
 
+def _time_elabo(card):
+    return _get_state_time('Elaborating', card)
+
+
 def started_after_report(team_or_rg_name, start_date):
     start_date = make_start_date(date=start_date)
     cards = _get_cards(team_or_rg_name, start_date)
@@ -140,6 +144,7 @@ def started_after_report(team_or_rg_name, start_date):
         'time_wait_qa',
         'time_in_qa',
         'time_building',
+        'time_elabo',
     )
 
     Row = namedtuple('Row', ' '.join(columns))
@@ -161,6 +166,7 @@ def started_after_report(team_or_rg_name, start_date):
             time_wait_qa=_time_wait_qa(c),
             time_in_qa=_time_in_qa(c),
             time_building=_time_building(c),
+            time_elabo=_time_elabo(c),
         )
         rows.append(row)
 
