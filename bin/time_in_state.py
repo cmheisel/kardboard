@@ -1,5 +1,5 @@
 """
-For a team, for a period of weeks, for each service class and for them all, show how long cards (not defects) spend in each state on average.
+For a team, for a period of weeks, for each service class and for them all, show how long cards spend in each state on average.
 """
 from datetime import datetime
 
@@ -101,7 +101,10 @@ def median(an_array):
 def card_state_medians(card_state_time):
     medians = {}
     for state, day_data in card_state_time.items():
-        medians[state] = median(day_data)
+        try:
+            medians[state] = median(day_data)
+        except Exception:
+            medians[state] = "N/A"
     return medians
 
 
@@ -143,25 +146,22 @@ def report_suite(name, weeks=None, start=None, end=None):
     states = States()
     unknown_states = [s for s in averages.keys() if s not in states]
     for state in states:
-        print "%s,%s,%s,%s" % (
+        print "%s,%s,%s,%s,%s,%s,%s,%s,%s" % (
+            start,
+            end,
             state,
             averages.get(state, "N/A"),
             medians.get(state, "N/A"),
             stdevs.get(state, "N/A"),
+            len(cards),
+            len([c for c in cards if c.is_card]),
+            len([c for c in cards if c.is_card is False]),
         )
     for state in unknown_states:
         print "UNUSED %s\t %s" % (
             state,
             averages.get(state, "N/A")
         )
-
-    print "Cards,%s" % (
-        len([c for c in cards if c.is_card])
-    )
-    print "Defects,%s" % (
-        len([c for c in cards if c.is_card is False])
-    )
-
 
 if __name__ == "__main__":
     import sys
