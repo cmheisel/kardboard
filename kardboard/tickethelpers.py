@@ -254,7 +254,6 @@ class JIRAHelper(TicketHelper):
         idic['resolution'] = self.resolve_resolution(idic['resolution'])
         idic['fixVersions'] = [self.object_to_dict(v) for v in idic['fixVersions']]
 
-
         return idic
 
     def object_to_dict(self, obj):
@@ -403,10 +402,12 @@ class JIRAHelper(TicketHelper):
         if len(mapping) >= 3:
             resolution = mapping[2]
 
+        state_changed = False
         if state:
             oldstate = card.state
             if card.state != state:
                 if resolution is None or resolution is not None and current_resolution == resolution:
+                    state_changed = True
                     card.state = state
                     resolution_msg = ""
                     if resolution is not None:
@@ -414,12 +415,13 @@ class JIRAHelper(TicketHelper):
                     self.logger.info(
                         "AUTOMOVE: %s state moved %s => %s because status was %s %s" % (self.card.key,
                             oldstate, card.state, current_ticket_status, resolution_msg))
-        if datefield:
+
+        if datefield and state_changed is True:
             current_value = getattr(card, datefield)
             if not current_value:
                 setattr(card, datefield, datetime.datetime.now())
                 self.logger.info(
-                    "AUTOMOVE: %s %s set to %s because status was %s" % (self.card.key,
+                    "AUTOMOVE DATE: %s %s set to %s because status was %s" % (self.card.key,
                     datefield, getattr(card, datefield), current_ticket_status))
 
         return card
