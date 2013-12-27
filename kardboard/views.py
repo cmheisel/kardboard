@@ -732,10 +732,10 @@ def report_throughput(group="all", months=3, start=None):
                     counts['defect'] += 1
                 else:
                     counts['card'] += 1
-            month_counts.append((start.strftime("%B"), counts))
+            month_counts.append((start.strftime("%B '%y"), counts))
         else:
             num = cards.count()
-            month_counts.append((start.strftime("%B"), num))
+            month_counts.append((start.strftime("%B, '%y"), num))
 
     chart = {}
     chart['categories'] = [c[0] for c in month_counts]
