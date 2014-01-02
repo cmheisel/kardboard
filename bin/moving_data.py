@@ -20,11 +20,21 @@ def daily_throughput_average(report_group_slug, stop, weeks=4):
     return len(kards) / float(weeks * 7)
 
 
+def find_flow_report(report_group_slug, stop):
+    try:
+        sl = FlowReport.objects.get(
+            date=make_end_date(date=stop),
+            group=report_group_slug,
+        )
+        return sl
+    except FlowReport.DoesNotExist:
+        print "NO REPORT for %s / %s" % (make_end_date(date=stop), report_group_slug)
+        stop = stop - relativedelta(days=1)
+        return find_flow_report(report_group_slug, stop)
+
+
 def find_wip(report_group_slug, stop):
-    sl = FlowReport.objects.get(
-        date=make_end_date(date=stop),
-        group=report_group_slug,
-    )
+    sl = find_flow_report(report_group_slug, stop)
 
     exclude = [u'Backlog', u'Done', ]
     wip = 0
@@ -57,7 +67,7 @@ def moving_data(report_group_slug, start, stop):
 
     bad_kards = [k for k in kards if k.cycle_time is None]
     print "Bad cards"
-    print "*"*10
+    print "*" * 10
     print [k.key for k in bad_kards]
 
     features = [k for k in kards if k.is_card]
@@ -115,8 +125,8 @@ def weekly_moving_data(report_group_slug, start):
 if __name__ == "__main__":
     import sys
     try:
-        data = weekly_moving_data(sys.argv[1], sys.argv[2])
+        data = weekly_moving_data(sys.argv[2], sys.argv[1])
     except IndexError:
-        print "{report_group_slug} {week_start_date}"
+        print "{week_start_date} {report_group_slug}"
         raise
     print_data(data)
