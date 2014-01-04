@@ -1,5 +1,5 @@
-{{ title }}
-============================================
+{{ title }} {{ start_date }} -- {{ end_date}}
+===============================================
 
-{% for card in cards %}* {{ card.done_date.strftime("%Y-%m-%d") }} -- {{ card.key }}: {{ card.title }}
+{% for card in cards %}# {{ card.done_date.strftime("%b. %d") }} / [{{ card.key }}|{{ url_for('card', key=card.key, _external=True) }}]: {{ card.title }} / {{ card.cycle_time }}d / {% for dev in card.ticket_system_data.get('developers', []) %}[{{ dev }}|{{ url_for('person', name=dev, _external=True) }}]{% if not loop.last %}, {% endif %}{% endfor %} {% for qa in card.ticket_system_data.get('qaers', []) %}[{{ qa }}|{{ url_for('person', name=qa, _external=True) }}]{% if not loop.last %}, {% endif %}{% endfor %}
 {% endfor %}

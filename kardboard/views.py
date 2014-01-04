@@ -30,6 +30,8 @@ from kardboard.services import teams as teams_service
 from kardboard.services.funnel import Funnel
 from kardboard.services.wiplimits import WIPLimits
 from kardboard.util import (
+    munge_date,
+    month_range,
     make_start_date,
     make_end_date,
     month_ranges,
@@ -606,6 +608,34 @@ def done(group="all", months=3, start=None):
     }
 
     return render_template('done.html', **context)
+
+
+def value_txt_report(year_number, month_number, group="all"):
+    start_date = munge_date(year=year_number, month=month_number, day=1)
+    start_date = make_start_date(date=start_date)
+
+    start_date, end_date = month_range(start_date)
+
+    rg = ReportGroup(group, Kard.objects.done())
+    done = rg.queryset
+
+    cards = done.filter(done_date__gte=start_date,
+        done_date__lte=end_date).order_by('-done_date')
+
+    cards = [c for c in cards if c.is_card]
+
+    context = {
+        'title': "Completed Value Cards",
+        'cards': cards,
+        'start_date': start_date,
+        'end_date': end_date,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    response = make_response(render_template('done-report.txt', **context))
+    response.headers['Content-Type'] = "text/plain"
+    return response
 
 
 def report_leaderboard(group="all", months=3, person=None, start_month=None, start_year=None):
@@ -1212,6 +1242,7 @@ app.add_url_rule('/reports/<group>/efficiency/', 'report_efficiency', report_eff
 app.add_url_rule('/reports/<group>/efficiency/<int:months>/', 'report_efficiency', report_efficiency)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/value/<int:year_number>/<int:month_number>/', 'value', value_txt_report)
 app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/assignee/', 'report_assignee', report_assignee)
