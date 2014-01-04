@@ -21,20 +21,18 @@ def daily_throughput_average(report_group_slug, stop, weeks=4):
 
 
 def find_flow_report(report_group_slug, stop):
-    try:
-        sl = FlowReport.objects.get(
-            date=make_end_date(date=stop),
-            group=report_group_slug,
-        )
-        return sl
-    except FlowReport.DoesNotExist:
-        print "NO REPORT for %s / %s" % (make_end_date(date=stop), report_group_slug)
-        stop = stop - relativedelta(days=1)
-        return find_flow_report(report_group_slug, stop)
+    sl = FlowReport.objects.get(
+        date=make_end_date(date=stop),
+        group=report_group_slug,
+    )
+    return sl
 
 
 def find_wip(report_group_slug, stop):
-    sl = find_flow_report(report_group_slug, stop)
+    try:
+        sl = find_flow_report(report_group_slug, stop)
+    except FlowReport.DoesNotExist:
+        return ""
 
     exclude = [u'Backlog', u'Done', ]
     wip = 0
@@ -80,9 +78,9 @@ def moving_data(report_group_slug, start, stop):
     tpa = daily_throughput_average(report_group_slug, stop)
 
     try:
-        little_law = wip / float(tpa)
+        little_law = int(round(wip / float(tpa)))
     except:
-        little_law = 0
+        little_law = ""
 
     cycle_time_ave = find_cycle_time_ave(report_group_slug, stop)
 
@@ -91,7 +89,7 @@ def moving_data(report_group_slug, start, stop):
         'stop': stop,
         'features': len(features),
         'bugfixes': len(defects),
-        'little_law': int(round(little_law)),
+        'little_law': little_law,
         'cycle_time_ave': int(round(cycle_time_ave)),
         'wip': wip,
         'cycle_average': int(round(card_cycle_ave)),
