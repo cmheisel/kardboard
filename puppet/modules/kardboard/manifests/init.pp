@@ -46,19 +46,28 @@ class kardboard(
         fail("Haven't written puppet code to clone src from git yet")
     }
 
+    exec { 'upgrade-setuptools':
+      user => root,
+      path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
+      cwd => "/home/$kbuser/$vepath/",
+      unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep distribute-0.7",
+      logoutput => on_failure,
+      timeout => 0, # Run forevers
+      command => "/home/$kbuser/$vepath/bin/pip install setuptools --no-use-wheel --upgrade",
+      require => [Package['gcc'], Package['python2.6-dev'], Package['python-virtualenv'], Exec['kardboard-src'],]
+    }
+
     exec { 'install-requirements':
-      user => $kbuser,
       path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
       cwd => "/home/$kbuser/$vepath/",
       command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements-deployment.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
       unless => "ls /home/$kbuser/$vepath/lib/python2.6/site-packages/ | grep Flask",
       logoutput => on_failure,
       timeout => 0, # Run forevers
-      require => [Package['gcc'], Package['python2.6-dev'], Package['python-virtualenv'], Exec['kardboard-src'],]
+      require => [Package['gcc'], Package['python2.6-dev'], Package['python-virtualenv'], Exec['kardboard-src'], Exec['upgrade-setuptools']]
     }
 
     exec { 'install-dev-reqs':
-      user => $kbuser,
       path => "/home/$kbuser/$vepath/bin:/usr/bin:/bin",
       cwd => "/home/$kbuser/$vepath/",
       command => "/home/$kbuser/$vepath/bin/pip install -r src/kardboard/requirements-development.txt --find-links file:///home/$kbuser/$vepath/src/kardboard/sdists/",
