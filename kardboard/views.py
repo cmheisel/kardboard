@@ -681,6 +681,8 @@ def report_service_class(group="all", months=None):
                 group=group,
             )
         time_range = 'current'
+        start_date = make_start_date(date=datetime.datetime.now())
+        end_date = make_end_date(date=datetime.datetime.now())
     else:
         start = now()
         months_ranges = month_ranges(start, months)
@@ -704,6 +706,8 @@ def report_service_class(group="all", months=None):
         'title': "Service classes: %s" % time_range,
         'service_classes': service_classes,
         'data': scr.data,
+        'start_date': start_date,
+        'end_date': end_date,
         'updated_at': scr.updated_at,
         'version': VERSION,
     }
