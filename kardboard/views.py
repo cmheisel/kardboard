@@ -180,10 +180,12 @@ def team(team_slug=None):
     )
 
     report_config = (
+        {'slug': 'assignee', 'name': "Assignee"},
         {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
-        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
-        {'slug': 'done', 'name': 'Done'},
         {'slug': 'service-class', 'name': 'Service class'},
+        {'slug': 'done', 'name': 'Done'},
+        {'slug': 'leaderboard', 'name': 'Leaderboard'},
+        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
     )
 
     context = {
