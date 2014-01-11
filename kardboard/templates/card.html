@@ -34,7 +34,7 @@
            <a href="{{ url_for('team', team_slug=card.team|slugify) }}#card_{{ card.key }}">{{ card.team }}</a> /
            <a href="{{ card.ticket_system.get_ticket_url() }}">JIRA</a> /
             <a href="{{ url_for('card_edit', key=card.key, next=next_url) }}">Edit</a> / <a href="{{ url_for('card_delete', key=card.key, next=next_url) }}">Delete</a> /
-            {% if not card.done_date and card.start_date %}
+            {% if not card.done_date %}
                 <a href="{{ url_for('card_block', key=card.key, next=next_url) }}">{% if card.blocked %}Unblock{% else %}Block{% endif %}</a> /
             {% endif %}
 <a href="{{ url_for('state') }}">Home</a>
