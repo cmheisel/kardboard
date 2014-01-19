@@ -163,7 +163,7 @@ class EfficiencyStats(object):
     efficiency.
     """
     def __init__(self, mapping=None):
-        self.mapping=mapping
+        self.mapping = mapping
 
     def _get_mapping(self, mapping=None):
         if mapping is not None:
