@@ -154,9 +154,6 @@ def team(team_slug=None):
     hit_sla_delta = team_stats.hit_sla(weeks, weeks_offset=weeks)
     hit_sla_delta = hit_sla - hit_sla_delta
 
-    hit_sla = "%d%%" % (round(100 * hit_sla))
-    hit_sla_delta = "%d%%" % (round(100 * hit_sla_delta))
-
     total_throughput = teams_service.TeamStats(team.name).throughput(weeks)
     total_throughput_delta = teams_service.TeamStats(team.name).throughput(weeks,
         weeks_offset=weeks)
@@ -167,13 +164,21 @@ def team(team_slug=None):
     cycle_time_delta = cycle_time - cycle_time_delta
 
     metrics = [
-        {'Monthly Throughput': total_throughput},
-        {'TP delta': total_throughput_delta},
-        {'Hit SLA': hit_sla},
-        {'Hit SLA Delta': hit_sla_delta},
-        {'Cycle time': cycle_time},
-        {'Cycle time dleta': cycle_time_delta},
-
+        {
+            'name': 'Throughput',
+            'value': total_throughput,
+            'delta': total_throughput_delta,
+        },
+        {
+            'name': 'Hit SLA',
+            'value': hit_sla,
+            'delta': hit_sla_delta,
+        },
+        {
+            'name': 'Cycle time',
+            'value': cycle_time,
+            'delta': cycle_time_delta,
+        },
     ]
 
     board = TeamBoard(team.name, States(), wip_limits)
@@ -207,6 +212,7 @@ def team(team_slug=None):
         'team': team,
         'teams': teams,
         'board': board,
+        'round': round,
         'backlog_markers': backlog_markers,
         'backlog_marker_data': backlog_marker_data,
         'weekly_throughput': weekly_throughput,

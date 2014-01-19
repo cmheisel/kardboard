@@ -35,22 +35,32 @@ $(document).ready(function() {
 
 {% block content %}
 
-{% if metrics %}
-{% for m in metrics %}
-    <div class="metric metric_{{ m.keys()[0]|slugify }}">
-      {% for name, value in m.items() %}
-          <h2>{{ name }}</h2>
-          <p class="value">
-            {{ value }}
-            {% if name == "WIP" and wip_limits.conwip %}
-            <span>/</span> {{ wip_limits.conwip }}
-            {% endif %}
-          </p>
-      {% endfor %}
-    </div>
-    {% endfor %}
-{% endif %}
 
+{% if metrics %}
+<table class="metrics"><tr>
+<td class="metric metrics_key">
+    <table>
+    <tr><th>KPI</th></tr>
+    <tr><th>Last 4 weeks</th></tr>
+    <tr><th>&Delta;</th></tr>
+    </table>
+</td>
+{% for m in metrics %}
+<td class="metric metric_{{ m['name']|slugify }}">
+    <table>
+    <tr><th>{{ m['name'] }}</th></tr>
+    {% if m['name'] == "Hit SLA" %}
+        <tr><td>{{ "%d%%"|format(round(m['value'] * 100)) }}</td></tr>
+        <tr><td>{% if m['delta'] > 0 %}+{% endif %}{{ "%d%%"|format(round(m['delta'] * 100)) }}</td></tr>
+    {% else %}
+        <tr><td>{{ m['value'] }}</td></tr>
+        <tr><td>{% if m['delta'] > 0 %}+{% endif %}{{ m['delta'] }}</td></tr>
+    {% endif %}
+    </table>
+</td>
+{% endfor %}
+</tr></table>
+{% endif %}
 
 <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
 {% for report in report_config %}
