@@ -149,18 +149,31 @@ def team(team_slug=None):
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+
     hit_sla = team_stats.hit_sla(weeks)
-    if hit_sla is not None:
-        hit_sla = "%d%%" % (round(100 * hit_sla))
-    else:
-        hit_sla = "0%"
+    hit_sla_delta = team_stats.hit_sla(weeks, weeks_offset=weeks)
+    hit_sla_delta = hit_sla - hit_sla_delta
+
+    hit_sla = "%d%%" % (round(100 * hit_sla))
+    hit_sla_delta = "%d%%" % (round(100 * hit_sla_delta))
 
     total_throughput = teams_service.TeamStats(team.name).throughput(weeks)
+    total_throughput_delta = teams_service.TeamStats(team.name).throughput(weeks,
+        weeks_offset=weeks)
+    total_throughput_delta = total_throughput - total_throughput_delta
+
+    cycle_time = team_stats.percentile(.8, weeks)
+    cycle_time_delta = team_stats.percentile(.8, weeks, weeks_offset=weeks)
+    cycle_time_delta = cycle_time - cycle_time_delta
 
     metrics = [
         {'Monthly Throughput': total_throughput},
+        {'TP delta': total_throughput_delta},
         {'Hit SLA': hit_sla},
-        {'Cycle time': team_stats.percentile(.8, weeks)},
+        {'Hit SLA Delta': hit_sla_delta},
+        {'Cycle time': cycle_time},
+        {'Cycle time dleta': cycle_time_delta},
+
     ]
 
     board = TeamBoard(team.name, States(), wip_limits)

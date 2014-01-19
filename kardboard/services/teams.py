@@ -63,7 +63,7 @@ class TeamStats(object):
         return done
 
     def cycle_times(self, weeks=4, weeks_offset=0):
-        start_date, end_date, weeks = self.throughput_date_range(weeks)
+        start_date, end_date, weeks = self.throughput_date_range(weeks, weeks_offset)
         cycle_time_list = self.done_in_range(start_date, end_date).values_list('_cycle_time')
         return [c for c in cycle_time_list if c is not None]
 
@@ -85,7 +85,7 @@ class TeamStats(object):
 
     def throughput_date_range(self, weeks=4, weeks_offset=0):
         oldest_card_date = self.oldest_card_date()
-        end_date = datetime.now()
+        end_date = datetime.now() - relativedelta(weeks=weeks_offset)
         start_date = end_date - relativedelta(weeks=weeks)
 
         if oldest_card_date and start_date < oldest_card_date:
@@ -138,15 +138,15 @@ class TeamStats(object):
             med = int(round(med))
         return med
 
-    def histogram(self, weeks=4):
-        times = self.cycle_times(weeks)
+    def histogram(self, weeks=4, weeks_offset=0):
+        times = self.cycle_times(weeks, weeks_offset)
         d = defaultdict(int)
         for t in times:
             d[t] += 1
         return dict(d)
 
-    def percentile(self, target_pct, weeks=4):
-        hist = self.histogram(weeks)
+    def percentile(self, target_pct, weeks=4, weeks_offset=0):
+        hist = self.histogram(weeks, weeks_offset)
         total = sum(hist.values())
         pct_threshold = target_pct * total
 
