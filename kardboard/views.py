@@ -150,16 +150,10 @@ def team(team_slug=None):
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
     metrics = [
-        {'WIP': team_stats.wip_count()},
         {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
+        {'Cyle time': team_stats.percentile(.8)},
+        {'Hit SLA': 'TBD'}
     ]
-    ave = team_stats.average(weeks)
-    if ave:
-        metrics.append({'Cycle time ave.': team_stats.average(weeks)})
-
-    stdev = team_stats.standard_deviation(weeks)
-    if stdev:
-        metrics.append({'Standard deviation': stdev},)
 
     board = TeamBoard(team.name, States(), wip_limits)
     backlog_limit = weekly_throughput * 4 or 30
@@ -174,9 +168,6 @@ def team(team_slug=None):
         team,
         board.columns[0]['cards'],
         weeks,
-    )
-    metrics.append(
-        {'80% confidence': backlog_marker_data['confidence_80']},
     )
 
     report_config = (
