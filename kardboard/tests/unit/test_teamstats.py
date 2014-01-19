@@ -221,6 +221,55 @@ class TeamStatsTest(unittest2.TestCase):
             actual = self.service.percentile(.7)
             assert 26 == actual
 
+    def test_hit_sla(self):
+        mock_card = mock.Mock()
+        mock_card.key = "CMSCI-1"
+        mock_card.done_date = datetime(2012, 12, 30)
+        mock_card.service_class = {'name': "Normal", 'upper': 30}
+        mock_card.cycle_time = 23
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+            mock_done_in_range.return_value = [
+                mock_card,
+            ]
+            actual = self.service.hit_sla()
+            assert 1 == actual
+
+    def test_hit_sla_multiple_cards(self):
+        mock_card = mock.Mock()
+        mock_card.key = "CMSCI-1"
+        mock_card.done_date = datetime(2012, 12, 30)
+        mock_card.service_class = {'name': "Normal", 'upper': 30}
+        mock_card.cycle_time = 23
+
+        mock_card2 = mock.Mock()
+        mock_card2.key = "CMSCI-2"
+        mock_card2.done_date = datetime(2012, 12, 30)
+        mock_card2.service_class = {'name': "Normal", 'upper': 30}
+        mock_card2.cycle_time = 45
+
+        mock_card3 = mock.Mock()
+        mock_card3.key = "CMSCI-3"
+        mock_card3.done_date = datetime(2012, 12, 30)
+        mock_card3.service_class = {'name': "Quick", 'upper': 3}
+        mock_card3.cycle_time = 4
+
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+            mock_done_in_range.return_value = [
+                mock_card,
+                mock_card2,
+                mock_card3,
+            ]
+            actual = self.service.hit_sla()
+            expected = 1 / 3.0
+            assert expected == actual
+
+    def test_hit_sla_zero_cards(self):
+        with mock.patch.object(self.service, 'done_in_range') as mock_done_in_range:
+            mock_done_in_range.return_value = [
+            ]
+            actual = self.service.hit_sla()
+            assert 0 == actual
+
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
             mock_wip_count.return_value = 9
@@ -248,6 +297,16 @@ class TeamStatsTest(unittest2.TestCase):
         start_date = end_date - relativedelta(weeks=4)
 
         actual = self.service.throughput_date_range()
+        delta = timedelta(seconds=10)
+
+        self.assertAlmostEqual(start_date, actual[0], delta=delta)
+        self.assertAlmostEqual(end_date, actual[1], delta=delta)
+
+    def test_throughput_date_range_with_offset(self):
+        end_date = datetime.now() - relativedelta(weeks=4)
+        start_date = end_date - relativedelta(weeks=4)
+
+        actual = self.service.throughput_date_range(weeks=4, weeks_offset=4)
         delta = timedelta(seconds=10)
 
         self.assertAlmostEqual(start_date, actual[0], delta=delta)

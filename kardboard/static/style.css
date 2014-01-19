@@ -529,3 +529,45 @@ table.board_enhanced td h3 a {
     color: #367000;
     text-decoration: underline;
 }
+
+table.metrics {
+    width: 60%;
+    margin: 10px 20% 10px 20%;
+}
+
+table.metrics td.metric {
+    padding: 0;
+    width: 25%;
+}
+
+table.metrics td.metric table {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+table.metrics td.metric table td,
+table.metrics td.metric table th {
+    text-align: center;
+}
+
+table.metrics td.metrics_key table th {
+    text-align: right;
+}
+
+table.metrics td.metric td.delta_positive {
+    color: #367000;
+}
+
+table.metrics td.metric td.delta_negative {
+    color: #991111;
+}
+
+
+table.metrics td.metric_cycle-time td.delta_nevative {
+    color: #367000;
+}
+
+table.metrics td.metric_cycle-time td.delta_positive {
+    color: #991111;
+}

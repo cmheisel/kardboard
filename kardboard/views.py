@@ -127,6 +127,12 @@ def _team_backlog_markers(team, cards, weeks=12):
     return backlog_marker_data, backlog_markers
 
 
+def zero_if_none(value):
+    if value is None:
+        return 0
+    return value
+
+
 def team(team_slug=None):
     from kardboard.services.boards import TeamBoard
 
@@ -149,17 +155,40 @@ def team(team_slug=None):
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
-    metrics = [
-        {'WIP': team_stats.wip_count()},
-        {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
-    ]
-    ave = team_stats.average(weeks)
-    if ave:
-        metrics.append({'Cycle time ave.': team_stats.average(weeks)})
 
-    stdev = team_stats.standard_deviation(weeks)
-    if stdev:
-        metrics.append({'Standard deviation': stdev},)
+    hit_sla = team_stats.hit_sla(weeks)
+    hit_sla_delta = team_stats.hit_sla(weeks, weeks_offset=weeks)
+    hit_sla, hit_sla_delta = zero_if_none(hit_sla), zero_if_none(hit_sla_delta)
+    hit_sla_delta = hit_sla - hit_sla_delta
+
+    total_throughput = teams_service.TeamStats(team.name).throughput(weeks)
+    total_throughput_delta = teams_service.TeamStats(team.name).throughput(weeks,
+        weeks_offset=weeks)
+    total_throughput, total_throughput_delta = zero_if_none(total_throughput), zero_if_none(total_throughput_delta)
+    total_throughput_delta = total_throughput - total_throughput_delta
+
+    cycle_time = team_stats.percentile(.8, weeks)
+    cycle_time_delta = team_stats.percentile(.8, weeks, weeks_offset=weeks)
+    cycle_time, cycle_time_delta = zero_if_none(cycle_time), zero_if_none(cycle_time_delta)
+    cycle_time_delta = cycle_time - cycle_time_delta
+
+    metrics = [
+        {
+            'name': 'Throughput',
+            'value': total_throughput,
+            'delta': total_throughput_delta,
+        },
+        {
+            'name': 'Hit SLA',
+            'value': hit_sla,
+            'delta': hit_sla_delta,
+        },
+        {
+            'name': 'Cycle time',
+            'value': cycle_time,
+            'delta': cycle_time_delta,
+        },
+    ]
 
     board = TeamBoard(team.name, States(), wip_limits)
     backlog_limit = weekly_throughput * 4 or 30
@@ -174,9 +203,6 @@ def team(team_slug=None):
         team,
         board.columns[0]['cards'],
         weeks,
-    )
-    metrics.append(
-        {'80% confidence': backlog_marker_data['confidence_80']},
     )
 
     report_config = (
@@ -195,6 +221,7 @@ def team(team_slug=None):
         'team': team,
         'teams': teams,
         'board': board,
+        'round': round,
         'backlog_markers': backlog_markers,
         'backlog_marker_data': backlog_marker_data,
         'weekly_throughput': weekly_throughput,
