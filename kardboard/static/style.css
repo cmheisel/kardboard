@@ -8,14 +8,14 @@ body {
 
 h1 {
     text-align: center;
-    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", "Impact", Helvetica, sans-serif;
+    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", Helvetica, sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     font-size: 40px;
 }
 
 h2 {
-    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", "Impact", Helvetica, sans-serif;
+    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", Helvetica, sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     font-size: 30px;
@@ -23,7 +23,7 @@ h2 {
 }
 
 caption {
-    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", "Impact", Helvetica, sans-serif;
+    font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue Condensed Bold", Helvetica, sans-serif;
     font-weight: bold;
     text-transform: uppercase;
     font-size: 20px;
