@@ -155,10 +155,12 @@ def team(team_slug=None):
     else:
         hit_sla = "0%"
 
+    total_throughput = teams_service.TeamStats(team.name).throughput(weeks)
+
     metrics = [
-        {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
-        {'Cyle time': team_stats.percentile(.8, weeks)},
-        {'Hit SLA': hit_sla}
+        {'Monthly Throughput': total_throughput},
+        {'Hit SLA': hit_sla},
+        {'Cycle time': team_stats.percentile(.8, weeks)},
     ]
 
     board = TeamBoard(team.name, States(), wip_limits)

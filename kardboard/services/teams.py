@@ -79,6 +79,10 @@ class TeamStats(object):
     def wip_count(self):
         return len(self.wip())
 
+    def throughput(self, weeks=4, weeks_offset=0):
+        start_date, end_date, weeks = self.throughput_date_range(weeks, weeks_offset)
+        return len(self.done_in_range(start_date, end_date))
+
     def throughput_date_range(self, weeks=4, weeks_offset=0):
         oldest_card_date = self.oldest_card_date()
         end_date = datetime.now()
