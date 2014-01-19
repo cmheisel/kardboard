@@ -268,7 +268,7 @@ class TeamStatsTest(unittest2.TestCase):
             mock_done_in_range.return_value = [
             ]
             actual = self.service.hit_sla()
-            assert None == actual
+            assert 0 == actual
 
     def test_lead_time_with_zero_throughput(self):
         with mock.patch.object(self.service, 'wip_count') as mock_wip_count:
@@ -297,6 +297,16 @@ class TeamStatsTest(unittest2.TestCase):
         start_date = end_date - relativedelta(weeks=4)
 
         actual = self.service.throughput_date_range()
+        delta = timedelta(seconds=10)
+
+        self.assertAlmostEqual(start_date, actual[0], delta=delta)
+        self.assertAlmostEqual(end_date, actual[1], delta=delta)
+
+    def test_throughput_date_range_with_offset(self):
+        end_date = datetime.now() - relativedelta(weeks=4)
+        start_date = end_date - relativedelta(weeks=4)
+
+        actual = self.service.throughput_date_range(weeks=4, weeks_offset=4)
         delta = timedelta(seconds=10)
 
         self.assertAlmostEqual(start_date, actual[0], delta=delta)

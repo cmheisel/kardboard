@@ -166,18 +166,10 @@ class TeamStats(object):
         kards = self.done_in_range(start_date, end_date)
         hit_sla = [k for k in kards if k.cycle_time <= k.service_class['upper']]
 
-        for k in kards:
-            print "%s - %s - %s" % (k.key, k.cycle_time, k.service_class['name'])
-
-        for k in hit_sla:
-            print "%s - %s - %s" % (k.key, k.cycle_time, k.service_class['upper'])
-
-        print len(kards)
-
         try:
             return len(hit_sla) / float(len(kards))
         except ZeroDivisionError:
-            return None
+            return 0
 
 
 class EfficiencyStats(object):
