@@ -554,3 +554,20 @@ table.metrics td.metric table th {
 table.metrics td.metrics_key table th {
     text-align: right;
 }
+
+table.metrics td.metric td.delta_positive {
+    color: #367000;
+}
+
+table.metrics td.metric td.delta_negative {
+    color: #991111;
+}
+
+
+table.metrics td.metric_cycle-time td.delta_nevative {
+    color: #367000;
+}
+
+table.metrics td.metric_cycle-time td.delta_positive {
+    color: #991111;
+}
