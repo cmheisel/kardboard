@@ -149,10 +149,16 @@ def team(team_slug=None):
     exclude_classes = _get_excluded_classes()
     team_stats = teams_service.TeamStats(team.name, exclude_classes)
     weekly_throughput = team_stats.weekly_throughput_ave(weeks)
+    hit_sla = team_stats.hit_sla(weeks)
+    if hit_sla is not None:
+        hit_sla = "%d%%" % (round(100 * hit_sla))
+    else:
+        hit_sla = "0%"
+
     metrics = [
         {'Weekly throughput': team_stats.weekly_throughput_ave(weeks)},
-        {'Cyle time': team_stats.percentile(.8)},
-        {'Hit SLA': 'TBD'}
+        {'Cyle time': team_stats.percentile(.8, weeks)},
+        {'Hit SLA': hit_sla}
     ]
 
     board = TeamBoard(team.name, States(), wip_limits)

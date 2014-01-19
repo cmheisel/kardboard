@@ -62,7 +62,7 @@ class TeamStats(object):
         self._card_info(done)
         return done
 
-    def cycle_times(self, weeks=4):
+    def cycle_times(self, weeks=4, weeks_offset=0):
         start_date, end_date, weeks = self.throughput_date_range(weeks)
         cycle_time_list = self.done_in_range(start_date, end_date).values_list('_cycle_time')
         return [c for c in cycle_time_list if c is not None]
@@ -79,7 +79,7 @@ class TeamStats(object):
     def wip_count(self):
         return len(self.wip())
 
-    def throughput_date_range(self, weeks=4):
+    def throughput_date_range(self, weeks=4, weeks_offset=0):
         oldest_card_date = self.oldest_card_date()
         end_date = datetime.now()
         start_date = end_date - relativedelta(weeks=weeks)
@@ -155,6 +155,25 @@ class TeamStats(object):
             card_total += card_count
             if card_total >= pct_threshold:
                 return cycle_time
+
+    def hit_sla(self, weeks=4, weeks_offset=0):
+        start_date, end_date, weeks = self.throughput_date_range(weeks, weeks_offset)
+        print "%s -- %s" % (start_date, end_date)
+        kards = self.done_in_range(start_date, end_date)
+        hit_sla = [k for k in kards if k.cycle_time <= k.service_class['upper']]
+
+        for k in kards:
+            print "%s - %s - %s" % (k.key, k.cycle_time, k.service_class['name'])
+
+        for k in hit_sla:
+            print "%s - %s - %s" % (k.key, k.cycle_time, k.service_class['upper'])
+
+        print len(kards)
+
+        try:
+            return len(hit_sla) / float(len(kards))
+        except ZeroDivisionError:
+            return None
 
 
 class EfficiencyStats(object):
