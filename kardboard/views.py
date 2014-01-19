@@ -127,6 +127,12 @@ def _team_backlog_markers(team, cards, weeks=12):
     return backlog_marker_data, backlog_markers
 
 
+def zero_if_none(value):
+    if value is None:
+        return 0
+    return value
+
+
 def team(team_slug=None):
     from kardboard.services.boards import TeamBoard
 
@@ -152,15 +158,18 @@ def team(team_slug=None):
 
     hit_sla = team_stats.hit_sla(weeks)
     hit_sla_delta = team_stats.hit_sla(weeks, weeks_offset=weeks)
+    hit_sla, hit_sla_delta = zero_if_none(hit_sla), zero_if_none(hit_sla_delta)
     hit_sla_delta = hit_sla - hit_sla_delta
 
     total_throughput = teams_service.TeamStats(team.name).throughput(weeks)
     total_throughput_delta = teams_service.TeamStats(team.name).throughput(weeks,
         weeks_offset=weeks)
+    total_throughput, total_throughput_delta = zero_if_none(total_throughput), zero_if_none(total_throughput_delta)
     total_throughput_delta = total_throughput - total_throughput_delta
 
     cycle_time = team_stats.percentile(.8, weeks)
     cycle_time_delta = team_stats.percentile(.8, weeks, weeks_offset=weeks)
+    cycle_time, cycle_time_delta = zero_if_none(cycle_time), zero_if_none(cycle_time_delta)
     cycle_time_delta = cycle_time - cycle_time_delta
 
     metrics = [
