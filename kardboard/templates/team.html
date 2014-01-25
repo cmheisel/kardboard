@@ -46,7 +46,7 @@ $(document).ready(function() {
     </table>
 </td>
 {% for m in metrics %}
-<td class="metric metric_{{ m['name']|slugify }}">
+<td class="metric" id="metric_{{ m['name']|slugify }}">
     <table>
     <tr><th>{{ m['name'] }}</th></tr>
     {% if m['name'] == "Hit SLA" %}
@@ -54,7 +54,7 @@ $(document).ready(function() {
         <tr><td class="delta_{% if m['delta'] >= 0 %}positive{% else %}negative{% endif %}">{% if m['delta'] >= 0 %}+{% endif %}{{ "%d%%"|format(round(m['delta'] * 100)) }}</td></tr>
     {% else %}
         <tr><td>{{ m['value'] }}</td></tr>
-        <tr><td class="delta_{% if m['delta'] >= 0 %}positive{% else %}negative{% endif %}">{% if m['delta'] >= 0 %}+{% endif %}{{ m['delta'] }}</td></tr>
+        <tr><td class="delta_{% if m['delta'] > 0 %}positive{% else %}negative{% endif %}">{% if m['delta'] >= 0 %}+{% endif %}{{ m['delta'] }}</td></tr>
     {% endif %}
     </table>
 </td>

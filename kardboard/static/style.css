@@ -564,10 +564,10 @@ table.metrics td.metric td.delta_negative {
 }
 
 
-table.metrics td.metric_cycle-time td.delta_nevative {
+table.metrics #metric_cycle-time td.delta_negative {
     color: #367000;
 }
 
-table.metrics td.metric_cycle-time td.delta_positive {
+table.metrics #metric_cycle-time td.delta_positive {
     color: #991111;
 }
