@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 
 {% block extrajs %}
-{% if authenticated %}
 <script type="text/javascript">
-var drag_and_drop_handler = function(event,ui) {
+var changere = new RegExp("\\dh");
+if ((new Date()).getDay() == 1) {
+  changere = new RegExp("\\b(([1-3]\\.\\dd)|\\dh)");
+}
+$(".assignee").each(function() {
+    if ($(this).text().match(changere)) {
+      $(this).parent().css('font-weight', 'bold');
+      $(this).parent().parent().css('background-color', '#ffa');
+    }
+  }
+  );
+
+{% if authenticated %}
+    var drag_and_drop_handler = function(event,ui) {
     $('td.cards_backlog').sortable('disable');
     var sorted_cards = $('td.cards_backlog').sortable('serialize', {
         expression: /(.+)[_](.+)/
@@ -29,8 +41,8 @@ $(document).ready(function() {
     $('td.cards_backlog').on('sortupdate', drag_and_drop_handler);
     $('td.cards_backlog').sortable('enable');
 });
-</script>
 {% endif %}
+</script>
 {% endblock extrajs %}
 
 {% block content %}
