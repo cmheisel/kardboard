@@ -253,7 +253,7 @@ def team_backlog(team_slug=None):
 
     teams = _get_teams()
     team = _find_team_by_slug(team_slug, teams)
-    weeks = 12
+    weeks = 4
 
     backlog = Kard.objects.filter(
         team=team.name,
