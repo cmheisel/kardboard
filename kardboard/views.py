@@ -262,6 +262,11 @@ def team_backlog(team_slug=None):
 
     backlog_marker_data, backlog_markers = _team_backlog_markers(team, backlog, weeks)
 
+    backlog_without_order = [k for k in backlog if k.priority is None]
+    backlog_with_order = [k for k in backlog if k.priority is not None]
+    backlog_with_order.sort(key=lambda k: k.priority)
+    backlog = backlog_with_order + backlog_without_order
+
     title = "%s backlog" % team.name
 
     context = {
