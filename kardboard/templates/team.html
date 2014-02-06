@@ -96,7 +96,8 @@ $(document).ready(function() {
         {% for column in board.columns %}
         <th class="col_wip_{{ column.wip_state }}">
             <div>
-                {{ column.name }} {{ column.wip }}
+                {{ column.name.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}
+                {{ column.wip }}
                 {% if column.wip_limit %}/ {{ column.wip_limit }}{% endif %}
             </div>
         </th>
@@ -131,7 +132,7 @@ $(document).ready(function() {
 
             {% if column.buffer %}
                 <div class="split_cell_header">
-                    {{ column.buffer }}
+                    {{ column.buffer.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}
                 </div>
                 {% for card in column.buffer_cards %}
                 {{ card_detail(card, request) }}
@@ -139,7 +140,7 @@ $(document).ready(function() {
             {% endif %}
 
             {% if column.name == board.states.backlog %}
-                <h3><a href="{{ url_for('team_backlog', team_slug=team.slug) }}">Full backlog &raquo;</a></h3>
+                <h3><a href="{{ url_for('team_backlog', team_slug=team.slug) }}">Full list &raquo;</a></h3>
             {% endif %}
 
         </td>

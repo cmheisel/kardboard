@@ -93,7 +93,7 @@ $(function () {
     <tr>
         <th>Date</th>
         {% for state in states %}
-        <th>{{ state }}</th>
+        <th>{{ state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}</th>
         {% endfor %}
     </tr>
 

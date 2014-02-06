@@ -69,7 +69,7 @@
                 {% set col_wip_limit = None %}
                 {% set col_classname = "col_normal" %}
             {% endif %}
-            <div class="{{ col_classname }}">{{ header.state }} ({{ header.count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
+            <div class="{{ col_classname }}">{{ header.state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }} ({{ header.count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
         {% endif %}
         {% if header.get('state', '') in ('Building', 'Testing', 'OTIS Verify') %}
             {% if wip_limits.get(board.headers[loop.index0+1].state) %}
@@ -83,7 +83,7 @@
                 {% set col_wip_limit = None %}
                 {% set col_classname = "col_normal" %}
             {% endif %}
-            <div>{{ board.headers[loop.index0+1].state }} ({{ board.headers[loop.index0+1].count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
+            <div>{{ board.headers[loop.index0+1].state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }} ({{ board.headers[loop.index0+1].count }}{% if col_wip_limit %}/{{ col_wip_limit }}{% endif %})</div>
         {% endif %}
 
     </th>
@@ -101,9 +101,9 @@
         {% if header.get('label') %}
             {{ header.label }}
         {% elif header.get('state', '') in ('Building', 'Testing', 'OTIS Verify') %}
-            {{ header.state }}
+            {{ header.state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}
         {% else %}
-            {{ header.state }}
+            {{ header.state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}
         {% endif %}
 
     </th>
