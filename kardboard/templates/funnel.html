@@ -46,7 +46,7 @@ $(document).ready(function() {
 
 <table class="funnel" id="content_detail">
 <thead>
-    <caption>{{ state }}: {{ cards|length }}</caption>
+    <caption>{{ state.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE") }}: {{ cards|length }}</caption>
     <tr>
         <th class="reorder_col">&nbsp;</th>
         <th class="ordering_col">#</th>

@@ -321,7 +321,7 @@ def funnel(state_slug):
     funnel_markers = funnel.markers()
 
     context = {
-        'title': title,
+        'title': title.replace("Backlog", "Ready: Elabo").replace("OTIS", "TIE"),
         'state': state,
         'state_slug': state_slug,
         'cards': cards,
