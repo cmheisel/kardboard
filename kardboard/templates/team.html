@@ -4,8 +4,9 @@
 <script type="text/javascript">
 $(document).ready( function() {
     var changere = new RegExp("\\dh");
-    if ((new Date()).getDay() == 1) {
-      changere = new RegExp("\\b(([1-3]\\.\\dd)|\\dh)");
+    if ((new Date()).getDay() < 2) {
+      // sun/mon check past 2 days
+      changere = new RegExp("\\b(([1-2]\\.\\dd)|\\dh)");
     }
     $(".assignee").each(function() {
         if ($(this).text().match(changere)) {
