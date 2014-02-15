@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="wip_data">
+
+{% import "card_macros.html" as card_macros %}
+{{ card_macros.card_table(cards, request, caption="Done", show_done=True, show_assigned=False, show_state=False, show_in_goal=False) }}
+
+
+
+</div>
+
+{% endblock content %}
