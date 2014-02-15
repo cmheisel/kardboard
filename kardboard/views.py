@@ -652,15 +652,15 @@ def blocked(group="all", months=3, start=None):
     start = months_ranges[0][0]
     end = months_ranges[-1][-1]
 
-    rg = ReportGroup(group, Kard.objects.done())
-    done = rg.queryset
+    rg = ReportGroup(group, Kard.objects())
+    blocked_cards = rg.queryset
 
-    cards = done.filter(done_date__gte=start,
-        done_date__lte=end).order_by('-done_date')
+    blocked_cards = blocked_cards.filter(start_date__gte=start,
+        start_date__lte=end, blocked_ever=True).order_by('-start_date')
 
     context = {
         'title': "Blocked",
-        'cards': cards,
+        'cards': blocked_cards,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
@@ -1300,8 +1300,8 @@ app.add_url_rule('/reports/<group>/efficiency/', 'report_efficiency', report_eff
 app.add_url_rule('/reports/<group>/efficiency/<int:months>/', 'report_efficiency', report_efficiency)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
-app.add_url_rule('/reports/<group>/blocked/', 'done', done)
-app.add_url_rule('/reports/<group>/blocked/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/blocked/', 'blocked', blocked)
+app.add_url_rule('/reports/<group>/blocked/<int:months>/', 'blocked', blocked)
 app.add_url_rule('/reports/<group>/value/<int:year_number>/<int:month_number>/', 'value', value_txt_report)
 app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)

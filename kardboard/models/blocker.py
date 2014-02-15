@@ -1,4 +1,5 @@
 from kardboard.app import app
+from kardboard.util import now, delta_in_hours
 
 
 class BlockerRecord(app.db.EmbeddedDocument):
@@ -14,3 +15,12 @@ class BlockerRecord(app.db.EmbeddedDocument):
 
     unblocked_at = app.db.DateTimeField(required=False)
     """When the card's blockage stopped."""
+
+    @property
+    def duration(self):
+        if self.unblocked_at is not None:
+            unblocked_at = self.unblocked_at
+        else:
+            unblocked_at = now()
+        delta = unblocked_at - self.blocked_at
+        return delta_in_hours(delta)

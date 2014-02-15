@@ -1,12 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
 
+{% import "card_macros.html" as card_macros %}
+
 <div id="wip_data">
 
-{% import "card_macros.html" as card_macros %}
-{{ card_macros.card_table(cards, request, caption="Done", show_done=True, show_assigned=False, show_state=False, show_in_goal=False) }}
+<table id="blocked_report">
+    <caption>{{ caption }}</caption>
+    <tr>
+        <th class="key_col">Card</th>
+        <th class="title_col">Title</th>
+        <th class="title_col">Blockers</th>
+    </tr>
 
+    {% for card in cards %}
+    <tr class="{{ loop.cycle('odd', 'even') }} {% if card.blocked %}blocked{% endif %}" id="card_{{ card.key }}">
+        <td>
+            <a href="{{ card.ticket_system.get_ticket_url() }}">{{ card.key }}</a>
+        </td>
 
+        <td>
+            <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
+        </td>
+
+        <td>
+            <table>
+                <tr>
+                    <th>Duration</th>
+                    <th>Reason</th>
+                </tr>
+
+                {% for blocker in card.blockers %}
+                <tr>
+                    <td>{{ card_macros.hours_to_days(blocker.duration) }}</td>
+                    <td>{{ blocker.reason }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+    {% endfor %}
 
 </div>
 
