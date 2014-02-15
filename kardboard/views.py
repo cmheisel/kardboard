@@ -209,6 +209,7 @@ def team(team_slug=None):
         {'slug': 'assignee', 'name': "Assignee"},
         {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
         {'slug': 'service-class', 'name': 'Service class'},
+        {'slug': 'blocked', 'name': 'Blocked'},
         {'slug': 'done', 'name': 'Done'},
         {'slug': 'leaderboard', 'name': 'Leaderboard'},
         {'slug': 'flow/detail', 'name': "Cumulative Flow"},
@@ -642,6 +643,31 @@ def done(group="all", months=3, start=None):
     }
 
     return render_template('done.html', **context)
+
+
+def blocked(group="all", months=3, start=None):
+    start = start or datetime.datetime.today()
+    months_ranges = month_ranges(start, months)
+
+    start = months_ranges[0][0]
+    end = months_ranges[-1][-1]
+
+    rg = ReportGroup(group, Kard.objects())
+    blocked_cards = rg.queryset
+
+    blocked_cards = blocked_cards.filter(start_date__gte=start,
+        start_date__lte=end, blocked_ever=True).order_by('-start_date')
+
+    context = {
+        'title': "Blocked",
+        'cards': blocked_cards,
+        'start': start,
+        'end': end,
+        'updated_at': datetime.datetime.now(),
+        'version': VERSION,
+    }
+
+    return render_template('blocked.html', **context)
 
 
 def value_txt_report(year_number, month_number, group="all"):
@@ -1276,6 +1302,8 @@ app.add_url_rule('/reports/<group>/efficiency/', 'report_efficiency', report_eff
 app.add_url_rule('/reports/<group>/efficiency/<int:months>/', 'report_efficiency', report_efficiency)
 app.add_url_rule('/reports/<group>/done/', 'done', done)
 app.add_url_rule('/reports/<group>/done/<int:months>/', 'done', done)
+app.add_url_rule('/reports/<group>/blocked/', 'blocked', blocked)
+app.add_url_rule('/reports/<group>/blocked/<int:months>/', 'blocked', blocked)
 app.add_url_rule('/reports/<group>/value/<int:year_number>/<int:month_number>/', 'value', value_txt_report)
 app.add_url_rule('/reports/<group>/service-class/', 'report_service_class', report_service_class)
 app.add_url_rule('/reports/<group>/service-class/<int:months>/', 'report_service_class', report_service_class)

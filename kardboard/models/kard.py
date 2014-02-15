@@ -240,6 +240,9 @@ class Kard(app.db.Document):
     blocked_ever = app.db.BooleanField(default=False)
     """Was the card ever blocked in its history."""
 
+    blocked_time = app.db.IntField(required=False)
+    """How long the card has been blocked in its history"""
+
     blockers = app.db.ListField(
         app.db.EmbeddedDocumentField(BlockerRecord),
     )
@@ -394,10 +397,16 @@ class Kard(app.db.Document):
             self._cycle_time = self.cycle_time
             self._lead_time = self.lead_time
 
+    def _set_blocked_time(self):
+        if self.blocked_ever:
+            durations = [b.duration for b in self.blockers]
+            self.blocked_time = sum(durations)
+
     def save(self, *args, **kwargs):
         self._set_dates()
 
         self._set_cycle_lead_times()
+        self._set_blocked_time()
         self._time_in_current_state = None  # Blank this
         self._time_in_current_state = self.time_in_state  # Recaclulate and cache
 

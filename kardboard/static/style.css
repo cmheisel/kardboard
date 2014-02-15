@@ -571,3 +571,14 @@ table.metrics #metric_cycle-time td.delta_negative {
 table.metrics #metric_cycle-time td.delta_positive {
     color: #991111;
 }
+
+table#blocked_report td.blocked_history {
+    vertical-align: top;
+    padding: 0;
+}
+
+table#blocked_report td table {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}

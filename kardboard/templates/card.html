@@ -63,6 +63,7 @@
             <tr>
                 <th>Cycle time</th>
                 <th>Lead time</th>
+                <th>Blocked</th>
                 <th>Backlogged</th>
                 <th>Started</th>
                 <th>Done</th>
@@ -83,6 +84,8 @@
                         {{ card.current_lead_time() }}
                     {% endif %}
                 </td>
+                <td>
+                    {{ card_macros.hours_to_days(card.blocked_time) }}
                 <td>
                     {{ blank_or_date(card.backlog_date) }}
                 </td>
