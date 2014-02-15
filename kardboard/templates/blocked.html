@@ -5,8 +5,9 @@
 
 <div id="wip_data">
 
+<br />
 <table id="blocked_report">
-    <caption>{{ caption }}</caption>
+    <caption>Cards starting {{ start.strftime("%m/%d/%Y") }} -- {{ end.strftime("%m/%d/%Y") }}</caption>
     <tr>
         <th class="key_col">Card</th>
         <th>Duration</th>
@@ -44,7 +45,7 @@
             </table>
         </td>
     {% endfor %}
-
+</table>
 </div>
 
 {% endblock content %}

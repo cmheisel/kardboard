@@ -661,6 +661,8 @@ def blocked(group="all", months=3, start=None):
     context = {
         'title': "Blocked",
         'cards': blocked_cards,
+        'start': start,
+        'end': end,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,
     }
