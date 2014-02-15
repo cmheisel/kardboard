@@ -9,6 +9,7 @@
     <caption>{{ caption }}</caption>
     <tr>
         <th class="key_col">Card</th>
+        <th>Duration</th>
         <th class="title_col">Title</th>
         <th class="title_col">Blockers</th>
     </tr>
@@ -17,6 +18,10 @@
     <tr class="{{ loop.cycle('odd', 'even') }} {% if card.blocked %}blocked{% endif %}" id="card_{{ card.key }}">
         <td>
             <a href="{{ card.ticket_system.get_ticket_url() }}">{{ card.key }}</a>
+        </td>
+
+        <td>
+            {{ card_macros.hours_to_days(card.blocked_time) }}
         </td>
 
         <td>
