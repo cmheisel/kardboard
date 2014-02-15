@@ -23,7 +23,7 @@
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
         </td>
 
-        <td>
+        <td class="blocked_history">
             <table>
                 <tr>
                     <th>Duration</th>
@@ -31,7 +31,7 @@
                 </tr>
 
                 {% for blocker in card.blockers %}
-                <tr>
+                <tr {% if blocker.unblocked_at == None %}class="blocked"{% endif %}>
                     <td>{{ card_macros.hours_to_days(blocker.duration) }}</td>
                     <td>{{ blocker.reason }}</td>
                 </tr>
