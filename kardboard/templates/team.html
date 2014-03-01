@@ -78,7 +78,7 @@ $(document).ready(function() {
 
 <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
 {% for report in report_config %}
-    <a href="/reports/{{ team.slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
+    <a href="/reports/{{ team.slug }}/{{ report['slug'] }}/{% if report['months'] %}{{ report['months'] }}/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
 {% endfor %}
 </p>
 

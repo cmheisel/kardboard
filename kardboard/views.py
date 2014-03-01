@@ -207,12 +207,12 @@ def team(team_slug=None):
 
     report_config = (
         {'slug': 'assignee', 'name': "Assignee"},
-        {'slug': 'cycle/distribution/all', 'name': "Cycle time"},
+        {'slug': 'cycle/distribution/all', 'name': "Cycle time", 'months': 1},
         {'slug': 'service-class', 'name': 'Service class'},
-        {'slug': 'blocked', 'name': 'Blocked'},
-        {'slug': 'done', 'name': 'Done'},
-        {'slug': 'leaderboard', 'name': 'Leaderboard'},
-        {'slug': 'flow/detail', 'name': "Cumulative Flow"},
+        {'slug': 'blocked', 'name': 'Blocked', 'months': 3},
+        {'slug': 'done', 'name': 'Done', 'months': 1},
+        {'slug': 'leaderboard', 'name': 'Leaderboard', 'months': 3},
+        {'slug': 'flow/detail', 'name': "Cumulative Flow", 'months': 2},
     )
 
     context = {
