@@ -268,7 +268,7 @@ def team_backlog(team_slug=None):
     backlog_with_order.sort(key=lambda k: k.priority)
     backlog = backlog_with_order + backlog_without_order
 
-    title = "%s backlog" % team.name
+    title = "%s" % team.name
 
     context = {
         'title': title,
