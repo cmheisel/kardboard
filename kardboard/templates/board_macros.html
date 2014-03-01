@@ -20,7 +20,7 @@
 
             {% if card.blocked %}
             <div class="blocker">
-                <p>{{ card.blockers[-1].reason }}</p>
+                <p>{{ card_macros.hours_to_days(card.blockers[-1].duration) }} - {{ card.blockers[-1].reason }}</p>
             </div>
         {% endif %}
 
