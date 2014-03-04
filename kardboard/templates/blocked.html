@@ -11,6 +11,7 @@
     <tr>
         <th class="key_col">Card</th>
         <th>Duration</th>
+        <th>Started</th>
         <th class="title_col">Title</th>
         <th class="title_col">Blockers</th>
     </tr>
@@ -26,6 +27,10 @@
         </td>
 
         <td>
+            {{ card.start_date.strftime("%m-%d") }}
+        </td>
+
+        <td>
             <a href="{{ url_for('card', key=card.key) }}">{{ card.ticket_system_data.get('summary', card.title) }}</a>
         </td>
 
@@ -34,12 +39,14 @@
                 <tr>
                     <th>Duration</th>
                     <th>Reason</th>
+                    <th>Dates</th>
                 </tr>
 
                 {% for blocker in card.blockers %}
                 <tr {% if blocker.unblocked_at == None %}class="blocked"{% endif %}>
                     <td>{{ card_macros.hours_to_days(blocker.duration) }}</td>
                     <td>{{ blocker.reason }}</td>
+                    <td>{{ blocker.blocked_at.strftime("%m-%d") }} - {% if blocker.unblocked_at %}{{ blocker.unblocked_at.strftime("%m-%d") }}{% else %}Ongoing{% endif %}</td>
                 </tr>
                 {% endfor %}
             </table>

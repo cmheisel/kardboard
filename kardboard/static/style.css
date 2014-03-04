@@ -582,3 +582,7 @@ table#blocked_report td table {
     padding: 0;
     width: 100%;
 }
+
+table#blocked_report td table td+td {
+    width: 70%;
+}
