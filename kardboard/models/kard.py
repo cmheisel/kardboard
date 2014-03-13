@@ -291,10 +291,10 @@ class Kard(app.db.Document):
                 'default', {})
 
         service_class = {
-            'name': classdef.get('name', None),
-            'upper': classdef.get('upper', None),
-            'lower': classdef.get('lower', None),
-            'wip': classdef.get('wip', None),
+            'name': classdef.get('name', ''),
+            'upper': classdef.get('upper', ''),
+            'lower': classdef.get('lower', ''),
+            'wip': classdef.get('wip', ''),
         }
         return service_class
 
