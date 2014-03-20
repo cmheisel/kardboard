@@ -339,17 +339,7 @@ def funnel(state_slug):
 
 
 def state():
-    date = datetime.datetime.now()
-    date = make_end_date(date=date)
-    states = States()
-
-    board = DisplayBoard(backlog_limit=0)  # defaults to all teams, 7 days of done
-    board.cards  # force the card calculation
-    board.rows
-
     title = app.config.get('SITE_NAME')
-
-    metrics = []
 
     teams = teams_service.setup_teams(
         app.config
@@ -357,11 +347,6 @@ def state():
 
     context = {
         'title': title,
-        'board': board,
-        'states': states,
-        'metrics': metrics,
-        'wip_limits': {},
-        'date': date,
         'teams': teams,
         'updated_at': datetime.datetime.now(),
         'version': VERSION,

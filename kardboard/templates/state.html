@@ -1,109 +1,12 @@
 {% extends "base.html" %}
 
-{% block extrajs %}
-{% if authenticated %}
-<script type="text/javascript">
-var drag_and_drop_handler = function(event,ui) {
-    $('td.cards_backlog').sortable('disable');
-    var sorted_cards = $('td.cards_backlog').sortable('serialize', {
-        expression: /(.+)[_](.+)/
-    });
-    $.ajax({
-        type: "POST",
-        data: sorted_cards,
-        url: "/team/" + '{{ team_slug }}' + "/backlog/",
-        error: function(jqXHR, textStatus, errorThrown) {
-            window.alert(textStatus + ": " + errorThrown);
-        },
-        success: function(data, textStatus, jqXHR) {
-            $('td.cards_backlog').sortable('enable');
-            var response = $.parseJSON(data);
-            if (window.console) {
-                console.log(textStatus + ": " + data['message']);
-            }
-        }
-    });
-}
 
-$(document).ready(function() {
-    $('td.cards_backlog').on('sortupdate', drag_and_drop_handler);
-    $('td.cards_backlog').sortable('enable');
-});
-</script>
-{% endif %}
-{% endblock extrajs %}
 
 {% block content %}
 
-{% import "card_macros.html" as card_macros %}
-{% import "board_macros.html" as board_macros %}
 
 
-{% if metrics %}
-<!-- Reference date: {{ date }} -->
-
-{% for m in metrics %}
-    <div class="metric metric_{{ m.keys()[0]|slugify }}">
-      {% for name, value in m.items() %}
-          <h2>{{ name }}</h2>
-          <p class="value">
-            {{ value }}
-            {% if name == "WIP" and wip_limits.conwip %}
-            <!--
-                name: {{ name }}
-                wip_limits.name: {{ wip_limits.name|safe }}
-                wip_limits.conwip: {{ wip_limits.conwip|safe }}
-                wip_limits: {{ wip_limits|safe }}
-                wip_limit_config: {{ wip_limit_config|safe }}
-            -->
-            <span>/</span> {{ wip_limits.conwip }}
-            {% endif %}
-          </p>
-      {% endfor %}
-    </div>
-    {% endfor %}
-{% endif %}
-
-{% if backlog_marker_data %}
-<!--
-Backlog markers based on:
-* Up to {{ backlog_marker_data['weeks'] }} weeks
-* Excludes: {% for cls in backlog_marker_data['exclude_classes'] %}{{ cls }},{% endfor %}
-* Cards: {{ backlog_marker_data['cards']|count }}
-* Weekly TP: {{  backlog_marker_data['weekly_throughput'] }}
-* 90% confidence: {{ backlog_marker_data['confidence_90'] }}
-
-Other data for comparison
-* Median: {{ backlog_marker_data['median'] }}
-* Average: {{ backlog_marker_data['average'] }}
-* Std Dev: {{ backlog_marker_data['standard_deviation'] }}
-
-Histogram
-==========
-Cycle time        Card count
-{% for key in backlog_marker_data['histogram_keys'] %}
-{{ key }}        {{ backlog_marker_data['histogram'][key] }}
-{% endfor %}
-
-Raw Data
-============
-key        service_class        cycle_time        done_date
-{% for card in backlog_marker_data['cards'] %}
-{{ card['key'] }}        {{ card['service_class']['name'] }}        {{ card['cycle_time']}}        {{ card['done_date'].strftime("%m/%d/%Y") }}
-{% endfor %}
-
--->
-{% endif %}
-
-{% if team_slug %}
-    <p class="nav" id="team_report_nav"><strong>How's {{ team.name }} doing?</strong>:
-    {% for report in report_config %}
-        <a href="/reports/{{ team_slug }}/{{ report['slug'] }}/{% if report['slug'] != 'assignee' and report['slug'] != 'service-class' %}1/{% endif %}">{{ report['name'] }}</a>{% if not loop.last %} / {% endif %}
-    {% endfor %}
-    </p>
-{% endif %}
-
-<p class="nav">
+<p class="nav">Teams:
 {% for team in teams %}
     <a href="{{ url_for('team', team_slug=team.slug) }}">{{ team.name }}</a>{% if not loop.last %} / {% endif %}
 {% endfor %}
@@ -111,19 +14,6 @@ key        service_class        cycle_time        done_date
 
 
 
-<div class="{% if team_slug %}team_page_board{% else %}overview_board{% endif %}" id="content_detail">
-
-{% if not team_slug %}
-    {% set repeat_headers = True %}
-{% else %}
-    {% set repeat_headers = False %}
-{% endif %}
-{% if backlog_markers %}
-{{ board_macros.board(board, wip_limits, request, repeat_headers, backlog_marker_data.get('weekly_throughput', 0), backlog_markers) }}
-{% else %}
-{{ board_macros.board(board, wip_limits, request, repeat_headers) }}
-{% endif %}
-</div>
 
 
 {% endblock content %}
