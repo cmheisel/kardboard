@@ -5,9 +5,9 @@
     <div class="card_on_board {% if vs_goal == 2 %}cycle_double_over_goal{% elif vs_goal == 1 %}cycle_over_goal{% elif vs_goal == 0 %}cycle_in_goal{% endif %} card_type_{{ card.type|slugify }} {% if card.blocked %}card_blocked{% endif %}" id="card_{{ card.key }}">
         <div class="card_key"><span>{{ card.key }}</span>
             {% if card.done_date %}
-                - {{ card.cycle_time }}d
+                - {{ card.cycle_time }}d / {{ card.cycle_goal.upper }}d
             {% elif card.start_date %}
-                - {{ card.current_cycle_time() }}d
+                - {{ card.current_cycle_time() }}d / {{ card.cycle_goal.upper }}d
             {% endif %}
             {% if not card.is_card %}<i class="icon-plus-sign-alt" title="{{ card.type }}"></i>{% endif %}
             {% if 'Expedite' in card.service_class['name'] %}<i class="icon-forward" title="{{ card.service_class['name'] }}"></i>

@@ -3,6 +3,7 @@ import datetime
 import math
 
 from dateutil.relativedelta import relativedelta
+from collections import namedtuple
 
 from kardboard.app import app
 
@@ -25,6 +26,8 @@ from kardboard.util import (
     median,
 )
 
+
+CycleGoalTuple = namedtuple('CycleGoalTuple', ['lower', 'upper'])
 
 class KardQuerySet(QuerySet):
     def done_in_week(self, year=None, month=None, day=None, date=None):
@@ -291,10 +294,10 @@ class Kard(app.db.Document):
                 'default', {})
 
         service_class = {
-            'name': classdef.get('name', None),
-            'upper': classdef.get('upper', None),
-            'lower': classdef.get('lower', None),
-            'wip': classdef.get('wip', None),
+            'name': classdef.get('name', ''),
+            'upper': classdef.get('upper', ''),
+            'lower': classdef.get('lower', ''),
+            'wip': classdef.get('wip', ''),
         }
         return service_class
 
@@ -566,7 +569,7 @@ class Kard(app.db.Document):
         lower = classdef.get('lower')
         upper = classdef.get('upper')
         if lower is not None and upper is not None:
-            return lower, upper
+            return CycleGoalTuple(lower, upper)
         return None
 
     @property

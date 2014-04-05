@@ -69,10 +69,10 @@ class TicketHelper(object):
 
 class NullHelper(TicketHelper):
     def get_title(self, key=None):
-        return ''
+        return 'Ticket title'
 
     def get_ticket_url(self, key=None):
-        return ''
+        return '/404'
 
     def update(self, sync=False):
         super(NullHelper, self).update(sync)
