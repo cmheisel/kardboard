@@ -37,7 +37,14 @@ def _get_cards(team, start, end):
         team=team.name,
     )
     done_cards = list(done_cards)
-    return done_cards
+
+    started_cards = Kard.objects.filter(
+        start_date__gte=start,
+        start_date__lte=end,
+        done_date=None,
+        team=team.name,
+    )
+    return list(started_cards) + list(done_cards)
 
 
 def _get_cards_by_report_group(rg_slug, start, end):
