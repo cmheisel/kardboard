@@ -57,7 +57,8 @@
 
             <form action="/quick/" method="GET">
                 <label for="search">Search:</label>
-                <input type="text" name="key" id="search" />
+                <input type="text" name="key" id="search" required="required" />
+                <input type="hidden" name="return_path" value="{{ request.path }}" />
                 <input type="submit" value="Go" name="go" />
             </form>
         </div>

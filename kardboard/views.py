@@ -534,8 +534,11 @@ def quick():
     key = request.args.get('key', None)
     key = key.strip()
     if not key:
-        url = url_for('dashboard')
-        return redirect(url)
+        previous = request.args.get('return_path', None)
+        if previous:
+            return redirect(previous)
+        else:
+            return redirect('/')
 
     try:
         card = Kard.objects.get(key=key)
