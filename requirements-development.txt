@@ -1,7 +1,7 @@
 -r requirements-testing.txt
 
 #Needed for docs
-Pygments==1.4
+Pygments==2.7.4
 Sphinx==1.0.7
 docutils==0.10
 tox==1.4.2
