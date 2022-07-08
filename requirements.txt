@@ -6,7 +6,7 @@ WTForms==1.0.1
 Werkzeug==0.8.3
 mongoengine==0.7.10
 blinker==1.2
-pymongo==2.5
+pymongo==2.5.2
 flask-mongoengine==0.6
 python-dateutil==1.5.0
 suds==0.4
